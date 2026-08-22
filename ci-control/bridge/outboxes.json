@@ -1,7 +1,8 @@
 {
  "v": "projection-pointer",
- "ts": "2026-08-21T22:11:53Z",
- "note": "本仓=暖区前哨（ONBOARD-STACK-01 §四b：只放公钥/规约/承诺轨，无内容囤积）。权威注册表=ci-control/bridge/outboxes.json（vinf 等六线已在册，2026-08-22 root 域名册实证核对）。qlv 注册请求经 qlv outbox 代投。",
+ "ts": "2026-08-22T00:23:10Z",
+ "note": "本仓=暖区前哨。权威注册表=ci-control/bridge/outboxes.json。",
  "authoritative": "https://raw.githubusercontent.com/chepin-ai/ci-control/main/bridge/outboxes.json",
- "qlv_interim_outbox": "https://raw.githubusercontent.com/chepin-ai/test/master/outbox/qlv-outbox.json"
+ "qlv_outbox": "https://chzd4e7sjb2lk.ok.kimi.link/qlv-outbox.json",
+ "qlv_outbox_fallback": "https://raw.githubusercontent.com/chepin-ai/test/master/outbox/qlv-outbox.json"
 }
