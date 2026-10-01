@@ -1,0 +1,55 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: cognitiveagents.asfa.io
+spec:
+  group: asfa.io
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                domainSchema:
+                  type: string
+                knowledgeGraph:
+                  type: object
+                  properties:
+                    hypergraphDensity:
+                      type: number
+                    epigeneticMarks:
+                      type: array
+                skills:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      skillId:
+                        type: string
+                      preconditions:
+                        type: string
+                      postconditions:
+                        type: string
+                quantumEnabled:
+                  type: boolean
+            status:
+              type: object
+              properties:
+                cognitiveState:
+                  type: string
+                proofAccumulatorRoot:
+                  type: string
+                crossDomainInsights:
+                  type: array
+  scope: Namespaced
+  names:
+    plural: cognitiveagents
+    singular: cognitiveagent
+    kind: CognitiveAgent
+    shortNames:
+      - cagent

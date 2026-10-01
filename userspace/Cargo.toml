@@ -1,0 +1,9 @@
+[package]
+name = "asfa-userspace"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+asfa-kernel = { path = "../kernel" }
+serde.workspace = true
+rayon.workspace = true

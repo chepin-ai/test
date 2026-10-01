@@ -1,0 +1,43 @@
+name: Formal Verification & Build
+
+on: [push, pull_request]
+
+jobs:
+  formal-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Coq
+        uses: coq-community/setup-coq-action@v1
+        with:
+          ocaml-version: default
+          coq-version: 8.18
+
+      - name: Verify Coq proofs
+        run: |
+          cd formal/coq
+          make
+          coqchk HyperGraph.Safety
+
+      - name: Check Lean proofs
+        uses: leanprover/lean-action@v1
+        with:
+          root: formal/lean
+
+  build-kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-action@stable
+
+      - name: Build kernel
+        run: cargo build --release -p asfa-kernel
+
+      - name: Run tests
+        run: cargo test --workspace
+
+      - name: ZK Circuit security audit
+        run: cargo audit --features zk-security

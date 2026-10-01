@@ -1,0 +1,22 @@
+[package]
+name = "asfa-kernel"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+# 工作区依赖
+halo2_proofs.workspace = true
+rayon.workspace = true
+petgraph.workspace = true
+serde.workspace = true
+
+# 内核特定
+spin = "0.9"          # 无锁原语
+x86_64 = "0.15"       # x86_64 支持
+uart_16550 = "0.3"    # 串口输出
+pic8259 = "0.11"      # 中断控制
+pc-keyboard = "0.7"   # 键盘输入
+
+[features]
+default = []
+formal-verification = []
