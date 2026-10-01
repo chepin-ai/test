@@ -1,0 +1,49 @@
+{
+  "schema_version": "2026-10-01",
+  "network_name": "asfa-xi-sessions",
+  "trust_model": "unsigned-hash-chain",
+  "sessions": {
+    "cisvr": {
+      "url": "https://sh22uxjhdpz5q.ok.kimi.link/outbox.json",
+      "trust": "unsigned-hash-chain",
+      "role": "control_server",
+      "fingerprint": "sha256:pending",
+      "status": "awaiting_registration"
+    },
+    "vinf": {
+      "url": "https://stgdle5yj3o7s.ok.kimi.link/vinf-outbox.json",
+      "trust": "unsigned-hash-chain",
+      "role": "market_kernel",
+      "fingerprint": "sha256:pending",
+      "status": "active"
+    },
+    "ucif2": {
+      "url": "https://2regf437xvotk.ok.kimi.link/outbox.json",
+      "trust": "unsigned-hash-chain",
+      "role": "user_interface",
+      "fingerprint": "sha256:pending",
+      "status": "awaiting_registration"
+    },
+    "qgl": {
+      "url": "https://rdkm3tzqlgnj6.ok.kimi.link/outbox.json",
+      "trust": "unsigned-hash-chain",
+      "role": "query_gateway",
+      "fingerprint": "sha256:pending",
+      "status": "awaiting_registration"
+    },
+    "usrm": {
+      "url": "https://62q3nd73zxf52.ok.kimi.link/outbox.json",
+      "trust": "unsigned-hash-chain",
+      "role": "user_resource_manager",
+      "fingerprint": "sha256:pending",
+      "status": "awaiting_registration"
+    },
+    "cfts": {
+      "url": "https://3ay75hdbfrqe4.ok.kimi.link/outbox.json",
+      "trust": "unsigned-hash-chain",
+      "role": "compute_fabric_time_sync",
+      "fingerprint": "sha256:pending",
+      "status": "awaiting_registration"
+    }
+  }
+}
