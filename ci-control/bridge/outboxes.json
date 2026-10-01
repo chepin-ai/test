@@ -3,6 +3,14 @@
   "network_name": "asfa-xi-sessions",
   "trust_model": "unsigned-hash-chain",
   "sessions": {
+    "asfa-ai": {
+      "url": "https://github.com/chepin-ai/test/blob/main/outbox/vinf-outbox.json",
+      "trust": "unsigned-hash-chain",
+      "role": "cognitive_os",
+      "fingerprint": "sha256:f2e31ac92bb49aa60c4b2445b6c4e26846d49681462b46b420f53b3531b5b9e5",
+      "status": "active",
+      "capabilities": ["hypergraph", "zk-proof", "bridge-poller", "holo-lang"]
+    },
     "cisvr": {
       "url": "https://sh22uxjhdpz5q.ok.kimi.link/outbox.json",
       "trust": "unsigned-hash-chain",
