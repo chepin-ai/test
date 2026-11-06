@@ -1,0 +1,22 @@
+{
+  "schema_version": "2026-11-06",
+  "network_name": "asfa-smoke-test",
+  "trust_model": "unsigned-hash-chain",
+  "sessions": {
+    "good": {
+      "url": "file://fixtures/valid-outbox.json",
+      "role": "fixture",
+      "trust": "unsigned-hash-chain"
+    },
+    "malformed": {
+      "url": "file://fixtures/malformed.json",
+      "role": "negative-fixture",
+      "trust": "unsigned-hash-chain"
+    },
+    "missing": {
+      "url": "file://fixtures/not-found.json",
+      "role": "negative-fixture",
+      "trust": "unsigned-hash-chain"
+    }
+  }
+}

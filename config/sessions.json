@@ -1,0 +1,45 @@
+{
+  "schema_version": "2026-11-06",
+  "network_name": "asfa-xi-sessions",
+  "trust_model": "unsigned-hash-chain",
+  "sessions": {
+    "asfa-ai": {
+      "url": "https://raw.githubusercontent.com/chepin-ai/test/main/outbox/asfa-ai-outbox.json",
+      "role": "cognitive_os",
+      "trust": "unsigned-hash-chain",
+      "note": "repository-native public channel"
+    },
+    "cisvr": {
+      "url": "https://sh22uxjhdpz5q.ok.kimi.link/outbox.json",
+      "role": "control_server",
+      "trust": "unsigned-hash-chain",
+      "note": "legacy temporary endpoint; expected to fail until replaced by a repository-native channel"
+    },
+    "vinf": {
+      "url": "https://stgdle5yj3o7s.ok.kimi.link/vinf-outbox.json",
+      "role": "market_kernel",
+      "trust": "unsigned-hash-chain",
+      "note": "legacy temporary endpoint; 200 alone does not establish protocol validity"
+    },
+    "ucif2": {
+      "url": "https://2regf437xvotk.ok.kimi.link/outbox.json",
+      "role": "user_interface",
+      "trust": "unsigned-hash-chain"
+    },
+    "qgl": {
+      "url": "https://rdkm3tzqlgnj6.ok.kimi.link/outbox.json",
+      "role": "query_gateway",
+      "trust": "unsigned-hash-chain"
+    },
+    "usrm": {
+      "url": "https://62q3nd73zxf52.ok.kimi.link/outbox.json",
+      "role": "user_resource_manager",
+      "trust": "unsigned-hash-chain"
+    },
+    "cfts": {
+      "url": "https://3ay75hdbfrqe4.ok.kimi.link/outbox.json",
+      "role": "compute_fabric_time_sync",
+      "trust": "unsigned-hash-chain"
+    }
+  }
+}

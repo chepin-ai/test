@@ -1,12 +1,8 @@
-#![no_std]
-#![feature(allocator_api, generic_const_exprs)]
-#![allow(incomplete_features)]
+//! ASFA-OS-Xi executable cognitive primitives.
+//!
+//! This crate intentionally contains no boot code, ZK prover, or operating-system
+//! claims. It provides tested data structures that can be embedded in a runtime.
 
-extern crate alloc;
+#![forbid(unsafe_code)]
 
 pub mod cognitive;
-pub mod formal;
-pub mod holobus;
-pub mod syscall;
-
-pub use cognitive::*;

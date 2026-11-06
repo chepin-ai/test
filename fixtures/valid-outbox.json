@@ -1,0 +1,13 @@
+{
+  "session": "good",
+  "url": "file://fixtures/valid-outbox.json",
+  "trust": "unsigned-hash-chain",
+  "directives": [],
+  "mailbox": {},
+  "hash_chain": {
+    "genesis": "0000000000000000000000000000000000000000000000000000000000000000",
+    "latest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "height": 0,
+    "blocks": []
+  }
+}

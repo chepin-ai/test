@@ -1,41 +1,52 @@
-# ASFA-OS-Ξ (Xi) - Cognitive Operating System
+# ASFA-OS-Xi：可验证认知原语与 Outbox 桥接器
 
-[![Formal Verification](https://img.shields.io/badge/verified-Coq%2FLean-blue)](docs/FORMAL_VERIFICATION.md)
-[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
+当前仓库是一个**可编译、可测试的 Rust 工作区**，不是已经完成 Boot 的操作系统，也不包含 ZK 证明器、HoTT 编译器或量子运行时。
 
-ASFA-OS-Ξ 是第一个基于**认知超图**（Cognitive HyperGraphs）与**形式化验证**的操作系统，融合：
-- **SuperHyperGraphs**: n-ary 关系调度与推理
-- **Compositional Neuroscience**: Operads/Monoids 神经形态组合
-- **Hippocampal Small-World**: 小世界拓扑认知内存
-- **Graph Schemas**: 跨域迁移学习与类比推理
+## 已实现
 
-## 架构亮点
+- `asfa-kernel`
+  - n 元超边：唯一 ID、并发创建、子集检索、共享 Agent 遍历；
+  - 认知记忆：真实键值存取、有限向量校验、最近位置导航；
+  - Operad：元数检查、顺序组合、错误传播。
+- `asfa-userspace`
+  - Agent 身份与位置；
+  - 可执行 JSON Skill 注册表。
+- `asfa-bridge-poller`
+  - `file://`、HTTP(S) 轮询；
+  - 无签名哈希链逐块重算；
+  - 404、非 JSON、schema 错误、身份错配、坏链、超限文档均产生显式负结果；
+  - 指令只在区块负载内计入已验证集合，按会话去重、过期拒绝、单次消费；
+  - HMAC 和完整签名明确返回“未支持”，不会误判为有效。
 
-- **推演即证明**: 每个系统调用生成 Nova 折叠证明
-- **涌现即类型**: 编译期验证集群安全性质 (依赖类型)
-- **认知即内存**: 海马体启发的小世界知识寻址
+## 复验
 
-## 快速开始
+需要稳定版 Rust、rustfmt 和 clippy：
 
 ```bash
-# 构建内核 (需 Rust nightly)
-cargo build --release -p asfa-kernel
-
-# 运行形式化验证测试
-cargo test --features formal-verification
-
-# 启动示例: 科学发现 Agent
-cargo run --example scientific_discovery
+cargo test --workspace --all-targets --locked
+cargo run --example cognitive_demo -p asfa-userspace
+cargo run -p asfa-bridge-poller -- \
+  --config config/sessions.smoke.json \
+  --out /tmp/asfa-smoke-report.json \
+  --now 1000
 ```
 
-## 系统要求
+一键全部门禁（`/mnt` 等禁止执行位挂载下也能构建）：
 
-- Rust 1.75+ (nightly for const generics)
-- Coq 8.18+ (形式化证明)
-- CUDA 12.0+ (可选, ZK 加速)
+```bash
+bash scripts/build-all.sh
+```
 
-## 文档
+预期：全部 Rust 测试通过；烟测汇总为 `total=3, verified=1, failed=2`，两个失败分别是故意设置的非法 JSON 和缺失文件。
 
-- [架构总览](docs/ARCHITECTURE.md)
-- [认知超图理论](docs/COGNITIVE_HYPERGRAPH.md)
-- [系统调用 API](docs/SYSCALL_API.md)
+## 证据与协议
+
+- [实现状态与未覆盖边界](docs/STATUS.md)
+- [实际架构](docs/ARCHITECTURE.md)
+- [Outbox / 哈希链协议](docs/BRIDGE_PROTOCOL.md)
+- [仓内 inbox](inbox/README.md)
+- [本地注册表指针](ci-control/bridge/outboxes.json)
+
+## 诚实边界
+
+“无签名哈希链”只证明数据内部一致性，不证明发布者身份。当前 Coq 文件只是一个高度定理示例，不能据此宣称系统经过形式化安全验证。详细限制见状态文档。

@@ -1,43 +1,38 @@
-name: Formal Verification & Build
+name: build-test-smoke
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
-  formal-verification:
+  rust-and-bridge:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Install Coq
-        uses: coq-community/setup-coq-action@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          ocaml-version: default
-          coq-version: 8.18
-
-      - name: Verify Coq proofs
+          components: rustfmt, clippy
+      - name: Format
+        run: cargo fmt --all -- --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Unit and integration tests
+        run: cargo test --workspace --all-targets --locked
+      - name: Credential scan
+        run: python3 scripts/check-no-secrets.py
+      - name: CLI smoke test
         run: |
-          cd formal/coq
-          make
-          coqchk HyperGraph.Safety
-
-      - name: Check Lean proofs
-        uses: leanprover/lean-action@v1
-        with:
-          root: formal/lean
-
-  build-kernel:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Install Rust
-        uses: dtolnay/rust-action@stable
-
-      - name: Build kernel
-        run: cargo build --release -p asfa-kernel
-
-      - name: Run tests
-        run: cargo test --workspace
-
-      - name: ZK Circuit security audit
-        run: cargo audit --features zk-security
+          cargo run --locked -p asfa-bridge-poller -- \
+            --config config/sessions.smoke.json \
+            --out smoke-report.json \
+            --now 1000
+          python3 - <<'PY'
+          import json
+          with open('smoke-report.json') as f:
+              report = json.load(f)
+          assert report['summary'] == {'total': 3, 'verified': 1, 'failed': 2}
+          kinds = {r['session']: r['status']['kind'] for r in report['records']}
+          assert kinds == {'good': 'verified', 'malformed': 'invalid_json', 'missing': 'transport'}
+          print('smoke: PASS', kinds)
+          PY

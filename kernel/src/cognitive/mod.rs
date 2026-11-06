@@ -1,9 +1,9 @@
-//! 认知计算层
+//! Cognitive data structures with deterministic behavior.
 
-pub mod hypergraph;
 pub mod hippocampus;
+pub mod hypergraph;
 pub mod operad;
 
-pub use hypergraph::{CognitiveHyperGraph, SuperHyperEdge, MetaRelation};
-pub use hippocampus::{HippocampalMemory, CognitiveVector};
-pub use operad::{Operad, NeuroUnit, Signal};
+pub use hippocampus::{CognitiveVector, HippocampalMemory, MemoryError};
+pub use hypergraph::{CognitiveHyperGraph, HyperGraphError, MetaRelation, SuperHyperEdge};
+pub use operad::{FunctionOperad, Operad, OperadError};

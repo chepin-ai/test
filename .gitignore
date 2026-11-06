@@ -1,0 +1,5 @@
+/target/
+.env
+*.log
+*-report.json
+.DS_Store

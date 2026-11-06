@@ -1,30 +1,24 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-echo "Building ASFA-OS-Ξ..."
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-/tmp/asfa-os-xi-target}"
 
-# 安装工具链
-echo "Installing Rust toolchain..."
-rustup component add rust-src llvm-tools-preview
-
-# 构建内核
-echo "Building kernel..."
-cd kernel
-cargo build --release --target x86_64-unknown-none
-
-# 构建用户空间
-echo "Building userspace..."
-cd ../userspace
-cargo build --release
-
-# 构建示例
-echo "Building examples..."
-cd ../examples
-cargo build --release
-
-# 形式化验证
-echo "Running formal verification..."
-cd ../formal/coq
-make
-
-echo "Build complete!"
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo test --workspace --all-targets --locked
+python3 scripts/check-no-secrets.py
+cargo run --locked -p asfa-bridge-poller -- \
+  --config config/sessions.smoke.json \
+  --out /tmp/asfa-smoke-report.json \
+  --now 1000
+python3 - <<'PY'
+import json
+with open('/tmp/asfa-smoke-report.json') as f:
+    report = json.load(f)
+assert report['summary'] == {'total': 3, 'verified': 1, 'failed': 2}, report['summary']
+kinds = {r['session']: r['status']['kind'] for r in report['records']}
+assert kinds == {'good': 'verified', 'malformed': 'invalid_json', 'missing': 'transport'}, kinds
+print('smoke: PASS', report['summary'], kinds)
+PY
