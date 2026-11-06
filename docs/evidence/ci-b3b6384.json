@@ -1,0 +1,17 @@
+{
+  "run_id": 42228729662,
+  "head_sha": "b3b63842c31849af945324d1637e95d56bd47410",
+  "name": "build-test-smoke",
+  "status": "completed",
+  "conclusion": "success",
+  "html_url": "https://github.com/chepin-ai/test/actions/runs/42228729662",
+  "run_started_at": "2026-11-06T13:50:20Z",
+  "updated_at": "2026-11-06T13:51:35Z",
+  "local_rebuild": {
+    "rust_tests": 31,
+    "failed_tests": 0,
+    "clippy_warnings": 0,
+    "credential_scan": "PASS",
+    "smoke_summary": {"total": 3, "verified": 1, "failed": 2}
+  }
+}
