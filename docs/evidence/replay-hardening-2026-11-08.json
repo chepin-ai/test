@@ -1,0 +1,34 @@
+{
+  "date_utc": "2026-11-08",
+  "base_commit": "c573dc496dc3caeab1f0f143373c80859ccd93d4",
+  "rustc": "1.99.1",
+  "tests": {
+    "passed": 43,
+    "failed": 0,
+    "unit_bridge": 15,
+    "integration_bridge": 14,
+    "kernel": 11,
+    "userspace": 3
+  },
+  "format": "PASS",
+  "clippy_warnings": 0,
+  "credential_scan": "PASS",
+  "smoke": {
+    "total": 3,
+    "verified": 1,
+    "failed": 2
+  },
+  "cognitive_demo_contract": "skill_output={\"sum\":42}; edge=1; matches=[1]",
+  "live_poll": {
+    "total": 7,
+    "verified": 1,
+    "failed": 6,
+    "self_channel": "verified_via_jsDelivr_read_mirror",
+    "canonical_document": "outbox/asfa-ai-outbox.json",
+    "sha256": "06046a765cec0c8ab03d421ff2fdcf63054369787788bf273819448c918952db"
+  },
+  "canonical_registry_status": "conditional",
+  "private_ack": "not_rechecked; authenticated private-channel credential unavailable",
+  "external_ci": "pending; this change has not been pushed",
+  "persistence_boundary": "explicit snapshot save required; no automatic write-ahead log"
+}

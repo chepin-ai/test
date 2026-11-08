@@ -31,7 +31,7 @@ ASFA-OS-XI/UNSIGNED-HASH-CHAIN/V1\n
 - `hmac`：未实现，返回 `unsupported_trust`。
 - `full-signature`：未实现，返回 `unsupported_trust`。
 
-HTTP 200、JSON 可解析或字段自报 `active` 均不等于验证通过。
+注册表顶层 `trust_model`、会话 `trust` 和文档 `trust` 必须一致且均为 `unsigned-hash-chain`。不支持的会话模式在发起网络读取前即拒绝。HTTP 200、JSON 可解析或字段自报 `active` 均不等于验证通过。
 
 ## 4. 指令
 
@@ -53,7 +53,11 @@ HTTP 200、JSON 可解析或字段自报 `active` 均不等于验证通过。
 }
 ```
 
-顶层 `Outbox.directives` 仅为兼容元数据，不计入可信指令。账本键为 `{session}/{id}`，防止跨会话 ID 冲突；重复、过期和空 ID 分别返回负结果；`consume` 为单次删除语义。
+顶层 `Outbox.directives` 仅为兼容元数据，不计入可信指令。区块指令必须满足 `from == Outbox.session`，且 `id`、`to`、`action` 非空；追加伪造指令时，生成端在修改链之前拒绝。
+
+账本使用 `(session, id)` 结构化键，避免字符串拼接碰撞。完全相同的重复指令返回 `Duplicate`；同键不同内容返回 `Conflict`；过期、空字段和来源不符分别返回负结果。`consume` 删除待办指令并保留 tombstone，再次收到同键指令返回 `Consumed`，不能重新入库。`pending_for_at` 与 `prune_expired` 会按当前时间重新检查过期状态。
+
+`LedgerSnapshot` 使用 `asfa-directive-ledger/v1`，将待办与 tombstone 以确定性数组表示；`save_atomic` 同目录临时文件原子替换，`load` 限制 16 MiB 并校验 schema、重复键、非法指令及“已消费但仍待办”矛盾。恢复后重放仍返回 `Consumed`。持久化不是隐式副作用：调用方必须在状态变更后保存，否则重启只恢复到最后一次快照。
 
 ## 5. 负结果
 

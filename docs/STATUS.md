@@ -1,9 +1,11 @@
-# 实现状态（2026-11-06）
+# 实现状态（2026-11-08）
 
 ## 已有实测
 
 - 稳定版 Rust 工作区可编译。
-- 31 个 Rust 单元／集成测试覆盖：并发 ID、子集检索、向量导航、Operad 组合、Skill 执行、哈希链篡改、HTTP 200／404、非 JSON、schema 与身份错配、HMAC 未支持、超大文档、区块内指令与顶层未认证指令分离。
+- 43 个 Rust 单元／集成测试覆盖：并发 ID、子集检索、向量导航、Operad 组合、Skill 执行、哈希链篡改、HTTP 200／404、非 JSON、schema 与身份错配、HMAC 未支持、超大文档、区块内指令与顶层未认证指令分离。
+- 2026-11-08 新增：指令来源会话绑定、空字段拒绝、结构化键防碰撞、同 ID 内容冲突检测、消费 tombstone 防重放、pending 过期复核、注册表 trust 交叉核对，以及“链验证→入库→消费→快照恢复→重放拒绝”端到端测试。账本支持确定性快照、原子保存与恢复矛盾检查；调用方仍须显式保存。
+- 本轮本地复验：43／43 通过、Clippy 零警告、凭据扫描通过、烟测通过；证据见 `evidence/replay-hardening-2026-11-08.json`。当前改动尚未推送，外部 CI 未运行，旧提交的 success 不被挪用为本轮结论。
 - CLI 烟测配置含一个正例和两个故意负例；最终通过证据以 CI／本地复跑输出为准。
 - 删除构建缓存后的重建级复验通过；外部 GitHub Actions run `42228729662` 已返回 `completed/success`，原始摘要见 `evidence/ci-b3b6384.json`。
 - 公网七端点实测：`asfa-ai=verified`；cisvr／ucif2／qgl／usrm／cfts 为 404；vinf 为 schema 不符。原始报告见 `evidence/poll-b3b6384.json`。
@@ -27,6 +29,8 @@ Boot／裸机内核、WASM 沙箱、TEE、ZK-SNARK／STARK、HoTT-ZK 编译器�
 ## 网络边界
 
 临时 `*.ok.kimi.link` 端点只作遗留负例输入，不能作为常备通道。vinf 的 HTTP 200 不构成协议有效证据；其他 404 不推断角色离线或身份不存在。
+
+本线仓内 JSON 是正本；jsDelivr 仅作只读镜像，用来绕开 raw 端点的间歇性 TLS reset。镜像返回 `Verified` 只代表其内容通过当前无签名链检查，不代表镜像运营者或发布者身份已认证。
 
 ## 形式化内容
 

@@ -1,7 +1,9 @@
 use asfa_bridge_poller::{
-    append_block, append_directives, Directive, Outbox, PollStatus, Poller, Session, TrustMode,
+    append_block, append_directives, verified_directives, Directive, DirectiveLedger,
+    IngestOutcome, Outbox, PollStatus, Poller, Registry, Session, TrustMode,
 };
 use serde_json::json;
+use std::collections::BTreeMap;
 use std::fs;
 use std::io::{Read, Write};
 use std::net::TcpListener;
@@ -183,4 +185,96 @@ fn oversized_document_is_rejected() {
         Poller::new().poll_session("node", &session(format!("file://{}", path.display())), 100);
     assert!(matches!(record.status, PollStatus::Transport { .. }));
     fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn session_trust_is_enforced_before_transport() {
+    let mut config = session("file:///definitely-not-present.json".into());
+    config.trust = TrustMode::Hmac;
+    let record = Poller::new().poll_session("node", &config, 100);
+    assert_eq!(
+        record.status,
+        PollStatus::UnsupportedTrust {
+            mode: TrustMode::Hmac
+        }
+    );
+}
+
+#[test]
+fn registry_trust_model_is_enforced_for_every_session() {
+    let outbox = Outbox::genesis("node", "file:///unused");
+    let path = temp_file(&serde_json::to_string(&outbox).unwrap());
+    let registry = Registry {
+        schema_version: "test".into(),
+        network_name: "negative".into(),
+        trust_model: "hmac".into(),
+        sessions: BTreeMap::from([("node".into(), session(format!("file://{}", path.display())))]),
+    };
+    let report = Poller::new().poll_registry(&registry, 100);
+    assert_eq!(report.summary.failed, 1);
+    assert!(matches!(
+        report.records[0].status,
+        PollStatus::InvalidTrust { .. }
+    ));
+    fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn forged_directive_source_is_an_observable_failure() {
+    let mut outbox = Outbox::genesis("node", "http://unused");
+    append_block(
+        &mut outbox,
+        json!({
+            "kind": "directives",
+            "directives": [{
+                "id": "forged",
+                "from": "someone-else",
+                "to": "peer",
+                "action": "Ping",
+                "payload": {}
+            }]
+        }),
+        100,
+        0,
+    )
+    .unwrap();
+    let url = serve_once("200 OK", serde_json::to_string(&outbox).unwrap());
+    let record = Poller::new().poll_session("node", &session(url), 102);
+    assert!(matches!(record.status, PollStatus::InvalidTrust { .. }));
+}
+
+#[test]
+fn verified_directive_cannot_reenter_ledger_after_consumption() {
+    let mut outbox = Outbox::genesis("node", "http://unused");
+    append_directives(
+        &mut outbox,
+        vec![Directive {
+            id: "once".into(),
+            from: "node".into(),
+            to: "peer".into(),
+            action: "Ping".into(),
+            payload: json!({"sequence": 1}),
+            expires_epoch: Some(200),
+        }],
+        100,
+        0,
+    )
+    .unwrap();
+    let url = serve_once("200 OK", serde_json::to_string(&outbox).unwrap());
+    let record = Poller::new().poll_session("node", &session(url), 102);
+    assert!(record.status.is_verified());
+
+    let verified = verified_directives(&outbox).unwrap();
+    let mut ledger = DirectiveLedger::new();
+    assert_eq!(
+        ledger.ingest("node", verified[0].clone(), 102),
+        IngestOutcome::Inserted
+    );
+    assert!(ledger.consume("node", "once").is_some());
+    let mut restored = DirectiveLedger::from_snapshot(ledger.snapshot()).unwrap();
+    assert_eq!(
+        restored.ingest("node", verified[0].clone(), 102),
+        IngestOutcome::Consumed
+    );
+    assert!(restored.pending_for_at("peer", 102).is_empty());
 }

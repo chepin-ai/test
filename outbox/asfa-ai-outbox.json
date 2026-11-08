@@ -1,6 +1,6 @@
 {
   "session": "asfa-ai",
-  "url": "https://raw.githubusercontent.com/chepin-ai/test/main/outbox/asfa-ai-outbox.json",
+  "url": "https://raw.githubusercontent.com/chepin-ai/test/refs/heads/main/outbox/asfa-ai-outbox.json",
   "trust": "unsigned-hash-chain",
   "directives": [],
   "mailbox": {},

@@ -4,10 +4,10 @@
   "trust_model": "unsigned-hash-chain",
   "sessions": {
     "asfa-ai": {
-      "url": "https://raw.githubusercontent.com/chepin-ai/test/main/outbox/asfa-ai-outbox.json",
+      "url": "https://cdn.jsdelivr.net/gh/chepin-ai/test@main/outbox/asfa-ai-outbox.json",
       "role": "cognitive_os",
       "trust": "unsigned-hash-chain",
-      "note": "repository-native public channel"
+      "note": "read mirror only; canonical document is outbox/asfa-ai-outbox.json in chepin-ai/test; unsigned chain does not authenticate the mirror"
     },
     "cisvr": {
       "url": "https://sh22uxjhdpz5q.ok.kimi.link/outbox.json",

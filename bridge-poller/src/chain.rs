@@ -156,6 +156,27 @@ pub fn append_block(
     Ok(block)
 }
 
+fn validate_directive(session: &str, directive: &Directive, height: u64) -> Result<(), ChainError> {
+    let reason = if directive.from != session {
+        Some(format!(
+            "source mismatch: session={session}, from={}",
+            directive.from
+        ))
+    } else if directive.id.trim().is_empty() {
+        Some("directive id must not be empty".into())
+    } else if directive.to.trim().is_empty() {
+        Some("directive target must not be empty".into())
+    } else if directive.action.trim().is_empty() {
+        Some("directive action must not be empty".into())
+    } else {
+        None
+    };
+    match reason {
+        Some(reason) => Err(ChainError::InvalidDirectiveBlock { height, reason }),
+        None => Ok(()),
+    }
+}
+
 /// Bind directives to a verified block. Top-level `Outbox.directives` is legacy
 /// metadata and is deliberately excluded from trusted ingestion.
 pub fn append_directives(
@@ -164,6 +185,10 @@ pub fn append_directives(
     timestamp: u64,
     nonce: u64,
 ) -> Result<ChainBlock, ChainError> {
+    let next_height = outbox.hash_chain.height + 1;
+    for directive in &directives {
+        validate_directive(&outbox.session, directive, next_height)?;
+    }
     append_block(
         outbox,
         serde_json::json!({"kind": "directives", "directives": directives}),
@@ -188,6 +213,9 @@ pub fn verified_directives(outbox: &Outbox) -> Result<Vec<Directive>, ChainError
                     height: block.height,
                     reason: error.to_string(),
                 })?;
+            for directive in &block_directives {
+                validate_directive(&outbox.session, directive, block.height)?;
+            }
             directives.append(&mut block_directives);
         }
     }
@@ -258,5 +286,54 @@ mod tests {
         let directives = verified_directives(&outbox).unwrap();
         assert_eq!(directives.len(), 1);
         assert_eq!(directives[0].id, "trusted");
+    }
+
+    #[test]
+    fn append_rejects_forged_source_without_mutating_chain() {
+        let mut outbox = Outbox::genesis("a", "file:///a.json");
+        let result = append_directives(
+            &mut outbox,
+            vec![Directive {
+                id: "forged".into(),
+                from: "other".into(),
+                to: "b".into(),
+                action: "Ping".into(),
+                payload: json!({}),
+                expires_epoch: None,
+            }],
+            100,
+            0,
+        );
+        assert!(matches!(
+            result,
+            Err(ChainError::InvalidDirectiveBlock { height: 1, .. })
+        ));
+        assert_eq!(outbox.hash_chain.height, 0);
+        assert!(outbox.hash_chain.blocks.is_empty());
+    }
+
+    #[test]
+    fn manually_inserted_forged_directive_fails_verification() {
+        let mut outbox = Outbox::genesis("a", "file:///a.json");
+        append_block(
+            &mut outbox,
+            json!({
+                "kind": "directives",
+                "directives": [{
+                    "id": "forged",
+                    "from": "other",
+                    "to": "b",
+                    "action": "Ping",
+                    "payload": {}
+                }]
+            }),
+            100,
+            0,
+        )
+        .unwrap();
+        assert!(matches!(
+            verified_directives(&outbox),
+            Err(ChainError::InvalidDirectiveBlock { height: 1, .. })
+        ));
     }
 }

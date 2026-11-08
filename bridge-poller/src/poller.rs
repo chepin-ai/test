@@ -7,6 +7,7 @@ use std::time::Duration;
 use thiserror::Error;
 
 pub const MAX_DOCUMENT_BYTES: u64 = 2 * 1024 * 1024;
+pub const SUPPORTED_TRUST_MODEL: &str = "unsigned-hash-chain";
 
 #[derive(Debug, Error)]
 enum FetchError {
@@ -45,12 +46,38 @@ impl Poller {
         let records = registry
             .sessions
             .iter()
-            .map(|(name, session)| self.poll_session(name, session, now_epoch))
+            .map(|(name, session)| {
+                if registry.trust_model != SUPPORTED_TRUST_MODEL {
+                    Self::record(
+                        name,
+                        session,
+                        now_epoch,
+                        PollStatus::InvalidTrust {
+                            message: format!(
+                                "unsupported registry trust_model: {}",
+                                registry.trust_model
+                            ),
+                        },
+                    )
+                } else {
+                    self.poll_session(name, session, now_epoch)
+                }
+            })
             .collect();
         BridgeReport::new(registry.network_name.clone(), now_epoch, records)
     }
 
     pub fn poll_session(&self, name: &str, session: &Session, now_epoch: u64) -> PollRecord {
+        if session.trust != TrustMode::UnsignedHashChain {
+            return Self::record(
+                name,
+                session,
+                now_epoch,
+                PollStatus::UnsupportedTrust {
+                    mode: session.trust,
+                },
+            );
+        }
         let status = match self.fetch(&session.url) {
             Err(FetchError::HttpStatus(code)) => PollStatus::HttpStatus { code },
             Err(FetchError::Transport(message)) => PollStatus::Transport { message },
@@ -60,8 +87,12 @@ impl Poller {
             Err(FetchError::InvalidUtf8) => PollStatus::InvalidJson {
                 message: "document is not valid UTF-8".into(),
             },
-            Ok(body) => Self::verify_document(name, &body),
+            Ok(body) => Self::verify_document(name, session.trust, &body),
         };
+        Self::record(name, session, now_epoch, status)
+    }
+
+    fn record(name: &str, session: &Session, now_epoch: u64, status: PollStatus) -> PollRecord {
         PollRecord {
             session: name.into(),
             url: session.url.clone(),
@@ -70,7 +101,7 @@ impl Poller {
         }
     }
 
-    fn verify_document(name: &str, body: &str) -> PollStatus {
+    fn verify_document(name: &str, expected_trust: TrustMode, body: &str) -> PollStatus {
         let value: Value = match serde_json::from_str(body) {
             Ok(value) => value,
             Err(error) => {
@@ -98,6 +129,14 @@ impl Poller {
         if outbox.trust != TrustMode::UnsignedHashChain {
             return PollStatus::UnsupportedTrust { mode: outbox.trust };
         }
+        if outbox.trust != expected_trust {
+            return PollStatus::InvalidTrust {
+                message: format!(
+                    "trust mismatch: registry={expected_trust:?}, document={:?}",
+                    outbox.trust
+                ),
+            };
+        }
         match verify_chain(&outbox.hash_chain) {
             Ok(verified_blocks) => match verified_directives(&outbox) {
                 Ok(directives) => PollStatus::Verified {
@@ -117,7 +156,20 @@ impl Poller {
 
     fn fetch(&self, url: &str) -> Result<String, FetchError> {
         if let Some(path) = url.strip_prefix("file://") {
-            let bytes = fs::read(path).map_err(|error| FetchError::Transport(error.to_string()))?;
+            let file =
+                fs::File::open(path).map_err(|error| FetchError::Transport(error.to_string()))?;
+            if file
+                .metadata()
+                .map_err(|error| FetchError::Transport(error.to_string()))?
+                .len()
+                > MAX_DOCUMENT_BYTES
+            {
+                return Err(FetchError::TooLarge);
+            }
+            let mut bytes = Vec::new();
+            file.take(MAX_DOCUMENT_BYTES + 1)
+                .read_to_end(&mut bytes)
+                .map_err(|error| FetchError::Transport(error.to_string()))?;
             if bytes.len() as u64 > MAX_DOCUMENT_BYTES {
                 return Err(FetchError::TooLarge);
             }

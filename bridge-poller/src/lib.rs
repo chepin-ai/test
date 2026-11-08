@@ -10,6 +10,8 @@ pub mod poller;
 pub use chain::{
     append_block, append_directives, make_block, verified_directives, verify_chain, ChainError,
 };
-pub use ledger::{DirectiveLedger, IngestOutcome};
+pub use ledger::{
+    ConsumedKey, DirectiveEntry, DirectiveLedger, IngestOutcome, LedgerSnapshot, RestoreError,
+};
 pub use model::*;
 pub use poller::Poller;

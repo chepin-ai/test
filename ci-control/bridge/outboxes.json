@@ -1,6 +1,6 @@
 {
   "schema_version": "2026-11-06",
-  "canonical": "https://raw.githubusercontent.com/chepin-ai/vci-inbox/main/bridge/outboxes.json",
+  "canonical": "https://raw.githubusercontent.com/chepin-ai/vci-inbox/refs/heads/main/bridge/outboxes.json",
   "local_member": "asfa-ai",
   "status": "conditional",
   "conditions": [
@@ -11,7 +11,8 @@
   "channels": {
     "public_repo": "https://github.com/chepin-ai/test",
     "inbox": "inbox/",
-    "outbox": "outbox/asfa-ai-outbox.json"
+    "outbox": "outbox/asfa-ai-outbox.json",
+    "read_mirror": "https://cdn.jsdelivr.net/gh/chepin-ai/test@main/outbox/asfa-ai-outbox.json"
   },
   "supersedes": [
     "2026-10-01 self-registration with stale temporary endpoints"
