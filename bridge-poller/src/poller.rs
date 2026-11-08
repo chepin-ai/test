@@ -1,5 +1,7 @@
 use crate::chain::{verified_directives, verify_chain};
-use crate::model::{BridgeReport, Outbox, PollRecord, PollStatus, Registry, Session, TrustMode};
+use crate::model::{
+    BridgeReport, Outbox, PollRecord, PollStatus, Registry, Session, SessionPoll, TrustMode,
+};
 use serde_json::Value;
 use std::fs;
 use std::io::Read;
@@ -43,53 +45,88 @@ impl Poller {
     }
 
     pub fn poll_registry(&self, registry: &Registry, now_epoch: u64) -> BridgeReport {
-        let records = registry
-            .sessions
-            .iter()
-            .map(|(name, session)| {
-                if registry.trust_model != SUPPORTED_TRUST_MODEL {
-                    Self::record(
-                        name,
-                        session,
-                        now_epoch,
-                        PollStatus::InvalidTrust {
-                            message: format!(
-                                "unsupported registry trust_model: {}",
-                                registry.trust_model
-                            ),
-                        },
-                    )
-                } else {
-                    self.poll_session(name, session, now_epoch)
-                }
-            })
+        let records = self
+            .poll_registry_detailed(registry, now_epoch)
+            .into_iter()
+            .map(|result| result.record)
             .collect();
         BridgeReport::new(registry.network_name.clone(), now_epoch, records)
     }
 
+    pub fn poll_registry_detailed(&self, registry: &Registry, now_epoch: u64) -> Vec<SessionPoll> {
+        registry
+            .sessions
+            .iter()
+            .map(|(name, session)| {
+                if registry.trust_model != SUPPORTED_TRUST_MODEL {
+                    SessionPoll {
+                        record: Self::record(
+                            name,
+                            session,
+                            now_epoch,
+                            PollStatus::InvalidTrust {
+                                message: format!(
+                                    "unsupported registry trust_model: {}",
+                                    registry.trust_model
+                                ),
+                            },
+                        ),
+                        outbox: None,
+                    }
+                } else {
+                    self.poll_session_detailed(name, session, now_epoch)
+                }
+            })
+            .collect()
+    }
+
     pub fn poll_session(&self, name: &str, session: &Session, now_epoch: u64) -> PollRecord {
+        self.poll_session_detailed(name, session, now_epoch).record
+    }
+
+    pub fn poll_session_detailed(
+        &self,
+        name: &str,
+        session: &Session,
+        now_epoch: u64,
+    ) -> SessionPoll {
         if session.trust != TrustMode::UnsignedHashChain {
-            return Self::record(
-                name,
-                session,
-                now_epoch,
-                PollStatus::UnsupportedTrust {
-                    mode: session.trust,
-                },
-            );
+            return SessionPoll {
+                record: Self::record(
+                    name,
+                    session,
+                    now_epoch,
+                    PollStatus::UnsupportedTrust {
+                        mode: session.trust,
+                    },
+                ),
+                outbox: None,
+            };
         }
-        let status = match self.fetch(&session.url) {
-            Err(FetchError::HttpStatus(code)) => PollStatus::HttpStatus { code },
-            Err(FetchError::Transport(message)) => PollStatus::Transport { message },
-            Err(FetchError::TooLarge) => PollStatus::Transport {
-                message: format!("document exceeds {MAX_DOCUMENT_BYTES} bytes"),
+        let (status, outbox) = match self.fetch(&session.url) {
+            Err(FetchError::HttpStatus(code)) => (PollStatus::HttpStatus { code }, None),
+            Err(FetchError::Transport(message)) => (PollStatus::Transport { message }, None),
+            Err(FetchError::TooLarge) => (
+                PollStatus::Transport {
+                    message: format!("document exceeds {MAX_DOCUMENT_BYTES} bytes"),
+                },
+                None,
+            ),
+            Err(FetchError::InvalidUtf8) => (
+                PollStatus::InvalidJson {
+                    message: "document is not valid UTF-8".into(),
+                },
+                None,
+            ),
+            Ok(body) => match Self::verify_document(name, session.trust, &body) {
+                Ok((status, outbox)) => (status, Some(outbox)),
+                Err(status) => (status, None),
             },
-            Err(FetchError::InvalidUtf8) => PollStatus::InvalidJson {
-                message: "document is not valid UTF-8".into(),
-            },
-            Ok(body) => Self::verify_document(name, session.trust, &body),
         };
-        Self::record(name, session, now_epoch, status)
+        SessionPoll {
+            record: Self::record(name, session, now_epoch, status),
+            outbox,
+        }
     }
 
     fn record(name: &str, session: &Session, now_epoch: u64, status: PollStatus) -> PollRecord {
@@ -101,57 +138,53 @@ impl Poller {
         }
     }
 
-    fn verify_document(name: &str, expected_trust: TrustMode, body: &str) -> PollStatus {
-        let value: Value = match serde_json::from_str(body) {
-            Ok(value) => value,
-            Err(error) => {
-                return PollStatus::InvalidJson {
-                    message: error.to_string(),
-                }
-            }
-        };
-        let outbox: Outbox = match serde_json::from_value(value) {
-            Ok(outbox) => outbox,
-            Err(error) => {
-                return PollStatus::InvalidSchema {
-                    message: error.to_string(),
-                }
-            }
-        };
+    fn verify_document(
+        name: &str,
+        expected_trust: TrustMode,
+        body: &str,
+    ) -> Result<(PollStatus, Outbox), PollStatus> {
+        let value: Value = serde_json::from_str(body).map_err(|error| PollStatus::InvalidJson {
+            message: error.to_string(),
+        })?;
+        let outbox: Outbox =
+            serde_json::from_value(value).map_err(|error| PollStatus::InvalidSchema {
+                message: error.to_string(),
+            })?;
         if outbox.session != name {
-            return PollStatus::InvalidSchema {
+            return Err(PollStatus::InvalidSchema {
                 message: format!(
                     "session mismatch: registry={name}, document={}",
                     outbox.session
                 ),
-            };
+            });
         }
         if outbox.trust != TrustMode::UnsignedHashChain {
-            return PollStatus::UnsupportedTrust { mode: outbox.trust };
+            return Err(PollStatus::UnsupportedTrust { mode: outbox.trust });
         }
         if outbox.trust != expected_trust {
-            return PollStatus::InvalidTrust {
+            return Err(PollStatus::InvalidTrust {
                 message: format!(
                     "trust mismatch: registry={expected_trust:?}, document={:?}",
                     outbox.trust
                 ),
-            };
+            });
         }
-        match verify_chain(&outbox.hash_chain) {
-            Ok(verified_blocks) => match verified_directives(&outbox) {
-                Ok(directives) => PollStatus::Verified {
-                    verified_blocks,
-                    verified_directives: directives.len(),
-                    untrusted_directives: outbox.directives.len(),
-                },
-                Err(error) => PollStatus::InvalidTrust {
-                    message: error.to_string(),
-                },
-            },
-            Err(error) => PollStatus::InvalidTrust {
+        let verified_blocks =
+            verify_chain(&outbox.hash_chain).map_err(|error| PollStatus::InvalidTrust {
                 message: error.to_string(),
+            })?;
+        let directives =
+            verified_directives(&outbox).map_err(|error| PollStatus::InvalidTrust {
+                message: error.to_string(),
+            })?;
+        Ok((
+            PollStatus::Verified {
+                verified_blocks,
+                verified_directives: directives.len(),
+                untrusted_directives: outbox.directives.len(),
             },
-        }
+            outbox,
+        ))
     }
 
     fn fetch(&self, url: &str) -> Result<String, FetchError> {

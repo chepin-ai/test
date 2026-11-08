@@ -143,6 +143,55 @@ pub struct PollRecord {
     pub status: PollStatus,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct SessionPoll {
+    pub record: PollRecord,
+    pub outbox: Option<Outbox>,
+}
+
+#[derive(Clone, Debug, Serialize, PartialEq)]
+pub struct IngestionEvent {
+    pub session: String,
+    pub id: String,
+    pub outcome: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub message: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, Serialize, PartialEq)]
+pub struct IngestionReport {
+    pub inserted: usize,
+    pub duplicate: usize,
+    pub replayed_consumed: usize,
+    pub conflict: usize,
+    pub expired: usize,
+    pub invalid: usize,
+    pub pending: usize,
+    pub tombstones: usize,
+    pub state_saved: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub consume_result: Option<String>,
+    pub events: Vec<IngestionEvent>,
+}
+
+impl IngestionReport {
+    pub fn merge(&mut self, mut other: Self) {
+        self.inserted += other.inserted;
+        self.duplicate += other.duplicate;
+        self.replayed_consumed += other.replayed_consumed;
+        self.conflict += other.conflict;
+        self.expired += other.expired;
+        self.invalid += other.invalid;
+        self.pending = other.pending;
+        self.tombstones = other.tombstones;
+        self.state_saved |= other.state_saved;
+        if other.consume_result.is_some() {
+            self.consume_result = other.consume_result.take();
+        }
+        self.events.append(&mut other.events);
+    }
+}
+
 #[derive(Clone, Debug, Default, Serialize, PartialEq)]
 pub struct ReportSummary {
     pub total: usize,
@@ -157,6 +206,8 @@ pub struct BridgeReport {
     pub generated_at_epoch: u64,
     pub summary: ReportSummary,
     pub records: Vec<PollRecord>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ingestion: Option<IngestionReport>,
 }
 
 impl BridgeReport {
@@ -176,6 +227,7 @@ impl BridgeReport {
             generated_at_epoch,
             summary,
             records,
+            ingestion: None,
         }
     }
 }

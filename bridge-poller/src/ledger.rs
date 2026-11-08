@@ -77,6 +77,10 @@ impl DirectiveLedger {
         self.directives.is_empty()
     }
 
+    pub fn consumed_len(&self) -> usize {
+        self.consumed.len()
+    }
+
     fn validate(session: &str, directive: &Directive) -> Result<(), String> {
         if session.trim().is_empty() {
             return Err("session must not be empty".into());

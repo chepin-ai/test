@@ -9,6 +9,14 @@ cargo fmt --all -- --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --all-targets --locked
 python3 scripts/check-no-secrets.py
+COGNITIVE_OUTPUT="$(cargo run --locked --quiet --example cognitive_demo -p asfa-userspace)"
+COGNITIVE_OUTPUT="$COGNITIVE_OUTPUT" python3 - <<'PY'
+import os
+expected = 'skill_output={"sum":42}; edge=1; matches=[1]'
+actual = os.environ['COGNITIVE_OUTPUT'].strip()
+assert actual == expected, (actual, expected)
+print('cognitive demo: PASS', actual)
+PY
 cargo run --locked -p asfa-bridge-poller -- \
   --config config/sessions.smoke.json \
   --out /tmp/asfa-smoke-report.json \

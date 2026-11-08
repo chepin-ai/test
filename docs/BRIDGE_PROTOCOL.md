@@ -59,6 +59,23 @@ ASFA-OS-XI/UNSIGNED-HASH-CHAIN/V1\n
 
 `LedgerSnapshot` 使用 `asfa-directive-ledger/v1`，将待办与 tombstone 以确定性数组表示；`save_atomic` 同目录临时文件原子替换，`load` 限制 16 MiB 并校验 schema、重复键、非法指令及“已消费但仍待办”矛盾。恢复后重放仍返回 `Consumed`。持久化不是隐式副作用：调用方必须在状态变更后保存，否则重启只恢复到最后一次快照。
 
-## 5. 负结果
+## 5. CLI 入库与消费闭环
+
+`poll_registry_detailed` 只在传输、schema、trust 和完整哈希链全部通过时返回 `Outbox`。`ingest_outbox` 在修改账本前再次执行完整验证；因此后续区块即使只有一个伪造指令，也不会部分应用前面的合法区块。随后才逐条写入账本并生成 `IngestionEvent`。
+
+```text
+load --state
+  → poll_registry_detailed
+  → ingest_outbox（仅 verified Outbox）
+  → 可选 consume(session, id)
+  → save_atomic(--state)
+  → 输出 BridgeReport.ingestion
+```
+
+`--consume-session` 与 `--consume-id` 必须成对提供，且消费必须同时指定 `--state`；`--state` 与 `--out` 不得相同。状态文件不存在时从空账本开始，存在但无法解析或恢复矛盾时直接失败，不覆盖原文件。`state_saved=true` 只表示本次原子保存已返回成功，不表示收到外部 ACK。
+
+`ingestion` 汇总 `inserted`、`duplicate`、`replayed_consumed`、`conflict`、`expired`、`invalid`、`pending`、`tombstones` 和逐指令事件。`--fail-on-error` 将轮询失败、`conflict`、`invalid` 或消费 `not_found` 转为非零退出；`duplicate`、`replayed_consumed` 与 `expired` 是已显式分类的协议结果，不单独触发该门禁。
+
+## 6. 负结果
 
 `http_status`、`transport`、`invalid_json`、`invalid_schema`、`invalid_trust`、`unsupported_trust` 都保留在报告中。禁止解析失败后静默跳过。
