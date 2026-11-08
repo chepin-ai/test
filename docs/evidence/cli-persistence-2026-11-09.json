@@ -1,0 +1,89 @@
+{
+  "date": "2026-11-09",
+  "source_commit": "d017045d2f0844ce940f1023b345a5b9522f5869",
+  "base_commit": "b99221dd1d79a5638054f9643652de7c4a789d03",
+  "verification_mode": "empty CARGO_TARGET_DIR; scripts/build-all.sh from source_commit",
+  "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+  "build_all": "PASS",
+  "tests": {
+    "passed": 46,
+    "failed": 0,
+    "unit_bridge": 15,
+    "integration_bridge": 17,
+    "kernel": 11,
+    "userspace": 3
+  },
+  "new_integration_tests": [
+    "cli_state_survives_independent_processes_and_blocks_replay",
+    "cli_invalid_state_fails_without_overwriting_it",
+    "ingest_outbox_does_not_partially_apply_a_later_forged_block"
+  ],
+  "cli_persistence_contract": {
+    "independent_processes": 3,
+    "sequence": [
+      {
+        "step": "initial_ingest",
+        "inserted": 1,
+        "pending": 1,
+        "state_saved": true
+      },
+      {
+        "step": "duplicate_and_consume_in_second_process",
+        "duplicate": 1,
+        "consume_result": "consumed",
+        "pending": 0,
+        "tombstones": 1
+      },
+      {
+        "step": "replay_in_third_process",
+        "replayed_consumed": 1,
+        "pending": 0,
+        "event_outcome": "consumed"
+      }
+    ],
+    "fourth_library_restore_check": "Consumed",
+    "invalid_state": "nonzero exit; original not-json bytes preserved; report not created",
+    "later_forged_block": "ingest error; zero directives and zero tombstones applied"
+  },
+  "format": "PASS",
+  "clippy_warnings": 0,
+  "credential_scan": "PASS",
+  "cognitive_demo_contract": "skill_output={\"sum\":42}; edge=1; matches=[1]",
+  "smoke": {
+    "total": 3,
+    "verified": 1,
+    "failed": 2,
+    "negative_kinds": [
+      "invalid_json",
+      "transport"
+    ]
+  },
+  "live_poll": {
+    "report": "docs/evidence/poll-2026-11-09.json",
+    "generated_at_utc": "2026-11-08T18:08:19Z",
+    "total": 7,
+    "verified": 1,
+    "failed": 6,
+    "self_channel": "verified_via_jsDelivr_read_mirror",
+    "canonical_document": "outbox/asfa-ai-outbox.json",
+    "canonical_sha256": "470abaed8f9641c514fcbaaa4914f6c1b879771503edcb8881b6cb21f97b77e3",
+    "poll_report_sha256": "565285ccc66eb9d2f3f657a5acebef7f6ed150da384bd633c10dbce83c57bb78"
+  },
+  "push": {
+    "target": "chepin-ai/test main",
+    "attempt_1": "transport connect failure",
+    "attempt_2": "authentication unavailable in non-interactive environment",
+    "result": "not_pushed",
+    "remote_main_after": "c573dc496dc3caeab1f0f143373c80859ccd93d4"
+  },
+  "external_ci": "not_run_for_source_commit; push did not complete",
+  "canonical_registry": {
+    "url": "https://raw.githubusercontent.com/chepin-ai/vci-inbox/refs/heads/main/bridge/outboxes.json",
+    "asfa_ai_status": "conditional",
+    "checked_on": "2026-11-09"
+  },
+  "private_ack": "not_rechecked; authenticated private-channel credential unavailable",
+  "key_sync_01": "not_closed; no active relay verified",
+  "persistence_boundary": "explicit --state / save_atomic; no automatic WAL or background daemon",
+  "security_boundary": "unsigned hash chain proves internal consistency only, not publisher identity"
+}
