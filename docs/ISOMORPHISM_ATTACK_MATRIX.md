@@ -101,3 +101,12 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 ## 6. 独立判读器范围
 
 `scripts/verify-outbox-python.py` 不用 Rust 中间产物，独立执行 UTF-8／重复键解析、V1 负载摘要、逐块哈希、latest 和指令来源检查，并对已知答案与篡改负例自证。为避免 Python 与 Rust 浮点格式差异，它明确只接受无浮点且整数落在 `serde_json` 整数范围内的 V1 子集；其 canonical bytes **不是 RFC 8785 JCS**。
+
+## 7. 可复算证据入口
+
+- `evidence/attack-consistency-2026-11-10.json`：干净归档哈希、56 项测试分解、全部门禁、四组旧新 CLI 差分、跨语言已知答案、JCS 候选评估和公网字段级差分。
+- `evidence/poll-2026-11-10.json`：干净归档产物对七个公网端点的原始轮询报告。
+- `../scripts/verify-outbox-python.py`：独立 Python 判读与已知答案／篡改负例自证入口。
+- `../scripts/build-all.sh`：格式、Clippy、全部测试、凭据扫描、Python 判读、认知示例和 CLI 烟测的统一重建门禁。
+
+公网镜像与本地正本的 `$.url` 差异已保留为负结果，不能改写成字节一致。所有外部状态（推送、CI、ACK、正典 active、KEY-SYNC-01）均需要独立回执，不能由本地门禁推导。

@@ -1,0 +1,196 @@
+{
+  "schema_version": "asfa-attack-consistency-evidence/v1",
+  "evidence_date": "2026-11-10",
+  "source_commit": "9347c470cd0a57a9fe5baf0b907bf7c308e08e25",
+  "old_source_commit": "d017045d2f0844ce940f1023b345a5b9522f5869",
+  "clean_archive_rebuild": {
+    "method": "git archive source_commit; extract to a clean directory; use an empty CARGO_TARGET_DIR; run scripts/build-all.sh",
+    "archive_sha256": "e4a234d2585b995b8f0645588b0ccb9acf5d625a3a97f8ee27346ffa69406d85",
+    "target_dir": "/tmp/asfa-rebuild-9347-target",
+    "build_all": "PASS",
+    "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+    "gates": {
+      "cargo_fmt": "PASS",
+      "clippy_warnings": 0,
+      "credential_scan": "PASS",
+      "python_oracle_and_negative_self_tests": "PASS",
+      "cognitive_demo_exact_output": "skill_output={\"sum\":42}; edge=1; matches=[1]",
+      "cli_smoke": {
+        "total": 3,
+        "verified": 1,
+        "failed": 2,
+        "expected_negative_kinds": [
+          "invalid_json",
+          "transport"
+        ]
+      }
+    }
+  },
+  "tests": {
+    "passed": 56,
+    "failed": 0,
+    "unit_bridge": 20,
+    "integration_bridge": 22,
+    "kernel": 11,
+    "userspace": 3,
+    "new_integration_tests": [
+      "duplicate_json_members_are_rejected_before_schema_or_chain_processing",
+      "cli_duplicate_registry_member_does_not_create_state",
+      "cli_cross_network_state_reuse_fails_without_overwrite",
+      "checkpoints_accept_extension_and_reject_rollback_and_forks_without_mutation",
+      "python_generated_non_ascii_chain_verifies_in_rust"
+    ]
+  },
+  "differential": {
+    "method": "execute old and new CLI binaries against equivalent malformed or adversarial inputs; compare exit, report, and state-mutation behavior",
+    "raw_result_sha256": "958ee448c5a3882950b5d3375706c7d95aae1331c9db2c4c56982f754846492f",
+    "cases": {
+      "duplicate_member": {
+        "old_returncode": 0,
+        "old_status": "verified",
+        "new_returncode": 2,
+        "new_status": "invalid_json"
+      },
+      "cross_network_state": {
+        "old_returncode": 0,
+        "old_duplicate": 1,
+        "new_returncode": 2,
+        "new_state_unchanged": true,
+        "new_report_created": false,
+        "old_state_schema": "asfa-directive-ledger/v1",
+        "old_network_name_present": false,
+        "old_cross_network_duplicate_accepted": true
+      },
+      "rollback": {
+        "old_returncode": 0,
+        "old_duplicate": 1,
+        "new_returncode": 2,
+        "new_state_unchanged": true,
+        "new_report_created": false,
+        "new_stderr_contains_rollback": true
+      },
+      "same_height_fork": {
+        "old_returncode": 0,
+        "old_conflict": 1,
+        "new_returncode": 2,
+        "new_state_unchanged": true,
+        "new_report_created": false,
+        "new_stderr_contains_fork": true
+      }
+    },
+    "differential_verdict": "PASS",
+    "criterion_correction": "The first cross-network assertion incorrectly required old-state bytes to change. Identical output can leave v1 bytes unchanged; the actual vulnerability is that old code accepts network A's directive as duplicate while running network B and records no network identity. The criterion was corrected before the final verdict."
+  },
+  "python_oracle": {
+    "profile": "asfa-v1-python/no-floats/non-jcs",
+    "independence": "Python standard-library parsing and hashing; no Rust intermediate values",
+    "negative_self_tests": [
+      {
+        "case": "escaped_duplicate_member",
+        "verdict": "rejected"
+      },
+      {
+        "case": "tampered_chain",
+        "verdict": "rejected"
+      }
+    ],
+    "known_answers": [
+      {
+        "path": "fixtures/python-oracle-outbox.json",
+        "document_sha256": "16de68101d8171fba044d7fcd63a40f1d6bbb2c954d85fa1a2220a5855fce80f",
+        "height": 1,
+        "latest": "87774ce37ab65262df3f5efdd331ed711104cbd9b35ab562cc94b474109d302f",
+        "verified_directives": 1,
+        "python_verdict": "verified",
+        "rust_verdict": "verified_blocks=1, verified_directives=1, untrusted_directives=0"
+      },
+      {
+        "path": "outbox/asfa-ai-outbox.json",
+        "document_sha256": "470abaed8f9641c514fcbaaa4914f6c1b879771503edcb8881b6cb21f97b77e3",
+        "height": 0,
+        "latest": "0000000000000000000000000000000000000000000000000000000000000000",
+        "verified_directives": 0,
+        "python_verdict": "verified"
+      }
+    ],
+    "scope_boundary": "No floats; integers must fit serde_json's supported integer range; canonical_bytes is not RFC 8785 JCS."
+  },
+  "jcs_candidate_evaluation": {
+    "candidates_reviewed": [
+      "serde_jcs 0.2.0",
+      "jcs-canonicalize 0.2.1",
+      "serde_json_canonicalizer 0.4.1"
+    ],
+    "candidate_tested": "jcs-canonicalize 0.2.1",
+    "candidate_own_tests": {
+      "passed": 14,
+      "failed": 0,
+      "unit": 3,
+      "cyberphone_corpus": 2,
+      "edge_cases": 5,
+      "jcs_golden": 4
+    },
+    "integrated_into_repository": false,
+    "reason": "V1 hash-domain compatibility, duplicate-member last-value-wins behavior, large-integer rounding risk, and the missing versioned V2 migration and cross-language boundary matrix prevent silent adoption."
+  },
+  "live_poll": {
+    "report": "docs/evidence/poll-2026-11-10.json",
+    "report_sha256": "464e24c876e111eac32bfcb123cdc605e2053115035ad8a546b6b08f2debe402",
+    "generated_at_epoch": 1794338792,
+    "generated_at_utc": "2026-11-10T19:26:32Z",
+    "producer": "clean-archive build of source_commit",
+    "summary": {
+      "total": 7,
+      "verified": 1,
+      "failed": 6
+    },
+    "records": {
+      "asfa-ai": "verified; height=0",
+      "cfts": "http_status=404",
+      "cisvr": "http_status=404",
+      "qgl": "http_status=404",
+      "ucif2": "http_status=404",
+      "usrm": "http_status=404",
+      "vinf": "invalid_schema: invalid value: map, expected map with a single key"
+    }
+  },
+  "public_local_crosscheck": {
+    "captured_at_utc": "2026-11-10T19:26:32Z",
+    "public_mirror_url": "https://cdn.jsdelivr.net/gh/chepin-ai/test@main/outbox/asfa-ai-outbox.json",
+    "public_document_sha256": "c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4",
+    "local_document": "outbox/asfa-ai-outbox.json",
+    "local_document_sha256": "470abaed8f9641c514fcbaaa4914f6c1b879771503edcb8881b6cb21f97b77e3",
+    "byte_equal": false,
+    "semantic_equal": false,
+    "hash_chain_equal": true,
+    "public_python_oracle": "verified",
+    "local_python_oracle": "verified",
+    "differences": [
+      {
+        "path": "$.url",
+        "kind": "value",
+        "local": "https://raw.githubusercontent.com/chepin-ai/test/refs/heads/main/outbox/asfa-ai-outbox.json",
+        "public": "https://raw.githubusercontent.com/chepin-ai/test/main/outbox/asfa-ai-outbox.json"
+      }
+    ],
+    "conclusion": "Do not claim byte identity or remote=local for the outbox. Mirror retrieval and canonical identity need an explicit canonical_url and mirror policy rather than naive URL equality."
+  },
+  "security_boundaries": [
+    "The checkpoint is an O(n) local full-chain prefix comparison, not a Merkle consistency proof or Signed Tree Head.",
+    "Replacing the entire local state file with an older snapshot is not prevented; no external witness, cosignature, quorum, or trusted monotonic anchor is implemented.",
+    "Atomic rename prevents torn writes but does not provide multi-writer locking or compare-and-swap; the contract is single-writer.",
+    "Strict unique-member parsing is not complete RFC 8785 JCS; V1 payload hashing remains serde_json::to_vec within the existing hash domain.",
+    "The unsigned hash chain checks internal consistency and directive source equality, not publisher authentication or instruction authorization.",
+    "canonical_url, mirror allowlisting, SSRF, redirects, DNS pinning, HTTP downgrade, and trusted-time policies remain open.",
+    "The Python oracle covers only its declared no-float, non-JCS V1 subset.",
+    "The JCS candidate's own passing tests are not evidence of integration or compatibility with this repository."
+  ],
+  "external_state_at_evidence_time": {
+    "last_known_remote_main": "c573dc496dc3caeab1f0f143373c80859ccd93d4",
+    "new_external_ci_for_source_commit": false,
+    "federation_active_evidence": false,
+    "cisvr_ack_evidence": false,
+    "key_sync_01_closed_evidence": false,
+    "note": "Push, remote equality, ACK, federation promotion, and CI require independent external receipts; none is inferred from local build success."
+  }
+}
