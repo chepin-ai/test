@@ -12,19 +12,20 @@
   - Agent 身份与位置；
   - 可执行 JSON Skill 注册表。
 - `asfa-bridge-poller`
-  - `file://`、HTTP(S) 轮询；
+  - 默认 HTTPS 轮询；`file://` 与 HTTP 必须显式授权，自动重定向关闭且 3xx 显式失败；
+  - `Outbox.url` 绑定显式正典 URL，只读镜像可在声明后与读取 URL 不同；
   - 无签名哈希链逐块重算；
-  - Outbox、Registry、Snapshot 统一严格 JSON 入口，递归拒绝重复及转义后同名键；
+  - Outbox、Registry、Snapshot 统一严格 JSON 入口，递归拒绝重复、转义后同名键及未知协议字段；
   - 404、非 JSON、schema 错误、身份错配、坏链、超限文档均产生显式负结果；
   - 指令只在区块负载内计入已验证集合，并强制 `from == session`；
   - 结构化会话键去重、同 ID 内容冲突拒绝、过期复核、消费 tombstone 防重放；
-  - v2 账本绑定 `network_name`，跨网络复用直接失败且不覆盖原状态；
+  - v3 账本绑定 `network_name` 与完整安全策略 `policy_hash`，跨网络或同网络策略混配直接失败且不覆盖原状态；
   - 每会话持久化 `(height,latest)` 检查点，拒绝降高、同高分叉及长链改写旧前缀；
   - 确定性账本快照、原子保存、恢复矛盾检查，重载后仍拒绝已消费指令与历史分叉；
   - CLI 可直接执行“轮询→完整链复验→入库→显式消费→原子保存”，并输出逐指令 ingestion 事件；
   - 任一后续区块伪造时整份 Outbox 不入库，不用前面的合法块制造部分应用；
   - 注册表／会话／文档 trust 交叉核对，HMAC 和完整签名明确返回“未支持”；
-  - 文件与 HTTP 均按 2 MiB 上限流式读取，避免先整文件载入再判超限。
+  - Outbox 与 Registry 均按 2 MiB 上限读取，Snapshot 上限 16 MiB；同时检查 metadata 和实际读回字节。
 
 ## 复验
 
@@ -35,10 +36,15 @@ cargo test --workspace --all-targets --locked
 cargo run --example cognitive_demo -p asfa-userspace
 python3 scripts/verify-outbox-python.py --self-test \
   fixtures/python-oracle-outbox.json outbox/asfa-ai-outbox.json
+python3 scripts/verify-policy-python.py --fixture fixtures/policy-oracle.json
 cargo run -p asfa-bridge-poller -- \
   --config config/sessions.smoke.json \
   --out /tmp/asfa-smoke-report.json \
+  --state /tmp/asfa-smoke-state.json \
   --now 1000
+python3 scripts/verify-policy-python.py \
+  --registry config/sessions.smoke.json \
+  --snapshot /tmp/asfa-smoke-state.json
 
 # 带持久化账本运行；状态不存在时新建，非法状态直接失败且不覆盖
 cargo run -p asfa-bridge-poller -- \
@@ -55,7 +61,7 @@ cargo run -p asfa-bridge-poller -- \
   --out /tmp/asfa-consume-report.json
 ```
 
-`--fail-on-error` 会把轮询失败、入库冲突／非法指令和消费目标不存在变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v2 状态与 `network_name` 绑定，旧 v1 或无网络身份状态不做隐式迁移。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、多写者互斥仍不在保障范围内。
+`--fail-on-error` 会把轮询失败、入库冲突／非法指令和消费目标不存在变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v3 状态同时绑定 `network_name` 与 Registry 安全策略摘要 `policy_hash`；旧 v1／v2、跨网络及同网络策略变化均不做隐式迁移，说明性 `role`／`note` 变化不影响兼容性。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、多写者互斥仍不在保障范围内。
 
 一键全部门禁（`/mnt` 等禁止执行位挂载下也能构建）：
 

@@ -8,6 +8,8 @@ use std::io;
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+const MAX_REGISTRY_BYTES: u64 = 2 * 1024 * 1024;
+
 fn now_epoch() -> Result<u64, Box<dyn Error>> {
     Ok(SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs())
 }
@@ -69,20 +71,19 @@ fn run() -> Result<(), Box<dyn Error>> {
         None => now_epoch()?,
     };
 
-    let registry: Registry = strict_json::from_str(&fs::read_to_string(&config)?)?;
+    let registry: Registry = strict_json::from_path(&config, MAX_REGISTRY_BYTES)?;
     if registry.network_name.trim().is_empty() {
         return Err("registry network_name must not be empty".into());
     }
     let poller = Poller::new();
     let report = if let Some(state_path) = state {
-        let mut ledger =
-            match DirectiveLedger::load_for_network(&state_path, &registry.network_name) {
-                Ok(ledger) => ledger,
-                Err(error) if error.kind() == io::ErrorKind::NotFound => {
-                    DirectiveLedger::for_network(registry.network_name.clone())
-                }
-                Err(error) => return Err(error.into()),
-            };
+        let mut ledger = match DirectiveLedger::load_for_registry(&state_path, &registry) {
+            Ok(ledger) => ledger,
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                DirectiveLedger::for_registry(&registry)
+            }
+            Err(error) => return Err(error.into()),
+        };
         let mut ingestion = IngestionReport::default();
         let mut records = Vec::new();
         for SessionPoll { record, outbox } in poller.poll_registry_detailed(&registry, now) {

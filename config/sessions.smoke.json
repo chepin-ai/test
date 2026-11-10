@@ -6,17 +6,20 @@
     "good": {
       "url": "file://fixtures/valid-outbox.json",
       "role": "fixture",
-      "trust": "unsigned-hash-chain"
+      "trust": "unsigned-hash-chain",
+      "allow_file": true
     },
     "malformed": {
       "url": "file://fixtures/malformed.json",
       "role": "negative-fixture",
-      "trust": "unsigned-hash-chain"
+      "trust": "unsigned-hash-chain",
+      "allow_file": true
     },
     "missing": {
       "url": "file://fixtures/not-found.json",
       "role": "negative-fixture",
-      "trust": "unsigned-hash-chain"
+      "trust": "unsigned-hash-chain",
+      "allow_file": true
     }
   }
 }

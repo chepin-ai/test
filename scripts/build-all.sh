@@ -12,6 +12,7 @@ python3 scripts/check-no-secrets.py
 python3 scripts/verify-outbox-python.py --self-test \
   fixtures/python-oracle-outbox.json \
   outbox/asfa-ai-outbox.json
+python3 scripts/verify-policy-python.py --fixture fixtures/policy-oracle.json
 COGNITIVE_OUTPUT="$(cargo run --locked --quiet --example cognitive_demo -p asfa-userspace)"
 COGNITIVE_OUTPUT="$COGNITIVE_OUTPUT" python3 - <<'PY'
 import os
@@ -20,10 +21,16 @@ actual = os.environ['COGNITIVE_OUTPUT'].strip()
 assert actual == expected, (actual, expected)
 print('cognitive demo: PASS', actual)
 PY
+rm -f /tmp/asfa-smoke-report.json /tmp/asfa-smoke-state.json
 cargo run --locked -p asfa-bridge-poller -- \
   --config config/sessions.smoke.json \
   --out /tmp/asfa-smoke-report.json \
+  --state /tmp/asfa-smoke-state.json \
   --now 1000
+python3 scripts/verify-policy-python.py \
+  --fixture fixtures/policy-oracle.json \
+  --registry config/sessions.smoke.json \
+  --snapshot /tmp/asfa-smoke-state.json
 python3 - <<'PY'
 import json
 with open('/tmp/asfa-smoke-report.json') as f:

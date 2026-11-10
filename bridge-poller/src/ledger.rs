@@ -1,15 +1,15 @@
 use crate::chain::ChainError;
-use crate::model::{Directive, Outbox, GENESIS_HASH};
+use crate::model::{Directive, Outbox, Registry, GENESIS_HASH};
 use crate::strict_json;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
-use std::io::{self, Read};
+use std::io;
 use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
 use thiserror::Error;
 
-pub const LEDGER_SCHEMA_VERSION: &str = "asfa-directive-ledger/v2";
+pub const LEDGER_SCHEMA_VERSION: &str = "asfa-directive-ledger/v3";
 pub const MAX_LEDGER_BYTES: u64 = 16 * 1024 * 1024;
 static NEXT_TEMP_FILE: AtomicU64 = AtomicU64::new(1);
 
@@ -26,24 +26,28 @@ pub enum IngestOutcome {
 type DirectiveKey = (String, String);
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(deny_unknown_fields)]
 pub struct DirectiveEntry {
     pub session: String,
     pub directive: Directive,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct ConsumedKey {
     pub session: String,
     pub id: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct ChainCheckpoint {
     pub height: u64,
     pub latest: String,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
 pub struct CheckpointEntry {
     pub session: String,
     pub height: u64,
@@ -51,10 +55,13 @@ pub struct CheckpointEntry {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(deny_unknown_fields)]
 pub struct LedgerSnapshot {
     pub schema_version: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub network_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub policy_hash: Option<String>,
     pub directives: Vec<DirectiveEntry>,
     pub consumed: Vec<ConsumedKey>,
     pub checkpoints: Vec<CheckpointEntry>,
@@ -82,14 +89,15 @@ pub enum RestoreError {
 #[derive(Default)]
 pub struct DirectiveLedger {
     network_name: Option<String>,
+    policy_hash: Option<String>,
     directives: BTreeMap<DirectiveKey, Directive>,
     consumed: BTreeSet<DirectiveKey>,
     checkpoints: BTreeMap<String, ChainCheckpoint>,
 }
 
 impl DirectiveLedger {
-    /// Construct an unbound in-memory ledger for isolated library use. Network
-    /// CLI callers use `for_network` or `load_for_network` instead.
+    /// Construct an unbound in-memory ledger for isolated library use. Stateful
+    /// CLI callers use `for_registry` or `load_for_registry` instead.
     pub fn new() -> Self {
         Self::default()
     }
@@ -101,8 +109,20 @@ impl DirectiveLedger {
         }
     }
 
+    pub fn for_registry(registry: &Registry) -> Self {
+        Self {
+            network_name: Some(registry.network_name.clone()),
+            policy_hash: Some(registry.policy_digest()),
+            ..Self::default()
+        }
+    }
+
     pub fn network_name(&self) -> Option<&str> {
         self.network_name.as_deref()
+    }
+
+    pub fn policy_hash(&self) -> Option<&str> {
+        self.policy_hash.as_deref()
     }
 
     pub fn len(&self) -> usize {
@@ -253,6 +273,7 @@ impl DirectiveLedger {
         LedgerSnapshot {
             schema_version: LEDGER_SCHEMA_VERSION.into(),
             network_name: self.network_name.clone(),
+            policy_hash: self.policy_hash.clone(),
             directives: self
                 .directives
                 .iter()
@@ -294,8 +315,18 @@ impl DirectiveLedger {
                 "network_name must not be empty when present".into(),
             ));
         }
+        if snapshot
+            .policy_hash
+            .as_deref()
+            .is_some_and(|hash| !valid_hash(hash))
+        {
+            return Err(RestoreError::InvalidEntry(
+                "policy_hash must be a lowercase SHA-256 digest when present".into(),
+            ));
+        }
         let mut ledger = Self {
             network_name: snapshot.network_name,
+            policy_hash: snapshot.policy_hash,
             ..Self::default()
         };
         for entry in snapshot.directives {
@@ -384,23 +415,7 @@ impl DirectiveLedger {
     }
 
     fn read_snapshot(path: &Path) -> io::Result<LedgerSnapshot> {
-        let file = fs::File::open(path)?;
-        if file.metadata()?.len() > MAX_LEDGER_BYTES {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                format!("ledger exceeds {MAX_LEDGER_BYTES} bytes"),
-            ));
-        }
-        let mut bytes = Vec::new();
-        file.take(MAX_LEDGER_BYTES + 1).read_to_end(&mut bytes)?;
-        if bytes.len() as u64 > MAX_LEDGER_BYTES {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                format!("ledger exceeds {MAX_LEDGER_BYTES} bytes"),
-            ));
-        }
-        strict_json::from_slice(&bytes)
-            .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))
+        strict_json::from_path(path, MAX_LEDGER_BYTES)
     }
 
     pub fn load(path: &Path) -> io::Result<Self> {
@@ -408,14 +423,34 @@ impl DirectiveLedger {
             .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))
     }
 
-    pub fn load_for_network(path: &Path, expected_network: &str) -> io::Result<Self> {
+    pub fn load_for_registry(path: &Path, registry: &Registry) -> io::Result<Self> {
         let snapshot = Self::read_snapshot(path)?;
-        if snapshot.network_name.as_deref() != Some(expected_network) {
+        if snapshot.schema_version != LEDGER_SCHEMA_VERSION {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!(
+                    "unsupported ledger schema: {}; refusing implicit migration",
+                    snapshot.schema_version
+                ),
+            ));
+        }
+        if snapshot.network_name.as_deref() != Some(registry.network_name.as_str()) {
             let actual = snapshot.network_name.as_deref().unwrap_or("<unbound>");
             return Err(io::Error::new(
                 io::ErrorKind::InvalidData,
                 format!(
-                    "ledger network mismatch: expected={expected_network}, actual={actual}; refusing implicit migration"
+                    "ledger network mismatch: expected={}, actual={actual}; refusing implicit migration",
+                    registry.network_name
+                ),
+            ));
+        }
+        let expected_policy = registry.policy_digest();
+        if snapshot.policy_hash.as_deref() != Some(expected_policy.as_str()) {
+            let actual = snapshot.policy_hash.as_deref().unwrap_or("<unbound>");
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!(
+                    "ledger policy mismatch: expected={expected_policy}, actual={actual}; refusing implicit migration"
                 ),
             ));
         }
@@ -444,6 +479,15 @@ mod tests {
             action: "Ping".into(),
             payload: json!({}),
             expires_epoch,
+        }
+    }
+
+    fn registry(network_name: &str) -> Registry {
+        Registry {
+            schema_version: "test".into(),
+            network_name: network_name.into(),
+            trust_model: "unsigned-hash-chain".into(),
+            sessions: BTreeMap::new(),
         }
     }
 
@@ -560,14 +604,14 @@ mod tests {
         let path =
             std::env::temp_dir().join(format!("asfa-ledger-restart-{}.json", std::process::id()));
         let _ = fs::remove_file(&path);
-        let mut ledger = DirectiveLedger::for_network("alpha");
+        let mut ledger = DirectiveLedger::for_registry(&registry("alpha"));
         let item = directive("a", "once", None);
         ledger.ingest("a", item.clone(), 100);
         ledger.consume("a", "once");
         ledger.save_atomic(&path).unwrap();
-        let mut restored = DirectiveLedger::load_for_network(&path, "alpha").unwrap();
+        let mut restored = DirectiveLedger::load_for_registry(&path, &registry("alpha")).unwrap();
         assert_eq!(restored.ingest("a", item, 100), IngestOutcome::Consumed);
-        assert!(DirectiveLedger::load_for_network(&path, "beta").is_err());
+        assert!(DirectiveLedger::load_for_registry(&path, &registry("beta")).is_err());
         fs::remove_file(path).unwrap();
     }
 
@@ -577,6 +621,7 @@ mod tests {
         let snapshot = LedgerSnapshot {
             schema_version: LEDGER_SCHEMA_VERSION.into(),
             network_name: None,
+            policy_hash: None,
             directives: vec![DirectiveEntry {
                 session: "a".into(),
                 directive: item,
@@ -598,6 +643,7 @@ mod tests {
         let duplicate = LedgerSnapshot {
             schema_version: LEDGER_SCHEMA_VERSION.into(),
             network_name: Some("alpha".into()),
+            policy_hash: None,
             directives: vec![],
             consumed: vec![],
             checkpoints: vec![
@@ -621,6 +667,7 @@ mod tests {
         let malformed = LedgerSnapshot {
             schema_version: LEDGER_SCHEMA_VERSION.into(),
             network_name: Some("alpha".into()),
+            policy_hash: None,
             directives: vec![],
             consumed: vec![],
             checkpoints: vec![CheckpointEntry {

@@ -1,0 +1,45 @@
+{
+  "registry": {
+    "schema_version": "registry-oracle/v1",
+    "network_name": "跨语言策略",
+    "trust_model": "unsigned-hash-chain",
+    "sessions": {
+      "alpha": {
+        "url": "https://mirror.example/a.json",
+        "canonical_url": "https://canonical.example/a.json",
+        "role": "说明性角色",
+        "trust": "unsigned-hash-chain",
+        "note": "role/note 不进入安全投影",
+        "allow_insecure_http": false,
+        "allow_file": false
+      },
+      "beta": {
+        "url": "file://fixtures/b.json",
+        "trust": "unsigned-hash-chain",
+        "allow_file": true
+      }
+    }
+  },
+  "projection": {
+    "schema_version": "registry-oracle/v1",
+    "network_name": "跨语言策略",
+    "trust_model": "unsigned-hash-chain",
+    "sessions": {
+      "alpha": {
+        "url": "https://mirror.example/a.json",
+        "canonical_url": "https://canonical.example/a.json",
+        "trust": "unsigned-hash-chain",
+        "allow_insecure_http": false,
+        "allow_file": false
+      },
+      "beta": {
+        "url": "file://fixtures/b.json",
+        "canonical_url": "file://fixtures/b.json",
+        "trust": "unsigned-hash-chain",
+        "allow_insecure_http": false,
+        "allow_file": true
+      }
+    }
+  },
+  "expected_policy_sha256": "d5805bd450f0778f996fd6094d3a1723114da35be1adee5ca8bd0f361a3c7a21"
+}

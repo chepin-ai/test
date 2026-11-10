@@ -1,9 +1,11 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
 
 pub const GENESIS_HASH: &str = "0000000000000000000000000000000000000000000000000000000000000000";
 pub const REPORT_SCHEMA_VERSION: &str = "asfa-bridge-report/v1";
+pub const POLICY_DIGEST_DOMAIN: &str = "ASFA-OS-XI/REGISTRY-POLICY/V1\n";
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
@@ -15,6 +17,7 @@ pub enum TrustMode {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(deny_unknown_fields)]
 pub struct Registry {
     pub schema_version: String,
     pub network_name: String,
@@ -22,18 +25,71 @@ pub struct Registry {
     pub sessions: BTreeMap<String, Session>,
 }
 
+impl Registry {
+    /// Deterministic digest of the complete security-relevant policy projection.
+    /// Descriptive role/note fields are deliberately excluded. This is a versioned
+    /// domain-separated SHA-256 digest, not a signature or an RFC 8785 JCS claim.
+    pub fn policy_digest(&self) -> String {
+        let sessions: BTreeMap<String, Value> = self
+            .sessions
+            .iter()
+            .map(|(name, session)| {
+                (
+                    name.clone(),
+                    json!({
+                        "url": session.url,
+                        "canonical_url": session.canonical_url(),
+                        "trust": session.trust,
+                        "allow_insecure_http": session.allow_insecure_http,
+                        "allow_file": session.allow_file,
+                    }),
+                )
+            })
+            .collect();
+        let projection = json!({
+            "schema_version": self.schema_version,
+            "network_name": self.network_name,
+            "trust_model": self.trust_model,
+            "sessions": sessions,
+        });
+        let mut encoded = POLICY_DIGEST_DOMAIN.as_bytes().to_vec();
+        encoded.extend(
+            serde_json::to_vec(&projection).expect("registry policy projection always serializes"),
+        );
+        format!("{:x}", Sha256::digest(&encoded))
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(deny_unknown_fields)]
 pub struct Session {
+    /// Fetch URL. A read-only mirror may differ from the canonical document URL.
     pub url: String,
+    /// Expected Outbox.url. Omitted means exact equality with the fetch URL.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub canonical_url: Option<String>,
     #[serde(default)]
     pub role: Option<String>,
     #[serde(default)]
     pub trust: TrustMode,
     #[serde(default)]
     pub note: Option<String>,
+    /// HTTP is denied unless this explicit test/legacy opt-in is present.
+    #[serde(default)]
+    pub allow_insecure_http: bool,
+    /// Local file transport is denied unless explicitly enabled.
+    #[serde(default)]
+    pub allow_file: bool,
+}
+
+impl Session {
+    pub fn canonical_url(&self) -> &str {
+        self.canonical_url.as_deref().unwrap_or(&self.url)
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(deny_unknown_fields)]
 pub struct Directive {
     pub id: String,
     pub from: String,
@@ -46,6 +102,7 @@ pub struct Directive {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(deny_unknown_fields)]
 pub struct ChainBlock {
     pub height: u64,
     pub previous_hash: String,
@@ -57,6 +114,7 @@ pub struct ChainBlock {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(deny_unknown_fields)]
 pub struct HashChain {
     pub genesis: String,
     pub latest: String,
@@ -77,6 +135,7 @@ impl Default for HashChain {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(deny_unknown_fields)]
 pub struct Outbox {
     pub session: String,
     pub url: String,

@@ -2,7 +2,9 @@
 
 ## 1. 文档
 
-`Outbox` 必填字段：`session`、`url`、`trust`、`hash_chain`；`directives`、`mailbox` 可省略。文档必须是 UTF-8 JSON，最大 2 MiB。注册表键名必须与文档 `session` 完全一致。Outbox、Registry 与 LedgerSnapshot 在 schema 转换前共用严格 JSON 入口，递归拒绝所有对象层级的重复成员；键名在 JSON 转义解码后比较，因此 `a` 与 `\u0061` 也判重。
+`Outbox` 必填字段：`session`、`url`、`trust`、`hash_chain`；`directives`、`mailbox` 可省略。文档必须是 UTF-8 JSON，最大 2 MiB；Registry 最大 2 MiB，LedgerSnapshot 最大 16 MiB，均在读取时同时检查 metadata 和实际读回字节。注册表键名必须与文档 `session` 完全一致。Outbox、Registry 与 LedgerSnapshot 在 schema 转换前共用严格 JSON 入口，递归拒绝所有对象层级的重复成员；键名在 JSON 转义解码后比较，因此 `a` 与 `\u0061` 也判重。协议结构使用 `deny_unknown_fields`，未知字段不会被静默当作“已验证签名”或其他扩展语义；`mailbox` 与区块 `payload` 仍是明确开放的数据字段。
+
+文档自报 `Outbox.url` 必须等于会话的 `canonical_url`。未填写 `canonical_url` 时，正典 URL 默认就是读取 `url`；只有显式声明后，jsDelivr 等只读镜像地址才允许与正典地址不同。该检查是精确字符串身份对拍，不做 URL 语义归一化，也不认证镜像或发布者。
 
 ## 2. 哈希计算
 
@@ -35,6 +37,8 @@ ASFA-OS-XI/UNSIGNED-HASH-CHAIN/V1\n
 
 注册表顶层 `trust_model`、会话 `trust` 和文档 `trust` 必须一致且均为 `unsigned-hash-chain`。不支持的会话模式在发起网络读取前即拒绝。HTTP 200、JSON 可解析或字段自报 `active` 均不等于验证通过。
 
+传输默认只接受 HTTPS。`http://` 必须显式设置 `allow_insecure_http=true`，`file://` 必须显式设置 `allow_file=true`；其他 scheme 和 URL fragment 在任何 I/O 前拒绝，HTTP(S) 还拒绝缺失主机与 URL userinfo。HTTP client 禁用自动重定向，300–399 均作为 `http_status` 负结果，第二跳不会被请求。15 秒超时和 2 MiB 响应上限继续保留。这些门禁不等于完整 SSRF 防护：DNS rebinding／pinning、私网与 metadata 地址、连接时 IP 绑定、出口防火墙和 DNS 超时仍需外层或后续实现。
+
 ## 4. 指令
 
 可信指令放在区块负载中：
@@ -59,7 +63,19 @@ ASFA-OS-XI/UNSIGNED-HASH-CHAIN/V1\n
 
 账本使用 `(session, id)` 结构化键，避免字符串拼接碰撞。完全相同的重复指令返回 `Duplicate`；同键不同内容返回 `Conflict`；过期、空字段和来源不符分别返回负结果。`consume` 删除待办指令并保留 tombstone，再次收到同键指令返回 `Consumed`，不能重新入库。`pending_for_at` 与 `prune_expired` 会按当前时间重新检查过期状态。
 
-`LedgerSnapshot` 使用 `asfa-directive-ledger/v2`，将网络身份、待办、tombstone 与每会话 `(height,latest)` 检查点以确定性数组表示。CLI 通过 `load_for_network` 强制快照 `network_name` 等于 Registry；旧 v1、无网络身份或跨网络状态不做隐式迁移，加载失败不覆盖原文件。`save_atomic` 使用同目录临时文件原子替换，读取限制 16 MiB，并校验 schema、重复 JSON 成员、重复结构化键、非法指令、非法／重复检查点及“已消费但仍待办”矛盾。恢复后重放仍返回 `Consumed`，历史分叉仍被拒绝。
+`LedgerSnapshot` 使用 `asfa-directive-ledger/v3`，将网络身份、安全策略摘要、待办、tombstone 与每会话 `(height,latest)` 检查点以确定性数组表示。CLI 通过 `load_for_registry` 强制快照 `network_name` 与 `policy_hash` 同时等于当前 Registry；旧 v1／v2、无网络或无策略身份、跨网络及同网络安全策略变化均不做隐式迁移，加载失败不覆盖原文件。只修改说明性 `role`／`note` 不改变策略摘要，可以继续加载。
+
+策略摘要的域分离定义为：
+
+```text
+policy_hash = SHA256(
+  "ASFA-OS-XI/REGISTRY-POLICY/V1\n" || serde_json::to_vec(policy_projection)
+)
+```
+
+`policy_projection` 包含 Registry `schema_version`、`network_name`、`trust_model`，以及每个 session 的读取 URL、解析后的正典 URL、trust、`allow_insecure_http` 和 `allow_file`。`role`／`note` 被明确排除。省略 `canonical_url` 与显式填写相同读取 URL 具有相同投影。该摘要是版本化、确定性的 SHA-256 投影，不是完整 JCS，也不是签名；能同时篡改 Registry 与 state 的本机攻击者仍可重算它。
+
+`save_atomic` 使用同目录临时文件原子替换，并校验 schema、重复／未知 JSON 成员、重复结构化键、非法指令、非法／重复检查点及“已消费但仍待办”矛盾。恢复后重放仍返回 `Consumed`，历史分叉仍被拒绝。
 
 检查点规则：新高度低于旧高度为 `Rollback`；同高不同 latest 为 `Fork`；更高高度在旧高度处的块哈希必须等于旧 latest，否则为 `Fork`。合法重读和保留旧前缀的延长放行。该检查是 O(n) 全链前缀对拍，不是 Merkle consistency proof；整份状态文件被替换仍需外部单调锚或独立 witness。持久化不是隐式副作用：调用方必须在状态变更后保存，否则重启只恢复到最后一次快照。原子改名不等于多写者互斥，当前 `--state` 只支持单写者。
 
@@ -68,7 +84,7 @@ ASFA-OS-XI/UNSIGNED-HASH-CHAIN/V1\n
 `poll_registry_detailed` 只在传输、严格 JSON、schema、trust 和完整哈希链全部通过时返回 `Outbox`。`ingest_outbox` 在修改账本前再次执行完整验证和本地检查点对拍；因此后续区块即使只有一个伪造指令，或新链改写本地旧头，也不会部分应用前面的合法区块。随后才逐条写入账本、提交检查点并生成 `IngestionEvent`。
 
 ```text
-load --state
+load_for_registry(--state, network_name + policy_hash)
   → poll_registry_detailed
   → ingest_outbox（仅 verified Outbox，且通过本地链头一致性对拍）
   → 可选 consume(session, id)
@@ -82,4 +98,6 @@ load --state
 
 ## 6. 负结果
 
-`http_status`、`transport`、`invalid_json`、`invalid_schema`、`invalid_trust`、`unsupported_trust` 都保留在报告中。禁止解析失败后静默跳过。
+`http_status`、`transport`、`invalid_json`、`invalid_schema`、`invalid_trust`、`unsupported_trust` 都保留在报告中。重定向、正典 URL 错配、未知字段、未授权 scheme、超限输入、解析失败均不得静默跳过。策略／版本恢复失败发生在轮询之前，因此不生成新报告、不覆盖原状态。
+
+当前还以 256 层嵌套负例验证 serde_json 的递归限制会失败关闭，但应用自身尚未定义独立的深度／节点数预算；Registry 的 session 数、全轮询总 deadline 与多写者锁也未实现。上述项目不能被 2 MiB 字节上限或原子 rename 替代。

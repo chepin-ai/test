@@ -39,7 +39,10 @@ impl Poller {
 
     pub fn with_timeout(timeout: Duration) -> Self {
         Self {
-            agent: ureq::AgentBuilder::new().timeout(timeout).build(),
+            agent: ureq::AgentBuilder::new()
+                .timeout(timeout)
+                .redirects(0)
+                .build(),
         }
     }
 
@@ -102,7 +105,7 @@ impl Poller {
                 outbox: None,
             };
         }
-        let (status, outbox) = match self.fetch(&session.url) {
+        let (status, outbox) = match self.fetch(session) {
             Err(FetchError::HttpStatus(code)) => (PollStatus::HttpStatus { code }, None),
             Err(FetchError::Transport(message)) => (PollStatus::Transport { message }, None),
             Err(FetchError::TooLarge) => (
@@ -117,7 +120,7 @@ impl Poller {
                 },
                 None,
             ),
-            Ok(body) => match Self::verify_document(name, session.trust, &body) {
+            Ok(body) => match Self::verify_document(name, session, &body) {
                 Ok((status, outbox)) => (status, Some(outbox)),
                 Err(status) => (status, None),
             },
@@ -139,7 +142,7 @@ impl Poller {
 
     fn verify_document(
         name: &str,
-        expected_trust: TrustMode,
+        session: &Session,
         body: &str,
     ) -> Result<(PollStatus, Outbox), PollStatus> {
         let value =
@@ -158,14 +161,23 @@ impl Poller {
                 ),
             });
         }
+        if outbox.url != session.canonical_url() {
+            return Err(PollStatus::InvalidTrust {
+                message: format!(
+                    "canonical URL mismatch: expected={}, document={}",
+                    session.canonical_url(),
+                    outbox.url
+                ),
+            });
+        }
         if outbox.trust != TrustMode::UnsignedHashChain {
             return Err(PollStatus::UnsupportedTrust { mode: outbox.trust });
         }
-        if outbox.trust != expected_trust {
+        if outbox.trust != session.trust {
             return Err(PollStatus::InvalidTrust {
                 message: format!(
-                    "trust mismatch: registry={expected_trust:?}, document={:?}",
-                    outbox.trust
+                    "trust mismatch: registry={:?}, document={:?}",
+                    session.trust, outbox.trust
                 ),
             });
         }
@@ -187,7 +199,39 @@ impl Poller {
         ))
     }
 
-    fn fetch(&self, url: &str) -> Result<String, FetchError> {
+    fn fetch(&self, session: &Session) -> Result<String, FetchError> {
+        let url = &session.url;
+        let parsed = url::Url::parse(url)
+            .map_err(|error| FetchError::Transport(format!("invalid URL: {error}")))?;
+        if parsed.fragment().is_some() {
+            return Err(FetchError::Transport(
+                "URL fragments are not allowed in transport policy".into(),
+            ));
+        }
+        match parsed.scheme() {
+            "file" => {
+                if !session.allow_file {
+                    return Err(FetchError::Transport(
+                        "file transport requires explicit allow_file=true".into(),
+                    ));
+                }
+            }
+            "http" | "https" => {
+                if parsed.scheme() == "http" && !session.allow_insecure_http {
+                    return Err(FetchError::Transport(
+                        "insecure HTTP requires explicit allow_insecure_http=true".into(),
+                    ));
+                }
+                if parsed.host_str().is_none() {
+                    return Err(FetchError::Transport("URL host is required".into()));
+                }
+                if !parsed.username().is_empty() || parsed.password().is_some() {
+                    return Err(FetchError::Transport("URL userinfo is not allowed".into()));
+                }
+            }
+            _ => return Err(FetchError::Transport("unsupported URL scheme".into())),
+        }
+
         if let Some(path) = url.strip_prefix("file://") {
             let file =
                 fs::File::open(path).map_err(|error| FetchError::Transport(error.to_string()))?;
@@ -208,14 +252,14 @@ impl Poller {
             }
             return String::from_utf8(bytes).map_err(|_| FetchError::InvalidUtf8);
         }
-        if !(url.starts_with("https://") || url.starts_with("http://")) {
-            return Err(FetchError::Transport("unsupported URL scheme".into()));
-        }
 
         let response = self.agent.get(url).call().map_err(|error| match error {
             ureq::Error::Status(code, _) => FetchError::HttpStatus(code),
             ureq::Error::Transport(transport) => FetchError::Transport(transport.to_string()),
         })?;
+        if (300..400).contains(&response.status()) {
+            return Err(FetchError::HttpStatus(response.status()));
+        }
         let mut bytes = Vec::new();
         response
             .into_reader()

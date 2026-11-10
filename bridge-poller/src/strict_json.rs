@@ -1,6 +1,9 @@
 use serde::de::{DeserializeOwned, MapAccess, SeqAccess, Visitor};
 use serde::{Deserialize, Deserializer};
 use serde_json::{Map, Number, Value};
+use std::fs;
+use std::io::{self, Read};
+use std::path::Path;
 
 /// Parse a JSON value while rejecting duplicate member names at every object
 /// depth. Keys are compared after JSON escape decoding.
@@ -23,6 +26,27 @@ pub fn from_str<T: DeserializeOwned>(input: &str) -> Result<T, serde_json::Error
 
 pub fn from_slice<T: DeserializeOwned>(input: &[u8]) -> Result<T, serde_json::Error> {
     serde_json::from_value(value_from_slice(input)?)
+}
+
+/// Read at most `max_bytes + 1` bytes, rejecting both a large initial metadata
+/// length and a file that grows while it is being read.
+pub fn from_path<T: DeserializeOwned>(path: &Path, max_bytes: u64) -> io::Result<T> {
+    let file = fs::File::open(path)?;
+    if file.metadata()?.len() > max_bytes {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("JSON input exceeds {max_bytes} bytes"),
+        ));
+    }
+    let mut bytes = Vec::new();
+    file.take(max_bytes + 1).read_to_end(&mut bytes)?;
+    if bytes.len() as u64 > max_bytes {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!("JSON input exceeds {max_bytes} bytes"),
+        ));
+    }
+    from_slice(&bytes).map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))
 }
 
 struct StrictValue(Value);
@@ -137,5 +161,25 @@ mod tests {
     fn typed_entry_uses_the_same_uniqueness_gate() {
         let result = from_str::<Value>(r#"{"a":1,"\u0061":2}"#);
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn excessive_nesting_fails_closed() {
+        let input = format!("{}0{}", "[".repeat(256), "]".repeat(256));
+        assert!(value_from_str(&input).is_err());
+    }
+
+    #[test]
+    fn bounded_file_reader_rejects_oversize_input() {
+        let path = std::env::temp_dir().join(format!(
+            "asfa-strict-json-oversize-{}.json",
+            std::process::id()
+        ));
+        let _ = fs::remove_file(&path);
+        fs::write(&path, b"          ").unwrap();
+        let error = from_path::<Value>(&path, 9).unwrap_err();
+        assert_eq!(error.kind(), io::ErrorKind::InvalidData);
+        assert!(error.to_string().contains("exceeds 9 bytes"));
+        fs::remove_file(path).unwrap();
     }
 }
