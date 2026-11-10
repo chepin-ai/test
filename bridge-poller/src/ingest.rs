@@ -10,6 +10,7 @@ pub fn ingest_outbox(
     now_epoch: u64,
 ) -> Result<IngestionReport, ChainError> {
     let directives = verified_directives(outbox)?;
+    let checkpoint = ledger.checkpoint_for(outbox)?;
     let mut report = IngestionReport::default();
     for directive in directives {
         let id = directive.id.clone();
@@ -47,6 +48,8 @@ pub fn ingest_outbox(
             message,
         });
     }
+    ledger.commit_checkpoint(&outbox.session, checkpoint);
+    report.chain_checkpoints = 1;
     report.pending = ledger.len();
     report.tombstones = ledger.consumed_len();
     Ok(report)

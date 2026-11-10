@@ -2,7 +2,6 @@ use crate::chain::{verified_directives, verify_chain};
 use crate::model::{
     BridgeReport, Outbox, PollRecord, PollStatus, Registry, Session, SessionPoll, TrustMode,
 };
-use serde_json::Value;
 use std::fs;
 use std::io::Read;
 use std::time::Duration;
@@ -143,9 +142,10 @@ impl Poller {
         expected_trust: TrustMode,
         body: &str,
     ) -> Result<(PollStatus, Outbox), PollStatus> {
-        let value: Value = serde_json::from_str(body).map_err(|error| PollStatus::InvalidJson {
-            message: error.to_string(),
-        })?;
+        let value =
+            crate::strict_json::value_from_str(body).map_err(|error| PollStatus::InvalidJson {
+                message: error.to_string(),
+            })?;
         let outbox: Outbox =
             serde_json::from_value(value).map_err(|error| PollStatus::InvalidSchema {
                 message: error.to_string(),

@@ -14,10 +14,13 @@
 - `asfa-bridge-poller`
   - `file://`、HTTP(S) 轮询；
   - 无签名哈希链逐块重算；
+  - Outbox、Registry、Snapshot 统一严格 JSON 入口，递归拒绝重复及转义后同名键；
   - 404、非 JSON、schema 错误、身份错配、坏链、超限文档均产生显式负结果；
   - 指令只在区块负载内计入已验证集合，并强制 `from == session`；
   - 结构化会话键去重、同 ID 内容冲突拒绝、过期复核、消费 tombstone 防重放；
-  - 确定性账本快照、原子保存、恢复矛盾检查，重载后仍拒绝已消费指令；
+  - v2 账本绑定 `network_name`，跨网络复用直接失败且不覆盖原状态；
+  - 每会话持久化 `(height,latest)` 检查点，拒绝降高、同高分叉及长链改写旧前缀；
+  - 确定性账本快照、原子保存、恢复矛盾检查，重载后仍拒绝已消费指令与历史分叉；
   - CLI 可直接执行“轮询→完整链复验→入库→显式消费→原子保存”，并输出逐指令 ingestion 事件；
   - 任一后续区块伪造时整份 Outbox 不入库，不用前面的合法块制造部分应用；
   - 注册表／会话／文档 trust 交叉核对，HMAC 和完整签名明确返回“未支持”；
@@ -30,6 +33,8 @@
 ```bash
 cargo test --workspace --all-targets --locked
 cargo run --example cognitive_demo -p asfa-userspace
+python3 scripts/verify-outbox-python.py --self-test \
+  fixtures/python-oracle-outbox.json outbox/asfa-ai-outbox.json
 cargo run -p asfa-bridge-poller -- \
   --config config/sessions.smoke.json \
   --out /tmp/asfa-smoke-report.json \
@@ -50,7 +55,7 @@ cargo run -p asfa-bridge-poller -- \
   --out /tmp/asfa-consume-report.json
 ```
 
-`--fail-on-error` 会把轮询失败、入库冲突／非法指令和消费目标不存在变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。
+`--fail-on-error` 会把轮询失败、入库冲突／非法指令和消费目标不存在变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v2 状态与 `network_name` 绑定，旧 v1 或无网络身份状态不做隐式迁移。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、多写者互斥仍不在保障范围内。
 
 一键全部门禁（`/mnt` 等禁止执行位挂载下也能构建）：
 
@@ -65,6 +70,7 @@ bash scripts/build-all.sh
 - [实现状态与未覆盖边界](docs/STATUS.md)
 - [实际架构](docs/ARCHITECTURE.md)
 - [Outbox / 哈希链协议](docs/BRIDGE_PROTOCOL.md)
+- [形式化结构、规范同构与攻击矩阵](docs/ISOMORPHISM_ATTACK_MATRIX.md)
 - [仓内 inbox](inbox/README.md)
 - [本地注册表指针](ci-control/bridge/outboxes.json)
 

@@ -166,6 +166,7 @@ pub struct IngestionReport {
     pub conflict: usize,
     pub expired: usize,
     pub invalid: usize,
+    pub chain_checkpoints: usize,
     pub pending: usize,
     pub tombstones: usize,
     pub state_saved: bool,
@@ -182,6 +183,7 @@ impl IngestionReport {
         self.conflict += other.conflict;
         self.expired += other.expired;
         self.invalid += other.invalid;
+        self.chain_checkpoints += other.chain_checkpoints;
         self.pending = other.pending;
         self.tombstones = other.tombstones;
         self.state_saved |= other.state_saved;

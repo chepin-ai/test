@@ -9,6 +9,9 @@ cargo fmt --all -- --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --all-targets --locked
 python3 scripts/check-no-secrets.py
+python3 scripts/verify-outbox-python.py --self-test \
+  fixtures/python-oracle-outbox.json \
+  outbox/asfa-ai-outbox.json
 COGNITIVE_OUTPUT="$(cargo run --locked --quiet --example cognitive_demo -p asfa-userspace)"
 COGNITIVE_OUTPUT="$COGNITIVE_OUTPUT" python3 - <<'PY'
 import os

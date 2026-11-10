@@ -1,5 +1,6 @@
 use asfa_bridge_poller::{
-    ingest_outbox, BridgeReport, DirectiveLedger, IngestionReport, Poller, Registry, SessionPoll,
+    ingest_outbox, strict_json, BridgeReport, DirectiveLedger, IngestionReport, Poller, Registry,
+    SessionPoll,
 };
 use std::error::Error;
 use std::fs;
@@ -68,14 +69,20 @@ fn run() -> Result<(), Box<dyn Error>> {
         None => now_epoch()?,
     };
 
-    let registry: Registry = serde_json::from_str(&fs::read_to_string(&config)?)?;
+    let registry: Registry = strict_json::from_str(&fs::read_to_string(&config)?)?;
+    if registry.network_name.trim().is_empty() {
+        return Err("registry network_name must not be empty".into());
+    }
     let poller = Poller::new();
     let report = if let Some(state_path) = state {
-        let mut ledger = match DirectiveLedger::load(&state_path) {
-            Ok(ledger) => ledger,
-            Err(error) if error.kind() == io::ErrorKind::NotFound => DirectiveLedger::new(),
-            Err(error) => return Err(error.into()),
-        };
+        let mut ledger =
+            match DirectiveLedger::load_for_network(&state_path, &registry.network_name) {
+                Ok(ledger) => ledger,
+                Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                    DirectiveLedger::for_network(registry.network_name.clone())
+                }
+                Err(error) => return Err(error.into()),
+            };
         let mut ingestion = IngestionReport::default();
         let mut records = Vec::new();
         for SessionPoll { record, outbox } in poller.poll_registry_detailed(&registry, now) {

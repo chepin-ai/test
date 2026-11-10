@@ -27,6 +27,14 @@ pub enum ChainError {
     BlockHashMismatch { height: u64 },
     #[error("invalid directive block at height {height}: {reason}")]
     InvalidDirectiveBlock { height: u64, reason: String },
+    #[error("chain rollback for session {session}: stored height {stored}, presented height {presented}")]
+    Rollback {
+        session: String,
+        stored: u64,
+        presented: u64,
+    },
+    #[error("chain fork for session {session}: stored head at height {height} is not preserved")]
+    Fork { session: String, height: u64 },
 }
 
 fn sha256_hex(bytes: &[u8]) -> String {

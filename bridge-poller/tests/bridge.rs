@@ -1,5 +1,5 @@
 use asfa_bridge_poller::{
-    append_block, append_directives, ingest_outbox, verified_directives, Directive,
+    append_block, append_directives, ingest_outbox, verified_directives, ChainError, Directive,
     DirectiveLedger, IngestOutcome, Outbox, PollStatus, Poller, Registry, Session, TrustMode,
 };
 use serde_json::json;
@@ -441,4 +441,264 @@ fn ingest_outbox_does_not_partially_apply_a_later_forged_block() {
     assert!(ingest_outbox(&mut ledger, &outbox, 102).is_err());
     assert!(ledger.is_empty());
     assert_eq!(ledger.consumed_len(), 0);
+    assert_eq!(ledger.checkpoint_len(), 0);
+}
+
+#[test]
+fn python_generated_non_ascii_chain_verifies_in_rust() {
+    let path = temp_file(include_str!("../../fixtures/python-oracle-outbox.json"));
+    let record = Poller::new().poll_session(
+        "oracle",
+        &session(format!("file://{}", path.display())),
+        100,
+    );
+    assert_eq!(
+        record.status,
+        PollStatus::Verified {
+            verified_blocks: 1,
+            verified_directives: 1,
+            untrusted_directives: 0,
+        }
+    );
+    fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn duplicate_json_members_are_rejected_before_schema_or_chain_processing() {
+    let outbox = Outbox::genesis("node", "file:///unused");
+    let rendered = serde_json::to_string(&outbox).unwrap();
+    let duplicate_session = rendered.replacen(
+        "\"session\":\"node\"",
+        "\"session\":\"other\",\"session\":\"node\"",
+        1,
+    );
+    let path = temp_file(&duplicate_session);
+    let record =
+        Poller::new().poll_session("node", &session(format!("file://{}", path.display())), 100);
+    assert!(matches!(
+        record.status,
+        PollStatus::InvalidJson { message } if message.contains("duplicate JSON object member")
+    ));
+    fs::remove_file(path).unwrap();
+
+    let mut with_directive = Outbox::genesis("node", "file:///unused");
+    append_directives(
+        &mut with_directive,
+        vec![Directive {
+            id: "one".into(),
+            from: "node".into(),
+            to: "peer".into(),
+            action: "Ping".into(),
+            payload: json!({}),
+            expires_epoch: None,
+        }],
+        100,
+        0,
+    )
+    .unwrap();
+    let rendered = serde_json::to_string(&with_directive).unwrap();
+    let duplicate_nested_action = rendered.replacen(
+        "\"action\":\"Ping\"",
+        "\"action\":\"Harm\",\"action\":\"Ping\"",
+        1,
+    );
+    assert_ne!(rendered, duplicate_nested_action);
+    let path = temp_file(&duplicate_nested_action);
+    let record =
+        Poller::new().poll_session("node", &session(format!("file://{}", path.display())), 100);
+    assert!(matches!(
+        record.status,
+        PollStatus::InvalidJson { message } if message.contains("duplicate JSON object member")
+    ));
+    fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn cli_duplicate_registry_member_does_not_create_state() {
+    let outbox = Outbox::genesis("node", "file:///unused");
+    let outbox_path = temp_file(&serde_json::to_string(&outbox).unwrap());
+    let registry = Registry {
+        schema_version: "test".into(),
+        network_name: "alpha".into(),
+        trust_model: "unsigned-hash-chain".into(),
+        sessions: BTreeMap::from([(
+            "node".into(),
+            session(format!("file://{}", outbox_path.display())),
+        )]),
+    };
+    let rendered = serde_json::to_string(&registry).unwrap();
+    let polluted = rendered.replacen(
+        "\"network_name\":\"alpha\"",
+        "\"network_name\":\"beta\",\"network_name\":\"alpha\"",
+        1,
+    );
+    let config = temp_file(&polluted);
+    let state = unused_path("duplicate-registry-state");
+    let report = unused_path("duplicate-registry-report");
+    let output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .arg("--config")
+        .arg(&config)
+        .arg("--state")
+        .arg(&state)
+        .arg("--out")
+        .arg(&report)
+        .arg("--now")
+        .arg("100")
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(!state.exists());
+    assert!(!report.exists());
+    fs::remove_file(outbox_path).unwrap();
+    fs::remove_file(config).unwrap();
+}
+
+#[test]
+fn cli_cross_network_state_reuse_fails_without_overwrite() {
+    let mut outbox = Outbox::genesis("node", "file:///unused");
+    append_directives(
+        &mut outbox,
+        vec![Directive {
+            id: "shared-id".into(),
+            from: "node".into(),
+            to: "peer".into(),
+            action: "Ping".into(),
+            payload: json!({}),
+            expires_epoch: None,
+        }],
+        100,
+        0,
+    )
+    .unwrap();
+    let outbox_path = temp_file(&serde_json::to_string(&outbox).unwrap());
+    let registry_for = |network: &str| Registry {
+        schema_version: "test".into(),
+        network_name: network.into(),
+        trust_model: "unsigned-hash-chain".into(),
+        sessions: BTreeMap::from([(
+            "node".into(),
+            session(format!("file://{}", outbox_path.display())),
+        )]),
+    };
+    let alpha_config = temp_file(&serde_json::to_string(&registry_for("alpha")).unwrap());
+    let beta_config = temp_file(&serde_json::to_string(&registry_for("beta")).unwrap());
+    let state = unused_path("network-state");
+    let alpha_report = unused_path("alpha-report");
+    let beta_report = unused_path("beta-report");
+
+    let first = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .arg("--config")
+        .arg(&alpha_config)
+        .arg("--state")
+        .arg(&state)
+        .arg("--out")
+        .arg(&alpha_report)
+        .arg("--now")
+        .arg("101")
+        .output()
+        .unwrap();
+    assert!(
+        first.status.success(),
+        "alpha CLI failed: {}",
+        String::from_utf8_lossy(&first.stderr)
+    );
+    let before = fs::read(&state).unwrap();
+    let snapshot: serde_json::Value = serde_json::from_slice(&before).unwrap();
+    assert_eq!(
+        snapshot["schema_version"],
+        json!("asfa-directive-ledger/v2")
+    );
+    assert_eq!(snapshot["network_name"], json!("alpha"));
+
+    let second = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .arg("--config")
+        .arg(&beta_config)
+        .arg("--state")
+        .arg(&state)
+        .arg("--out")
+        .arg(&beta_report)
+        .arg("--now")
+        .arg("101")
+        .output()
+        .unwrap();
+    assert!(!second.status.success());
+    assert!(String::from_utf8_lossy(&second.stderr).contains("ledger network mismatch"));
+    assert_eq!(fs::read(&state).unwrap(), before);
+    assert!(!beta_report.exists());
+    assert!(DirectiveLedger::load_for_network(&state, "alpha").is_ok());
+    assert!(DirectiveLedger::load_for_network(&state, "beta").is_err());
+
+    for path in [outbox_path, alpha_config, beta_config, state, alpha_report] {
+        fs::remove_file(path).unwrap();
+    }
+}
+
+#[test]
+fn checkpoints_accept_extension_and_reject_rollback_and_forks_without_mutation() {
+    let item = |id: &str| Directive {
+        id: id.into(),
+        from: "node".into(),
+        to: "peer".into(),
+        action: "Ping".into(),
+        payload: json!({"id": id}),
+        expires_epoch: None,
+    };
+    let mut original = Outbox::genesis("node", "file:///unused");
+    append_directives(&mut original, vec![item("one")], 100, 0).unwrap();
+    let mut ledger = DirectiveLedger::for_network("checkpoint-test");
+    let first = ingest_outbox(&mut ledger, &original, 101).unwrap();
+    assert_eq!(first.inserted, 1);
+    assert_eq!(first.chain_checkpoints, 1);
+    let first_head = original.hash_chain.latest.clone();
+
+    append_directives(&mut original, vec![item("two")], 101, 0).unwrap();
+    let extended = ingest_outbox(&mut ledger, &original, 102).unwrap();
+    assert_eq!(extended.inserted, 1);
+    assert_eq!(extended.duplicate, 1);
+    assert_eq!(ledger.len(), 2);
+    assert_eq!(ledger.checkpoint("node").unwrap().height, 2);
+    let second_head = original.hash_chain.latest.clone();
+
+    let checkpoint_state = unused_path("checkpoint-state");
+    ledger.save_atomic(&checkpoint_state).unwrap();
+    let mut restored =
+        DirectiveLedger::load_for_network(&checkpoint_state, "checkpoint-test").unwrap();
+    assert_eq!(restored.checkpoint("node").unwrap().latest, second_head);
+    let genesis = Outbox::genesis("node", "file:///unused");
+    assert!(matches!(
+        ingest_outbox(&mut restored, &genesis, 103),
+        Err(ChainError::Rollback {
+            stored: 2,
+            presented: 0,
+            ..
+        })
+    ));
+    assert_eq!(restored.len(), 2);
+    assert_eq!(restored.checkpoint("node").unwrap().latest, second_head);
+
+    let mut fork = Outbox::genesis("node", "file:///unused");
+    append_directives(&mut fork, vec![item("fork-one")], 100, 0).unwrap();
+    assert_ne!(fork.hash_chain.latest, first_head);
+    append_directives(&mut fork, vec![item("fork-two")], 101, 0).unwrap();
+    assert!(matches!(
+        ingest_outbox(&mut restored, &fork, 103),
+        Err(ChainError::Fork { height: 2, .. })
+    ));
+    assert_eq!(restored.len(), 2);
+    assert_eq!(restored.consumed_len(), 0);
+    assert_eq!(restored.checkpoint("node").unwrap().latest, second_head);
+
+    append_directives(&mut fork, vec![item("fork-three")], 102, 0).unwrap();
+    assert!(matches!(
+        ingest_outbox(&mut restored, &fork, 103),
+        Err(ChainError::Fork { height: 2, .. })
+    ));
+    assert_eq!(restored.len(), 2);
+    assert_eq!(restored.checkpoint("node").unwrap().height, 2);
+    assert_eq!(restored.checkpoint("node").unwrap().latest, second_head);
+
+    let reread = ingest_outbox(&mut restored, &original, 104).unwrap();
+    assert_eq!(reread.duplicate, 2);
+    assert_eq!(restored.len(), 2);
+    fs::remove_file(checkpoint_state).unwrap();
 }
