@@ -23,3 +23,13 @@
 - `poll-2026-11-10.json`：使用上述干净归档产物采集的七端点原始报告。asfa-ai 为 `verified`，其余五项为 404，vinf 为 `invalid_schema`。
 - 公网镜像与本地正本的字节和完整语义均不相等，字段级唯一差异为 `$.url`，`hash_chain` 相同且双方均通过 Python 判读。不得将该结果写成 `remote=local`；显式 `canonical_url` 与镜像策略仍未实现。
 - 本地 checkpoint 不抵御整份状态快照回滚；单写者、无独立 witness／quorum、无完整 JCS V2 等边界已随证据登记。证据生成时没有新的外部 CI、cisvr ACK、正典升 active 或 KEY-SYNC-01 完成回执；最终推送结果须另经远端对拍确认。
+
+## 2026-11-11
+
+- `attack-consistency-2026-11-11.json`：实现提交 `a58e5ee6f94a555dedb248f927934912ea925518` 的综合证据。干净 Git 归档＋空 target 全门禁通过，67／67 测试分解为 bridge 单元 22、bridge 集成 31、kernel 11、userspace 3；归档 SHA-256 为 `5cbb697b9601c632a61e63407667c23c518a9bdce0d3352c7bc3c2e4307e0caa`，新二进制 SHA-256 为 `398f78bc3b26760009e5192e8b25c7732b76cb8a3099e3a002327ef644660bc9`。
+- `clean-rebuild-2026-11-11.log`：上述干净归档的完整重建输出；`smoke-report-2026-11-11.json` 与 `smoke-state-2026-11-11.json` 保存原始烟测报告和 v3 状态。独立 Policy Python fixture 与 live snapshot 对拍均通过。
+- `differential-2026-11-11.json`：五组旧新 CLI 原始差分与预注册判据。旧端为提交 `56b351b`，新端为上述干净归档二进制；302 第二跳、canonical 错配、同网络策略替换、未知 Outbox 字段和超大 Registry 均得到预期旧新区别，`differential_verdict=PASS`。PASS 只覆盖五项判据，不是全系统安全证明。
+- `poll-2026-11-11.json`：2026-11-11T03:50:56Z 的七端点原始报告。asfa-ai 为 `verified`，cfts／cisvr／qgl／ucif2／usrm 为 404，vinf 因未知字段 `chain_len` 为 `invalid_schema`。
+- `poll-canonical-rejection-2026-11-11.json`：以当前公网文档和故意保留旧 `refs/heads/main` 正典的单会话 Registry 重放的负例；得到 `invalid_trust`，第二跳或身份错配不会被静默接受。
+- `public-python-oracle-2026-11-11.json`：公网镜像与仓内正本的独立 Python 判读。当前两份 Outbox 字节完全相等，SHA-256 均为 `c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4`；该相等不代表 Git 远端 main 等于本地实现提交，也不代表发布者身份认证。2026-11-10 的历史 URL 差异不回改。
+- 证据生成时最后成功读回的远端 main 仍为 `c573dc496dc3caeab1f0f143373c80859ccd93d4`，本地实现尚无新外部 CI。cisvr ACK、正典 active、KEY-SYNC-01 和旧 PAT 撤销均无完成证据；最终推送结果另以实际推送与远端读回为准。

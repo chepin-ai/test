@@ -1,0 +1,270 @@
+{
+  "schema_version": "asfa-attack-consistency-evidence/v1",
+  "evidence_date": "2026-11-11",
+  "evidence_date_basis": "Session local date; generated_at_utc fields preserve the actual UTC capture times.",
+  "source_commit": "a58e5ee6f94a555dedb248f927934912ea925518",
+  "old_source_commit": "56b351b82b04967ce9118590f34f0405596f6362",
+  "clean_archive_rebuild": {
+    "method": "git archive source_commit; extract to a clean directory without .git; use an empty CARGO_TARGET_DIR; run scripts/build-all.sh",
+    "archive_sha256": "5cbb697b9601c632a61e63407667c23c518a9bdce0d3352c7bc3c2e4307e0caa",
+    "build_all": "PASS",
+    "binary_sha256": "398f78bc3b26760009e5192e8b25c7732b76cb8a3099e3a002327ef644660bc9",
+    "log": {
+      "path": "docs/evidence/clean-rebuild-2026-11-11.log",
+      "sha256": "8e588aa15fa9de87461098856eb03689e8176f628badcaef3a3c0d665aea8762",
+      "bytes": 17256
+    },
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "gates": {
+      "cargo_fmt": "PASS",
+      "clippy_warnings": 0,
+      "credential_scan": "PASS",
+      "python_outbox_oracle_and_negative_self_tests": "PASS",
+      "python_policy_fixture_and_live_snapshot": "PASS",
+      "cognitive_demo_exact_output": "skill_output={\"sum\":42}; edge=1; matches=[1]",
+      "cli_smoke": {
+        "total": 3,
+        "verified": 1,
+        "failed": 2,
+        "expected_negative_kinds": [
+          "invalid_json",
+          "transport"
+        ]
+      }
+    }
+  },
+  "tests": {
+    "passed": 67,
+    "failed": 0,
+    "unit_bridge": 22,
+    "integration_bridge": 31,
+    "kernel": 11,
+    "userspace": 3,
+    "new_integration_tests": [
+      "redirects_are_explicit_failures_and_never_reach_the_second_hop",
+      "outbox_url_must_match_the_declared_canonical_url",
+      "insecure_transports_require_explicit_opt_in_before_io",
+      "unknown_protocol_fields_are_rejected_instead_of_silently_ignored",
+      "policy_digest_binds_security_fields_and_excludes_descriptions",
+      "cli_same_network_policy_change_preserves_state_but_description_change_is_compatible",
+      "cli_v2_snapshot_is_not_implicitly_migrated",
+      "cli_oversized_registry_fails_before_state_or_report_creation",
+      "policy_digest_matches_independent_python_known_answer"
+    ]
+  },
+  "differential": {
+    "method": "Execute old and new CLI binaries from separate Git archives against equivalent adversarial inputs; independently assert exit, report, second-hop, and state-mutation behavior.",
+    "raw_evidence": {
+      "path": "docs/evidence/differential-2026-11-11.json",
+      "sha256": "0536d54b3c99a549a72aee2cba7cc9e15d7095fdd314589131613e56c5e29638",
+      "bytes": 14372
+    },
+    "old_archive_sha256": "3e19200367b3c804aabbcfa0ca3f271ddfa1e99a8c8e21e2a9206b2aeef9598d",
+    "old_binary_sha256": "952bd1a7a3f4bf06f2738dcde7795975b327c4c9b3b15c6f1a608eab9ebe851b",
+    "new_binary_sha256": "398f78bc3b26760009e5192e8b25c7732b76cb8a3099e3a002327ef644660bc9",
+    "new_binary_is_clean_rebuild_binary": true,
+    "cases": {
+      "redirect": {
+        "old_returncode": 0,
+        "old_target_hits": 1,
+        "old_status": "verified",
+        "new_returncode": 0,
+        "new_target_hits": 0,
+        "new_status": "http_status=302"
+      },
+      "canonical_mismatch": {
+        "old_returncode": 0,
+        "old_status": "verified",
+        "new_returncode": 0,
+        "new_status": "invalid_trust"
+      },
+      "same_network_policy_change": {
+        "old_returncode": 0,
+        "old_duplicate": 1,
+        "new_returncode": 2,
+        "new_state_unchanged": true,
+        "new_report_created": false,
+        "new_error": "ledger policy mismatch"
+      },
+      "unknown_outbox_field": {
+        "old_returncode": 0,
+        "old_status": "verified",
+        "new_returncode": 0,
+        "new_status": "invalid_schema: unknown field trusted"
+      },
+      "oversized_registry": {
+        "old_returncode": 0,
+        "old_state_created": true,
+        "old_report_created": true,
+        "new_returncode": 2,
+        "new_state_created": false,
+        "new_report_created": false,
+        "new_error": "JSON input exceeds 2097152 bytes"
+      }
+    },
+    "independent_assertions": "PASS",
+    "differential_verdict": "PASS",
+    "verdict_scope": "PASS means the five pre-registered old/new distinctions hold; it is not a whole-system security proof.",
+    "harness_corrections": [
+      "An earlier attempt reused the same filename for config and outbox, overwriting the document and causing an unrelated missing-session schema error. Config/report filenames were separated and all final cases were recaptured.",
+      "An earlier zero-height policy case only showed checkpoint reuse. The final case uses the real one-block Python fixture so the old cross-policy duplicate=1 acceptance and the new policy mismatch are both observable."
+    ]
+  },
+  "policy_oracle": {
+    "script": "scripts/verify-policy-python.py",
+    "independence": "Python standard-library parsing, projection reconstruction, and SHA-256; no Rust intermediate digest",
+    "fixture": {
+      "path": "fixtures/policy-oracle.json",
+      "sha256": "8149671054b26021087ed12b35d0e172ee5e86ccdb6ddaa99b002408e471e4e7"
+    },
+    "expected_policy_sha256": "d5805bd450f0778f996fd6094d3a1723114da35be1adee5ca8bd0f361a3c7a21",
+    "rust_known_answer": "PASS",
+    "python_known_answer": "PASS",
+    "self_tests": [
+      "role/note mutation preserves digest",
+      "explicit default canonical_url preserves digest",
+      "URL mutation changes digest"
+    ],
+    "live_smoke": {
+      "registry": "config/sessions.smoke.json",
+      "report": {
+        "path": "docs/evidence/smoke-report-2026-11-11.json",
+        "sha256": "5fde1432f9ff7ef5885e17be87395368c16e6553a34f9aa7ca39644d051301b6",
+        "bytes": 1200
+      },
+      "snapshot": {
+        "path": "docs/evidence/smoke-state-2026-11-11.json",
+        "sha256": "d8985877b6a676a3babd199053ad74abfc4d184656172a76986d8c970ab4a1be",
+        "bytes": 374
+      },
+      "schema_version": "asfa-directive-ledger/v3",
+      "policy_hash": "d7bb090c4022b10a3f46ca236315cd96a77091ca0edeac038fac4016245d6a19",
+      "python_verdict": "PASS"
+    },
+    "scope_boundary": "Deterministic policy projection, not a signature, trusted timestamp, complete JCS implementation, or protection against simultaneous Registry/state replacement."
+  },
+  "live_poll": {
+    "report": {
+      "path": "docs/evidence/poll-2026-11-11.json",
+      "sha256": "e4da71748ea546ed768f7671f12e8543e57a1f2a70fccfb4cf54b770e7d14c6d",
+      "bytes": 1948
+    },
+    "generated_at_epoch": 1794369056,
+    "generated_at_utc": "2026-11-11T03:50:56Z",
+    "producer": "clean-archive build of source_commit",
+    "producer_binary_sha256": "398f78bc3b26760009e5192e8b25c7732b76cb8a3099e3a002327ef644660bc9",
+    "summary": {
+      "total": 7,
+      "verified": 1,
+      "failed": 6
+    },
+    "records": {
+      "asfa-ai": "verified; blocks=0",
+      "cfts": "http_status=404",
+      "cisvr": "http_status=404",
+      "qgl": "http_status=404",
+      "ucif2": "http_status=404",
+      "usrm": "http_status=404",
+      "vinf": "invalid_schema: unknown field `chain_len`, expected one of `session`, `url`, `trust`, `directives`, `mailbox`, `hash_chain`"
+    }
+  },
+  "canonical_gate_negative": {
+    "method": "Poll the current public asfa-ai document with a one-session synthetic Registry that deliberately retains the legacy refs/heads/main canonical URL.",
+    "report": {
+      "path": "docs/evidence/poll-canonical-rejection-2026-11-11.json",
+      "sha256": "93c43e4453a85025e3c9331eed299261abd433b9826ca5bb2997d717ea5841f3",
+      "bytes": 678
+    },
+    "generated_at_epoch": 1794369059,
+    "generated_at_utc": "2026-11-11T03:50:59Z",
+    "summary": {
+      "total": 1,
+      "verified": 0,
+      "failed": 1
+    },
+    "status": {
+      "kind": "invalid_trust",
+      "message": "canonical URL mismatch: expected=https://raw.githubusercontent.com/chepin-ai/test/refs/heads/main/outbox/asfa-ai-outbox.json, document=https://raw.githubusercontent.com/chepin-ai/test/main/outbox/asfa-ai-outbox.json"
+    },
+    "producer_binary_sha256": "398f78bc3b26760009e5192e8b25c7732b76cb8a3099e3a002327ef644660bc9"
+  },
+  "public_local_crosscheck": {
+    "captured_at_utc": "2026-11-11T03:50:56Z",
+    "public_mirror_url": "https://cdn.jsdelivr.net/gh/chepin-ai/test@main/outbox/asfa-ai-outbox.json",
+    "public_document_sha256": "c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4",
+    "local_document": "outbox/asfa-ai-outbox.json",
+    "local_document_sha256": "c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4",
+    "outbox_byte_equal": true,
+    "outbox_semantic_equal": true,
+    "hash_chain_equal": true,
+    "public_python_oracle": "verified",
+    "local_python_oracle": "verified",
+    "oracle": {
+      "path": "docs/evidence/public-python-oracle-2026-11-11.json",
+      "sha256": "5e3c49b528584da062399f7eb784d668c8738ef5dc73eaa88c6a0ce4f829cc68",
+      "bytes": 1226
+    },
+    "git_remote_equals_local_at_capture": false,
+    "conclusion": "Only the current public Outbox mirror and local Outbox bytes are equal. This does not imply that remote main equals the local implementation commit, nor does unsigned verification authenticate the publisher."
+  },
+  "security_boundaries": [
+    "DNS rebinding/pinning, resolver disagreement, connection-time IP binding, and DNS deadline coverage remain open.",
+    "Private, loopback, link-local, and cloud-metadata addresses require application policy or outer egress isolation; redirects(0) is not complete SSRF protection.",
+    "Registry session count, whole-poll deadline, fan-out, and application-specific JSON depth/node budgets are not implemented.",
+    "Atomic rename prevents torn writes but does not provide multi-writer locking, CAS, WAL, or atomic check-and-persist; the contract is single-writer.",
+    "Replacing the entire state file with an older snapshot is not prevented; no external witness, cosignature, quorum, or trusted monotonic anchor is implemented.",
+    "The unsigned hash chain and policy digest do not authenticate publishers, mirrors, or instruction authorization.",
+    "Strict unique-member parsing and deterministic policy projection are not complete RFC 8785 JCS; V1 payload hashing remains in its existing hash domain.",
+    "The Python outbox oracle covers only its declared no-float, non-JCS V1 subset.",
+    "Trusted time, compact Merkle consistency proofs, post-quantum witnesses, ZK proving, HoTT, WASM, TEE, and a complete formal OS safety proof remain unimplemented."
+  ],
+  "external_state_at_evidence_time": {
+    "last_known_remote_main": "c573dc496dc3caeab1f0f143373c80859ccd93d4",
+    "local_source_commit": "a58e5ee6f94a555dedb248f927934912ea925518",
+    "remote_equals_local": false,
+    "new_external_ci_for_source_commit": false,
+    "federation_active_evidence": false,
+    "cisvr_ack_evidence": false,
+    "key_sync_01_closed_evidence": false,
+    "old_pat_revocation_evidence": false,
+    "note": "Push, remote equality, ACK, federation promotion, PAT revocation, and CI require independent external receipts; none is inferred from local build or public Outbox verification."
+  },
+  "artifacts": {
+    "clean-rebuild-2026-11-11.log": {
+      "path": "docs/evidence/clean-rebuild-2026-11-11.log",
+      "sha256": "8e588aa15fa9de87461098856eb03689e8176f628badcaef3a3c0d665aea8762",
+      "bytes": 17256
+    },
+    "differential-2026-11-11.json": {
+      "path": "docs/evidence/differential-2026-11-11.json",
+      "sha256": "0536d54b3c99a549a72aee2cba7cc9e15d7095fdd314589131613e56c5e29638",
+      "bytes": 14372
+    },
+    "poll-canonical-rejection-2026-11-11.json": {
+      "path": "docs/evidence/poll-canonical-rejection-2026-11-11.json",
+      "sha256": "93c43e4453a85025e3c9331eed299261abd433b9826ca5bb2997d717ea5841f3",
+      "bytes": 678
+    },
+    "poll-2026-11-11.json": {
+      "path": "docs/evidence/poll-2026-11-11.json",
+      "sha256": "e4da71748ea546ed768f7671f12e8543e57a1f2a70fccfb4cf54b770e7d14c6d",
+      "bytes": 1948
+    },
+    "public-python-oracle-2026-11-11.json": {
+      "path": "docs/evidence/public-python-oracle-2026-11-11.json",
+      "sha256": "5e3c49b528584da062399f7eb784d668c8738ef5dc73eaa88c6a0ce4f829cc68",
+      "bytes": 1226
+    },
+    "smoke-report-2026-11-11.json": {
+      "path": "docs/evidence/smoke-report-2026-11-11.json",
+      "sha256": "5fde1432f9ff7ef5885e17be87395368c16e6553a34f9aa7ca39644d051301b6",
+      "bytes": 1200
+    },
+    "smoke-state-2026-11-11.json": {
+      "path": "docs/evidence/smoke-state-2026-11-11.json",
+      "sha256": "d8985877b6a676a3babd199053ad74abfc4d184656172a76986d8c970ab4a1be",
+      "bytes": 374
+    }
+  }
+}

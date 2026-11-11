@@ -1,0 +1,43 @@
+{
+  "oracle_profile": "asfa-v1-python/no-floats/non-jcs",
+  "results": [
+    {
+      "session": "asfa-ai",
+      "height": 0,
+      "latest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "verified_directives": 0,
+      "path": "/mnt/agents/work/asfa-attack-2026-11-11/public-outbox.json",
+      "document_sha256": "c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4",
+      "verdict": "verified",
+      "self_test": [
+        {
+          "case": "escaped_duplicate_member",
+          "verdict": "rejected"
+        },
+        {
+          "case": "tampered_chain",
+          "verdict": "rejected"
+        }
+      ]
+    },
+    {
+      "session": "asfa-ai",
+      "height": 0,
+      "latest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "verified_directives": 0,
+      "path": "outbox/asfa-ai-outbox.json",
+      "document_sha256": "c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4",
+      "verdict": "verified",
+      "self_test": [
+        {
+          "case": "escaped_duplicate_member",
+          "verdict": "rejected"
+        },
+        {
+          "case": "tampered_chain",
+          "verdict": "rejected"
+        }
+      ]
+    }
+  ]
+}

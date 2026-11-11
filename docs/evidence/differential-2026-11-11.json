@@ -1,0 +1,428 @@
+{
+  "schema_version": "asfa-bridge-differential-evidence/v1",
+  "evidence_date": "2026-11-11",
+  "old_source_commit": "56b351b82b04967ce9118590f34f0405596f6362",
+  "new_source_commit": "a58e5ee6f94a555dedb248f927934912ea925518",
+  "producer_note": "Both binaries were built from separate Git archives. The new binary is the same clean-archive build used for the 67-test gate and public poll.",
+  "pre_registered_criteria": {
+    "redirect": "old reaches the redirected target and verifies; new returns http_status=302 with zero target hits",
+    "canonical_mismatch": "old verifies despite the declared canonical URL; new returns invalid_trust",
+    "same_network_policy_change": "old accepts the second policy and reports duplicate; new exits 2, creates no report, and preserves state bytes",
+    "unknown_outbox_field": "old verifies the unknown trusted extension; new returns invalid_schema",
+    "oversized_registry": "old accepts and creates state/report; new exits 2 before creating either file"
+  },
+  "independent_assertions": "PASS",
+  "differential_verdict": "PASS",
+  "before": {
+    "label": "before",
+    "binary": "/tmp/asfa-attack2-before-target/debug/asfa-bridge-poller",
+    "binary_sha256": "952bd1a7a3f4bf06f2738dcde7795975b327c4c9b3b15c6f1a608eab9ebe851b",
+    "cases": {
+      "redirect": {
+        "rc": 0,
+        "stdout": "",
+        "stderr": "polled=1 verified=1 failed=0\n",
+        "report_exists": true,
+        "report": {
+          "schema_version": "asfa-bridge-report/v1",
+          "network_name": "attack-net",
+          "generated_at_epoch": 1794339000,
+          "summary": {
+            "total": 1,
+            "verified": 1,
+            "failed": 0
+          },
+          "records": [
+            {
+              "session": "node",
+              "url": "http://127.0.0.1:35371/entry.json",
+              "fetched_at_epoch": 1794339000,
+              "status": {
+                "kind": "verified",
+                "verified_blocks": 0,
+                "verified_directives": 0,
+                "untrusted_directives": 0
+              }
+            }
+          ]
+        },
+        "state_sha256": null,
+        "redirect_hits": 1,
+        "target_hits": 1
+      },
+      "canonical_mismatch": {
+        "rc": 0,
+        "stdout": "",
+        "stderr": "polled=1 verified=1 failed=0\n",
+        "report_exists": true,
+        "report": {
+          "schema_version": "asfa-bridge-report/v1",
+          "network_name": "attack-net",
+          "generated_at_epoch": 1794339000,
+          "summary": {
+            "total": 1,
+            "verified": 1,
+            "failed": 0
+          },
+          "records": [
+            {
+              "session": "node",
+              "url": "file:///mnt/agents/work/asfa-attack-2026-11-11/run-before/canonical-doc.json",
+              "fetched_at_epoch": 1794339000,
+              "status": {
+                "kind": "verified",
+                "verified_blocks": 0,
+                "verified_directives": 0,
+                "untrusted_directives": 0
+              }
+            }
+          ]
+        },
+        "state_sha256": null
+      },
+      "same_network_policy_change": {
+        "first": {
+          "rc": 0,
+          "stdout": "",
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "report_exists": true,
+          "report": {
+            "schema_version": "asfa-bridge-report/v1",
+            "network_name": "same-net",
+            "generated_at_epoch": 100,
+            "summary": {
+              "total": 1,
+              "verified": 1,
+              "failed": 0
+            },
+            "records": [
+              {
+                "session": "oracle",
+                "url": "file:///mnt/agents/work/asfa-attack-2026-11-11/run-before/policy-a.json",
+                "fetched_at_epoch": 100,
+                "status": {
+                  "kind": "verified",
+                  "verified_blocks": 1,
+                  "verified_directives": 1,
+                  "untrusted_directives": 0
+                }
+              }
+            ],
+            "ingestion": {
+              "inserted": 1,
+              "duplicate": 0,
+              "replayed_consumed": 0,
+              "conflict": 0,
+              "expired": 0,
+              "invalid": 0,
+              "chain_checkpoints": 1,
+              "pending": 1,
+              "tombstones": 0,
+              "state_saved": true,
+              "events": [
+                {
+                  "session": "oracle",
+                  "id": "python-vector-1",
+                  "outcome": "inserted"
+                }
+              ]
+            }
+          },
+          "state_sha256": "0a53234e310be7d7eeac4e71c1f136653d56fe358da8fe697b8121da7f93016c"
+        },
+        "second": {
+          "rc": 0,
+          "stdout": "",
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "report_exists": true,
+          "report": {
+            "schema_version": "asfa-bridge-report/v1",
+            "network_name": "same-net",
+            "generated_at_epoch": 100,
+            "summary": {
+              "total": 1,
+              "verified": 1,
+              "failed": 0
+            },
+            "records": [
+              {
+                "session": "oracle",
+                "url": "file:///mnt/agents/work/asfa-attack-2026-11-11/run-before/policy-b.json",
+                "fetched_at_epoch": 100,
+                "status": {
+                  "kind": "verified",
+                  "verified_blocks": 1,
+                  "verified_directives": 1,
+                  "untrusted_directives": 0
+                }
+              }
+            ],
+            "ingestion": {
+              "inserted": 0,
+              "duplicate": 1,
+              "replayed_consumed": 0,
+              "conflict": 0,
+              "expired": 0,
+              "invalid": 0,
+              "chain_checkpoints": 1,
+              "pending": 1,
+              "tombstones": 0,
+              "state_saved": true,
+              "events": [
+                {
+                  "session": "oracle",
+                  "id": "python-vector-1",
+                  "outcome": "duplicate"
+                }
+              ]
+            }
+          },
+          "state_sha256": "0a53234e310be7d7eeac4e71c1f136653d56fe358da8fe697b8121da7f93016c"
+        },
+        "state_sha256_before_second": "0a53234e310be7d7eeac4e71c1f136653d56fe358da8fe697b8121da7f93016c",
+        "state_sha256_after_second": "0a53234e310be7d7eeac4e71c1f136653d56fe358da8fe697b8121da7f93016c",
+        "state_unchanged": true
+      },
+      "unknown_outbox_field": {
+        "rc": 0,
+        "stdout": "",
+        "stderr": "polled=1 verified=1 failed=0\n",
+        "report_exists": true,
+        "report": {
+          "schema_version": "asfa-bridge-report/v1",
+          "network_name": "attack-net",
+          "generated_at_epoch": 1794339000,
+          "summary": {
+            "total": 1,
+            "verified": 1,
+            "failed": 0
+          },
+          "records": [
+            {
+              "session": "node",
+              "url": "file:///mnt/agents/work/asfa-attack-2026-11-11/run-before/unknown-doc.json",
+              "fetched_at_epoch": 1794339000,
+              "status": {
+                "kind": "verified",
+                "verified_blocks": 0,
+                "verified_directives": 0,
+                "untrusted_directives": 0
+              }
+            }
+          ]
+        },
+        "state_sha256": null
+      },
+      "oversized_registry": {
+        "rc": 0,
+        "stdout": "",
+        "stderr": "polled=1 verified=1 failed=0\n",
+        "report_exists": true,
+        "report": {
+          "schema_version": "asfa-bridge-report/v1",
+          "network_name": "attack-net",
+          "generated_at_epoch": 1794339000,
+          "summary": {
+            "total": 1,
+            "verified": 1,
+            "failed": 0
+          },
+          "records": [
+            {
+              "session": "node",
+              "url": "file:///mnt/agents/work/asfa-attack-2026-11-11/run-before/oversize-doc.json",
+              "fetched_at_epoch": 1794339000,
+              "status": {
+                "kind": "verified",
+                "verified_blocks": 0,
+                "verified_directives": 0,
+                "untrusted_directives": 0
+              }
+            }
+          ],
+          "ingestion": {
+            "inserted": 0,
+            "duplicate": 0,
+            "replayed_consumed": 0,
+            "conflict": 0,
+            "expired": 0,
+            "invalid": 0,
+            "chain_checkpoints": 1,
+            "pending": 0,
+            "tombstones": 0,
+            "state_saved": true,
+            "events": []
+          }
+        },
+        "state_sha256": "e443a272e9fac971fdbae7698dc2e475046734367cb709ba020bfa7f4515ade9",
+        "config_bytes": 2097444,
+        "state_exists": true
+      }
+    }
+  },
+  "after": {
+    "label": "after",
+    "binary": "/tmp/asfa-rebuild-a58e5ee-target/debug/asfa-bridge-poller",
+    "binary_sha256": "398f78bc3b26760009e5192e8b25c7732b76cb8a3099e3a002327ef644660bc9",
+    "cases": {
+      "redirect": {
+        "rc": 0,
+        "stdout": "",
+        "stderr": "polled=1 verified=0 failed=1\n",
+        "report_exists": true,
+        "report": {
+          "schema_version": "asfa-bridge-report/v1",
+          "network_name": "attack-net",
+          "generated_at_epoch": 1794339000,
+          "summary": {
+            "total": 1,
+            "verified": 0,
+            "failed": 1
+          },
+          "records": [
+            {
+              "session": "node",
+              "url": "http://127.0.0.1:35107/entry.json",
+              "fetched_at_epoch": 1794339000,
+              "status": {
+                "kind": "http_status",
+                "code": 302
+              }
+            }
+          ]
+        },
+        "state_sha256": null,
+        "redirect_hits": 1,
+        "target_hits": 0
+      },
+      "canonical_mismatch": {
+        "rc": 0,
+        "stdout": "",
+        "stderr": "polled=1 verified=0 failed=1\n",
+        "report_exists": true,
+        "report": {
+          "schema_version": "asfa-bridge-report/v1",
+          "network_name": "attack-net",
+          "generated_at_epoch": 1794339000,
+          "summary": {
+            "total": 1,
+            "verified": 0,
+            "failed": 1
+          },
+          "records": [
+            {
+              "session": "node",
+              "url": "file:///mnt/agents/work/asfa-attack-2026-11-11/run-after/canonical-doc.json",
+              "fetched_at_epoch": 1794339000,
+              "status": {
+                "kind": "invalid_trust",
+                "message": "canonical URL mismatch: expected=https://canonical.example/expected.json, document=https://attacker.example/actual.json"
+              }
+            }
+          ]
+        },
+        "state_sha256": null
+      },
+      "same_network_policy_change": {
+        "first": {
+          "rc": 0,
+          "stdout": "",
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "report_exists": true,
+          "report": {
+            "schema_version": "asfa-bridge-report/v1",
+            "network_name": "same-net",
+            "generated_at_epoch": 100,
+            "summary": {
+              "total": 1,
+              "verified": 1,
+              "failed": 0
+            },
+            "records": [
+              {
+                "session": "oracle",
+                "url": "file:///mnt/agents/work/asfa-attack-2026-11-11/run-after/policy-a.json",
+                "fetched_at_epoch": 100,
+                "status": {
+                  "kind": "verified",
+                  "verified_blocks": 1,
+                  "verified_directives": 1,
+                  "untrusted_directives": 0
+                }
+              }
+            ],
+            "ingestion": {
+              "inserted": 1,
+              "duplicate": 0,
+              "replayed_consumed": 0,
+              "conflict": 0,
+              "expired": 0,
+              "invalid": 0,
+              "chain_checkpoints": 1,
+              "pending": 1,
+              "tombstones": 0,
+              "state_saved": true,
+              "events": [
+                {
+                  "session": "oracle",
+                  "id": "python-vector-1",
+                  "outcome": "inserted"
+                }
+              ]
+            }
+          },
+          "state_sha256": "035db60665b5d743e3cbd7f3162452b76915f6b2587fe3f8821caa70f7bb5100"
+        },
+        "second": {
+          "rc": 2,
+          "stdout": "",
+          "stderr": "bridge-poller: ledger policy mismatch: expected=794da7db27f2e6c09e05298606a7a2c479a9e6cb54b607aa43f424c5a1b4618e, actual=09d028adac25559223b112ec6cc9759a1f18489586f8a61216449f39550c7054; refusing implicit migration\n",
+          "report_exists": false,
+          "report": null,
+          "state_sha256": "035db60665b5d743e3cbd7f3162452b76915f6b2587fe3f8821caa70f7bb5100"
+        },
+        "state_sha256_before_second": "035db60665b5d743e3cbd7f3162452b76915f6b2587fe3f8821caa70f7bb5100",
+        "state_sha256_after_second": "035db60665b5d743e3cbd7f3162452b76915f6b2587fe3f8821caa70f7bb5100",
+        "state_unchanged": true
+      },
+      "unknown_outbox_field": {
+        "rc": 0,
+        "stdout": "",
+        "stderr": "polled=1 verified=0 failed=1\n",
+        "report_exists": true,
+        "report": {
+          "schema_version": "asfa-bridge-report/v1",
+          "network_name": "attack-net",
+          "generated_at_epoch": 1794339000,
+          "summary": {
+            "total": 1,
+            "verified": 0,
+            "failed": 1
+          },
+          "records": [
+            {
+              "session": "node",
+              "url": "file:///mnt/agents/work/asfa-attack-2026-11-11/run-after/unknown-doc.json",
+              "fetched_at_epoch": 1794339000,
+              "status": {
+                "kind": "invalid_schema",
+                "message": "unknown field `trusted`, expected one of `session`, `url`, `trust`, `directives`, `mailbox`, `hash_chain`"
+              }
+            }
+          ]
+        },
+        "state_sha256": null
+      },
+      "oversized_registry": {
+        "rc": 2,
+        "stdout": "",
+        "stderr": "bridge-poller: JSON input exceeds 2097152 bytes\n",
+        "report_exists": false,
+        "report": null,
+        "state_sha256": null,
+        "config_bytes": 2097443,
+        "state_exists": false
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": "asfa-bridge-report/v1",
+  "network_name": "asfa-xi-sessions",
+  "generated_at_epoch": 1794369059,
+  "summary": {
+    "total": 1,
+    "verified": 0,
+    "failed": 1
+  },
+  "records": [
+    {
+      "session": "asfa-ai",
+      "url": "https://cdn.jsdelivr.net/gh/chepin-ai/test@main/outbox/asfa-ai-outbox.json",
+      "fetched_at_epoch": 1794369059,
+      "status": {
+        "kind": "invalid_trust",
+        "message": "canonical URL mismatch: expected=https://raw.githubusercontent.com/chepin-ai/test/refs/heads/main/outbox/asfa-ai-outbox.json, document=https://raw.githubusercontent.com/chepin-ai/test/main/outbox/asfa-ai-outbox.json"
+      }
+    }
+  ]
+}
