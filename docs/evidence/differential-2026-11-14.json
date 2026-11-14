@@ -1,9 +1,9 @@
 {
   "schema_version": "asfa-fusion-differential/v1",
-  "recorded_at": "2026-11-14T08:06:40.102525+00:00",
+  "recorded_at": "2026-11-14T08:14:09.863091+00:00",
   "before_commit": "143668c20a79d2bcde5d555bee15be6cf8da2c91",
   "before_binary_sha256": "c6aeef9eda9f3df0dbd59443ec29dd8654c7b3ed1dc3c6f386303dec694bbea1",
-  "after_binary_sha256": "939275c09247921ef1626a3f944f2f625ac8ed087100d826694160d697bb6852",
+  "after_binary_sha256": "e6cbf30c7cc47467696894f5ab1177f603e30ba3267e698b02be92b73ac4f2d6",
   "evidence_status": "executed old/new differential; not a distributed-lock or publisher-authentication claim",
   "cases": {
     "SAT-01": {
@@ -15,13 +15,13 @@
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat1-old-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat1-old-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat1-old-report.json"
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat1-old-report.json"
           ],
           "returncode": 0,
           "stderr": "polled=2 verified=2 failed=0\n",
-          "elapsed_ms": 185.807
+          "elapsed_ms": 164.479
         },
         "state": {
           "pending": 5,
@@ -37,15 +37,15 @@
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat1-new-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat1-new-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat1-new-report.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat1-new-report.json",
             "--max-pending",
             "4"
           ],
           "returncode": 2,
           "stderr": "bridge-poller: pending directive capacity exceeded: limit=4\n",
-          "elapsed_ms": 3.11
+          "elapsed_ms": 2.479
         },
         "state_exists": false,
         "report_exists": false
@@ -62,9 +62,9 @@
               "--now",
               "100",
               "--state",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-state.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-old-state.json",
               "--out",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-0.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-old-0.json",
               "--consume-session",
               "a",
               "--consume-id",
@@ -72,7 +72,7 @@
             ],
             "returncode": 0,
             "stderr": "polled=2 verified=2 failed=0\n",
-            "elapsed_ms": 42.46
+            "elapsed_ms": 38.519
           },
           {
             "argv_tail": [
@@ -81,9 +81,9 @@
               "--now",
               "100",
               "--state",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-state.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-old-state.json",
               "--out",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-1.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-old-1.json",
               "--consume-session",
               "a",
               "--consume-id",
@@ -91,7 +91,7 @@
             ],
             "returncode": 0,
             "stderr": "polled=2 verified=2 failed=0\n",
-            "elapsed_ms": 59.701
+            "elapsed_ms": 69.059
           },
           {
             "argv_tail": [
@@ -100,9 +100,9 @@
               "--now",
               "100",
               "--state",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-state.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-old-state.json",
               "--out",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-2.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-old-2.json",
               "--consume-session",
               "a",
               "--consume-id",
@@ -110,7 +110,7 @@
             ],
             "returncode": 0,
             "stderr": "polled=2 verified=2 failed=0\n",
-            "elapsed_ms": 56.191
+            "elapsed_ms": 79.009
           },
           {
             "argv_tail": [
@@ -119,9 +119,9 @@
               "--now",
               "100",
               "--state",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-state.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-old-state.json",
               "--out",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-3.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-old-3.json",
               "--consume-session",
               "b",
               "--consume-id",
@@ -129,7 +129,7 @@
             ],
             "returncode": 0,
             "stderr": "polled=2 verified=2 failed=0\n",
-            "elapsed_ms": 72.975
+            "elapsed_ms": 58.356
           },
           {
             "argv_tail": [
@@ -138,9 +138,9 @@
               "--now",
               "100",
               "--state",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-state.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-old-state.json",
               "--out",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-4.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-old-4.json",
               "--consume-session",
               "b",
               "--consume-id",
@@ -148,7 +148,7 @@
             ],
             "returncode": 0,
             "stderr": "polled=2 verified=2 failed=0\n",
-            "elapsed_ms": 62.553
+            "elapsed_ms": 72.501
           }
         ],
         "state": {
@@ -166,9 +166,9 @@
               "--now",
               "100",
               "--state",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-new-state.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-new-state.json",
               "--out",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-new-a1.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-new-a1.json",
               "--max-tombstones",
               "2",
               "--consume-session",
@@ -178,7 +178,7 @@
             ],
             "returncode": 0,
             "stderr": "polled=2 verified=2 failed=0\n",
-            "elapsed_ms": 60.786
+            "elapsed_ms": 53.263
           },
           {
             "argv_tail": [
@@ -187,9 +187,9 @@
               "--now",
               "100",
               "--state",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-new-state.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-new-state.json",
               "--out",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-new-a2.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-new-a2.json",
               "--max-tombstones",
               "2",
               "--consume-session",
@@ -199,7 +199,7 @@
             ],
             "returncode": 0,
             "stderr": "polled=2 verified=2 failed=0\n",
-            "elapsed_ms": 58.131
+            "elapsed_ms": 68.77
           },
           {
             "argv_tail": [
@@ -208,9 +208,9 @@
               "--now",
               "100",
               "--state",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-new-state.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-new-state.json",
               "--out",
-              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-new-a3.json",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat2-new-a3.json",
               "--max-tombstones",
               "2",
               "--consume-session",
@@ -220,7 +220,7 @@
             ],
             "returncode": 2,
             "stderr": "bridge-poller: consumed tombstone capacity exceeded: limit=2\n",
-            "elapsed_ms": 2.858
+            "elapsed_ms": 2.402
           }
         ],
         "state": {
@@ -241,13 +241,13 @@
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat3-old-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat3-old-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat3-old-report.json"
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat3-old-report.json"
           ],
           "returncode": 0,
           "stderr": "polled=2 verified=2 failed=0\n",
-          "elapsed_ms": 54.985
+          "elapsed_ms": 45.636
         },
         "state": {
           "pending": 5,
@@ -263,15 +263,15 @@
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat3-new-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat3-new-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat3-new-report.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/sat3-new-report.json",
             "--max-pending",
             "4"
           ],
           "returncode": 2,
           "stderr": "bridge-poller: ledger resource limit: pending directive capacity exceeded: limit=4\n",
-          "elapsed_ms": 2.183
+          "elapsed_ms": 1.83
         },
         "state_unchanged": true,
         "report_exists": false
@@ -283,17 +283,17 @@
         "run": {
           "argv_tail": [
             "--config",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/fanout.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/fanout.json",
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/fanout-old-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/fanout-old-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/fanout-old-report.json"
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/fanout-old-report.json"
           ],
           "returncode": 0,
           "stderr": "polled=65 verified=0 failed=65\n",
-          "elapsed_ms": 62.53
+          "elapsed_ms": 59.252
         },
         "transport_hits": 65,
         "report_total": 65
@@ -302,17 +302,17 @@
         "run": {
           "argv_tail": [
             "--config",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/fanout.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/fanout.json",
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/fanout-new-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/fanout-new-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/fanout-new-report.json"
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/fanout-new-report.json"
           ],
           "returncode": 2,
           "stderr": "bridge-poller: registry session capacity exceeded: limit=64, actual=65\n",
-          "elapsed_ms": 1.883
+          "elapsed_ms": 1.802
         },
         "transport_hits": 0,
         "state_exists": false,
@@ -325,28 +325,28 @@
         "init": {
           "argv_tail": [
             "--config",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/registry.json",
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-old-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-old-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-old-init.json"
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-old-init.json"
           ],
           "returncode": 0,
           "stderr": "polled=2 verified=2 failed=0\n",
-          "elapsed_ms": 40.862
+          "elapsed_ms": 52.185
         },
         "first": {
           "argv_tail": [
             "--config",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/registry.json",
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-old-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-old-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-old-a.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-old-a.json",
             "--consume-session",
             "a",
             "--consume-id",
@@ -358,13 +358,13 @@
         "second": {
           "argv_tail": [
             "--config",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/registry.json",
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-old-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-old-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-old-b.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-old-b.json",
             "--consume-session",
             "b",
             "--consume-id",
@@ -376,35 +376,35 @@
         "state": {
           "pending": 4,
           "consumed": 1,
-          "sha256": "f26de201c848576617f1356ce38ab4d0b6600450addc4511a349f90b857ee0cf"
+          "sha256": "3c01dc9c41f67945a3f43ef050607f2622a35c110f1132aa752f7a57e20b6749"
         }
       },
       "after": {
         "init": {
           "argv_tail": [
             "--config",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/registry.json",
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-new-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-init.json"
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-new-init.json"
           ],
           "returncode": 0,
           "stderr": "polled=2 verified=2 failed=0\n",
-          "elapsed_ms": 45.016
+          "elapsed_ms": 41.051
         },
         "first": {
           "argv_tail": [
             "--config",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/registry.json",
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-new-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-a.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-new-a.json",
             "--consume-session",
             "a",
             "--consume-id",
@@ -416,37 +416,37 @@
         "contender": {
           "argv_tail": [
             "--config",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/registry.json",
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-new-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-b.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-new-b.json",
             "--consume-session",
             "b",
             "--consume-id",
             "b1"
           ],
           "returncode": 2,
-          "stderr": "bridge-poller: state is already locked: /mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-state.json.lock\n"
+          "stderr": "bridge-poller: state is already locked: /mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-new-state.json.lock\n"
         },
         "contender_transport_hits": 0,
         "state_after_contention": {
           "pending": 4,
           "consumed": 1,
-          "sha256": "f85324996ae2857977a0929075f284c9e871163463367f92fef04a41f5cf08e4"
+          "sha256": "c82f09187554304c5e442fef05e7d18bc53d1f4377af57a7fecdc0d1141709c1"
         },
         "retry": {
           "argv_tail": [
             "--config",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/registry.json",
             "--now",
             "100",
             "--state",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-state.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-new-state.json",
             "--out",
-            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-retry.json",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-7q8x7qvw/lock-new-retry.json",
             "--consume-session",
             "b",
             "--consume-id",
@@ -454,12 +454,12 @@
           ],
           "returncode": 0,
           "stderr": "polled=2 verified=2 failed=0\n",
-          "elapsed_ms": 45.123
+          "elapsed_ms": 44.332
         },
         "final_state": {
           "pending": 3,
           "consumed": 2,
-          "sha256": "b26dda63e386adfb5a886179cc583e298544dbb23493b0308b5eef91c91cdbd8"
+          "sha256": "0188e6a96e398139e22388c93cfca18d78c6092e6dec2ff2713dc0c35ddcd35e"
         }
       },
       "pass": true

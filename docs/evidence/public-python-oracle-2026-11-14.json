@@ -1,0 +1,24 @@
+{
+  "schema_version": "asfa-public-oracle-evidence/v1",
+  "recorded_at": "2026-11-14T08:14:36.321547+00:00",
+  "poll_generated_at_epoch": 1794644045,
+  "poll_summary": {
+    "total": 7,
+    "verified": 1,
+    "failed": 6
+  },
+  "statuses": {
+    "asfa-ai": "verified",
+    "cfts": "http_status=404",
+    "cisvr": "http_status=404",
+    "qgl": "http_status=404",
+    "ucif2": "http_status=404",
+    "usrm": "http_status=404",
+    "vinf": "invalid_schema"
+  },
+  "mirror_local_byte_equal": true,
+  "outbox_sha256": "c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4",
+  "mirror_sha256": "c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4",
+  "python_verdict": "verified for both documents; duplicate-key and tampered-chain self-tests rejected",
+  "scope": "Current bytes and internal consistency only; no publisher, remote Git HEAD, alliance, or ACK claim."
+}

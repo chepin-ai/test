@@ -1,87 +1,86 @@
-# 实现状态（本轮实测证据：2026-11-11）
+# 实现状态（本轮实测证据：2026-11-14）
 
 ## 已有实测
 
-- 稳定版 Rust 工作区可编译；实现提交为 `a58e5ee6f94a555dedb248f927934912ea925518`。
-- 67 个 Rust 单元／集成测试通过：bridge 单元 22、bridge 集成 31、kernel 11、userspace 3，失败为 0。
-- 从该实现的 Git 归档解到无 `.git` 的干净目录，并使用空 `CARGO_TARGET_DIR` 完整执行 `scripts/build-all.sh`。格式检查、Clippy 零警告、67 项测试、凭据扫描、Outbox／Policy Python 独立判读及负例自证、认知示例精确契约和 CLI 烟测均通过。归档 SHA-256 为 `5cbb697b9601c632a61e63407667c23c518a9bdce0d3352c7bc3c2e4307e0caa`，干净重建二进制 SHA-256 为 `398f78bc3b26760009e5192e8b25c7732b76cb8a3099e3a002327ef644660bc9`。
-- 认知示例精确输出为 `skill_output={"sum":42}; edge=1; matches=[1]`。CLI 烟测为 `total=3, verified=1, failed=2`，两个失败是故意设置的非法 JSON 和缺失文件；v3 烟测状态的独立 Python 策略对拍通过，摘要为 `d7bb090c4022b10a3f46ca236315cd96a77091ca0edeac038fac4016245d6a19`。
-- 综合机器可读证据见 `evidence/attack-consistency-2026-11-11.json`，其 SHA-256 为 `c60577c7fb78cc9500ecebeeb426e553e243e03bd43e05d96e133c8980385a42`；原始差分、重建日志、公网报告与判读结果均单独落盘。攻击、规范映射与未覆盖边界见 `ISOMORPHISM_ATTACK_MATRIX.md`。
+- 实现提交为 `88a92e3778a3664f62835aa1746f21b9b831433c`（`feat(bridge): add bounded QF-OS wave planning`）。78 个 Rust 单元／集成测试通过：bridge 单元 27、bridge 集成 37、kernel 11、userspace 3，失败为 0。
+- 从该提交的 Git 归档解到无 `.git` 的干净目录，并使用空 `CARGO_TARGET_DIR` 完整执行 `scripts/build-all.sh`。格式检查、Clippy 零警告、78 项测试、凭据扫描、Outbox／Policy／Wave Python 独立判读、波次临时重建与 fixture 字节对拍、认知示例和 CLI 烟测均通过。
+- 干净归档 SHA-256 为 `f25eefdcbd83f3bdbf8e9dcb592673d33ed39f310325dc0e45a92d8d53ea3602`，干净重建二进制 SHA-256 为 `e6cbf30c7cc47467696894f5ab1177f603e30ba3267e698b02be92b73ac4f2d6`；五组旧新攻击使用同一干净二进制重跑并全部通过。
+- 认知示例精确输出为 `skill_output={"sum":42}; edge=1; matches=[1]`。CLI 烟测为 `total=3, verified=1, failed=2`，两个失败是故意设置的非法 JSON 和缺失文件；v3 烟测状态策略摘要为 `d7bb090c4022b10a3f46ca236315cd96a77091ca0edeac038fac4016245d6a19`。
+- 综合机器证据为 `evidence/attack-consistency-2026-11-14.json`，SHA-256 为 `1cd3f9341c83ef647971be2c7c7077466a0bcfac692bb58b3a7de5d92275b108`。其 10 项 artifact 的路径、字节数与 SHA-256 已独立复算，且差分新端哈希与干净重建二进制一致。
 
 ## 本轮新增安全性质
 
-1. **重定向显式失败**：HTTP client 禁止自动重定向，300–399 均产生 `http_status` 负结果；302 负例中第二跳命中数为 0。
-2. **正典 URL 绑定**：`Outbox.url` 必须精确等于会话 `canonical_url`；未配置时默认等于读取 URL。显式配置后只读镜像地址可与正典地址不同，但不因此获得发布者或镜像身份认证。
-3. **传输显式授权**：默认只接受 HTTPS；HTTP 与 file 分别要求 `allow_insecure_http=true` 和 `allow_file=true`。其他 scheme、fragment、HTTP(S) 缺失 host 与 userinfo 在 I/O 前拒绝。
-4. **封闭协议 schema**：Outbox、Registry、LedgerSnapshot 等核心协议结构拒绝未知字段，避免把未知扩展静默解释成安全语义；`mailbox` 与区块 `payload` 仍为开放数据。
-5. **网络＋安全策略联合绑定**：账本升级为 `asfa-directive-ledger/v3`，保存并复核 `network_name` 与 `policy_hash`。旧 v1／v2、跨网络或同网络不同安全策略的状态不隐式迁移；只改 `role`／`note` 保持兼容。
-6. **有界输入**：Outbox 与 Registry 上限均为 2 MiB，Snapshot 上限 16 MiB；文件同时检查 metadata 与实际读回字节。256 层嵌套负例失败关闭，但应用自定义深度／节点预算仍未实现。
-7. **独立策略判读**：Python 从原始 Registry 重建安全投影与 SHA-256，和 Rust 已知答案一致；说明字段与显式默认 canonical 不改变摘要，URL 变化必须改变摘要。
+1. **有界轮询扇出**：Registry 除 2 MiB 字节上限外，最多 64 个 session；第 65 个会话导致任何 socket I/O 前非零失败。
+2. **有界持久队列**：pending、tombstone、单 Outbox 已验证指令分别硬限 4096、16384、1024；CLI 参数只能调低，缺值或试图调高均失败。
+3. **容量事务**：每份 Outbox 在克隆账本中暂存入库；任一容量超限会丢弃整个批次，不提交前面的成功前缀。恢复超基数 snapshot 和写出超 16 MiB 也失败关闭。
+4. **消费不丢任务**：tombstone 满时，消费在删除 pending 前失败；原状态字节保持不变，待办仍可后续处理。
+5. **协作写者排他锁**：`--state` 在加载前取得稳定 `<state>.lock` sidecar 的 OS 排他锁并持有到输出结束；竞争进程非零退出。它只覆盖使用相同词法路径的协作 CLI，不是分布式锁。
+6. **QF-OS 波次接口**：`qfos-wave-plan/v1` 从已验证账本生成来源轮转、全局／来源双配额、显式 deferred 的确定性计划，绑定 network、policy、完整 snapshot、Job 和来源计数。
+7. **计划能力边界**：计划模式固定为 `plan-only-no-execution`；生成计划不改账本、不消费指令、不执行 action、不调用 Skill。`plan_hash` 只是完整性摘要，不是执行证明或签名。
+8. **独立波次判读**：Python 从 Registry 与原始 snapshot 重建过滤、轮转、配额、计数和双摘要；篡改 Job 或账本绑定均拒绝。
 
-既有严格重复键拒绝、每会话 `(height,latest)` 检查点、完整验链后才入库和零部分应用继续有效。策略摘要与检查点只覆盖本机已有视图，不是签名、Merkle consistency proof 或外部 witness；整份状态文件被旧快照替换仍需外部单调锚或独立 quorum。
+既有严格 JSON、传输授权、禁重定向、正典 URL、网络＋策略绑定、完整验链后入库和历史检查点继续有效。无签名链、策略摘要、账本摘要和计划摘要均不认证发布者。
 
 ## 旧新 CLI 差分
 
-旧实现提交为 `56b351b82b04967ce9118590f34f0405596f6362`，新实现提交为 `a58e5ee6f94a555dedb248f927934912ea925518`。两端均从各自 Git 归档构建；新端二进制与上述干净全门禁、公网轮询使用同一 SHA-256。五组真实进程级 A/B 均通过预注册差分判据：
+旧端为前一提交 `143668c20a79d2bcde5d555bee15be6cf8da2c91` 的 Git 归档构建；新端为上述实现提交的干净归档构建。判据在实现前登记于 `evidence/qfos-fusion-preregister-2026-11-14.json`，原始结果见 `evidence/differential-2026-11-14.json`，其 SHA-256 为 `61d66e79c01b9433e9ac4ef3607a26ab699fa2ebfe50a23281e1a5e1b203d982`。
 
-| 输入 | 旧端实测 | 新端实测 |
+| 攻击 | 旧端实测 | 新端实测 |
 |---|---|---|
-| 302 指向第二跳 | 返回 0，第二跳命中 1，`verified` | 返回 0，第二跳命中 0，`http_status=302` |
-| 正典 URL 错配 | 忽略声明的 canonical，返回 0，`verified` | 返回 0，`invalid_trust`，明确报告 mismatch |
-| 同网络替换读取策略 | 第二次返回 0，复用状态并报 `duplicate=1` | 第二次返回 2，`ledger policy mismatch`，状态字节不变且不生成报告 |
-| 未知 Outbox 字段 `trusted` | 返回 0，`verified` | 返回 0，`invalid_schema: unknown field trusted` |
-| Registry 超过 2 MiB | 返回 0，生成 state／report 并 `verified` | 返回 2，报超过 2097152 字节，state／report 均不创建 |
+| SAT-01：5 个 pending，新端 cap=4 | 返回 0，pending=5 | 返回 2，整批拒绝，state／report 均不创建 |
+| SAT-02：连续消费制造 tombstone | 五次均返回 0，consumed=5、pending=0 | cap=2 后第三次返回 2，状态字节不变，consumed=2、pending=3 |
+| SAT-03：以低 cap 恢复 5 项 snapshot | 返回 0 并接受 | 轮询前返回 2，状态不变且不生成报告 |
+| SAT-04：65 个 HTTP session | 实际传输命中 65 次，report.total=65 | 返回 2，传输命中 0，state／report 不创建 |
+| LCK-01：双进程消费不同 ID | 两端均返回 0，但最后只剩 1 个 tombstone，另一消费被丢失 | 锁竞争者返回 2 且零竞争网络命中；显式重试后 consumed=2，两项均保留 |
 
-原始结果见 `evidence/differential-2026-11-11.json`，SHA-256 为 `0536d54b3c99a549a72aee2cba7cc9e15d7095fdd314589131613e56c5e29638`。独立断言与 `differential_verdict=PASS` 只表示五项预注册旧新区别成立，不是全系统安全证明。
+`PASS` 只表示五项预注册旧新判据成立，不证明非协作写者、跨主机锁、分布式 CAS 或全系统安全。
 
-早期 harness 曾把 config 与 outbox 写成同一路径，产生与目标漏洞无关的 missing-session 错误；分离文件名后全部重采。零高度策略用例也曾只显示 checkpoint 复用，最终改用真实单块指令，使旧端跨策略 `duplicate=1` 与新端策略拒绝都可观测。修正记录已写入综合证据，未把 harness 错误当安全结论。
+## QF-OS 融合实测与 QIOS 边界
+
+静态向量包含两个来源、五条未过期指令、一条过期指令、一个通配目标和非 ASCII 载荷。以 `max_jobs=3`、`max_per_source=2` 生成计划：
+
+```text
+admitted = [a1, b1, a2]
+a3 → deferred_source_quota
+b2 → deferred_wave_quota
+plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
+```
+
+`evidence/wave-oracle-2026-11-14.json` 记录独立重建及两个篡改负例。构建门禁会从原始 fixture 重新生成 state／plan，并与提交字节 `cmp` 相等。
+
+本轮只实现 QF-OS 的**计划面接口**。QF-OS 引擎波次的实际执行、租约、回执、失败重试、poison-message 死信、结果签名与 Skill 沙箱均未接入。QIOS 在仓内、已读在役定义和本轮精确公开检索中均未解析为本项目正典实体；搜索结果中的同名医疗或其他领域术语不是适配依据。因此当前没有 QIOS adapter、兼容性或互操作完成声称。
 
 ## 独立判读与跨语言勾稽
 
-- `scripts/verify-outbox-python.py` 独立执行 UTF-8、重复键、V1 负载摘要、逐块哈希、latest 和指令来源检查；`escaped_duplicate_member` 与 `tampered_chain` 两个自证负例均被拒绝。它只覆盖无浮点且整数处于 `serde_json` 支持范围内的 V1 子集，不是 RFC 8785 JCS。
-- 非 ASCII 单块向量继续由 Rust 与 Python 双方接受，`latest` 为 `87774ce37ab65262df3f5efdd331ed711104cbd9b35ab562cc94b474109d302f`。
-- `scripts/verify-policy-python.py` 的 fixture 摘要为 `d5805bd450f0778f996fd6094d3a1723114da35be1adee5ca8bd0f361a3c7a21`，Rust 集成测试与 Python 独立重算一致；三项自证及 live v3 snapshot 对拍均通过。
-- 策略投影包含 Registry 版本、网络、trust model 及每会话 URL、解析后 canonical、trust 和两个传输授权布尔值；`role`／`note` 明确排除。省略 canonical 与显式填写相同读取 URL 具有相同投影。
+- `verify-outbox-python.py`：无浮点 V1 链重算、指令来源检查、已知答案和篡改自证；不是 RFC 8785 JCS。
+- `verify-policy-python.py`：Registry 安全投影、策略摘要、三项自证和 live snapshot 对拍；fixture 摘要仍为 `d5805bd450f0778f996fd6094d3a1723114da35be1adee5ca8bd0f361a3c7a21`。
+- `verify-wave-python.py`：从原始 snapshot 重建完整波次计划；两个篡改自证通过，范围为无浮点 qfos-wave-v1 子集，不是签名、执行或 QIOS 证明。
 
 ## 公网交叉验证
 
-使用干净归档重建产物，于 2026-11-11T03:50:56Z 轮询七个端点：`asfa-ai=verified`，高度 0；cisvr／ucif2／qgl／usrm／cfts 为 HTTP 404；vinf 为 `invalid_schema`，信息为未知字段 `chain_len`。原始报告见 `evidence/poll-2026-11-11.json`，SHA-256 为 `e4da71748ea546ed768f7671f12e8543e57a1f2a70fccfb4cf54b770e7d14c6d`。
+使用干净归档二进制，于 2026-11-14T08:14:05Z 轮询七端点：`asfa-ai=verified`；cfts／cisvr／qgl／ucif2／usrm 为 HTTP 404；vinf 因未知字段 `chain_len` 为 `invalid_schema`。原始报告见 `evidence/poll-2026-11-14.json`，SHA-256 为 `e303f1b73fcc2c10e0749c3c4d0c2275c1cb4714cb5c07cff3016dd387da2a30`。
 
-另以同一二进制和当前公网文档执行单会话负例：故意把 Registry 正典保留为旧 `refs/heads/main` 形式，于 2026-11-11T03:50:59Z 得到 `total=1, verified=0, failed=1` 和 `invalid_trust: canonical URL mismatch`。该报告见 `evidence/poll-canonical-rejection-2026-11-11.json`，不是伪造的历史采集记录。
+公网 jsDelivr 镜像与仓内 Outbox 字节相等，SHA-256 均为 `c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4`；两份均通过 Python 判读与篡改自证。该相等不表示远端 Git main 等于本地实现提交，也不认证发布者。详见 `evidence/public-python-oracle-2026-11-14.json`。
 
-当前公网 jsDelivr 镜像与仓内正本的 Outbox 字节完全相等，`cmp` 通过，双方 SHA-256 均为 `c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4`；两份字节均通过 Python 独立判读。该相等只针对当前 Outbox 内容：**Git 远端 main 与本地实现提交并不相等**，镜像 `verified` 也不认证发布者。2026-11-10 的 `$.url` 历史差异保留在旧证据中，不回改。
+## 联邦、凭证与推送边界
 
-## 联邦状态
+最后已核验正典状态仍为历史记录 `asfa-ai = conditional`（2026-11-09）。本轮没有 cisvr ACK、正典升 active 或 KEY-SYNC-01 relay 完成回执；写入 Outbox 不等于真实投递或对方 ACK。
 
-最后已核验的正典状态仍为历史记录 `asfa-ai = conditional`（2026-11-09）。本轮没有取得 cisvr ACK、正典升 active 或 KEY-SYNC-01 relay 完成回执；本仓 Actions Secret 写入不等于联邦中继闭环。旧 OTP 永久弃用，写入 outbox 文件不等于真实投递，更不等于对方 ACK。
-
-## 凭证、推送与外部 CI 边界
-
-本地 remote 为 `https://github.com/chepin-ai/test.git`，不含明文凭证；秘密值不得从日志、历史文件或会话记录恢复。此前泄露的 PAT 仍应撤销／轮换，当前没有 GitHub 侧已完成撤销的证据。
-
-证据生成时，最后成功读回的远端 `main` 为 `c573dc496dc3caeab1f0f143373c80859ccd93d4`，与本地实现提交 `a58e5ee6f94a555dedb248f927934912ea925518` 不相等；实现提交没有新的外部 CI 回执。后续是否推送成功必须以实际推送后的 `git ls-remote` 和 local／remote 提交对拍为准；历史 run `42228729662` 只适用于旧提交 `b3b6384`，不能挪用为本轮结论。
+本地 remote 为 `https://github.com/chepin-ai/test.git`，不含明文凭证。此前泄露的 PAT 仍应撤销／轮换，当前没有 GitHub 侧撤销证据。最后成功远端读回仍是 2026-11-11 的 `c573dc496dc3caeab1f0f143373c80859ccd93d4`；本轮两次 `ls-remote` 分别出现 TLS 非正确终止和超时，不能声称已刷新远端状态。按最后本地跟踪引用，实现提交为 `ahead_by=8, behind_by=0`；最终推送与 evidence 提交后的对拍另以实际命令结果为准。没有本轮外部 CI 回执。
 
 ## 明确未实现与后续债
 
-Boot／裸机内核、WASM 沙箱、TEE、ZK-SNARK／STARK、HoTT-ZK 编译器、涌现类型系统、量子调度、神经网络推理、Holo-Lang、跨域顿悟、完整形式化安全证明均未实现。当前 CLI 也不是后台守护进程；跨重启状态依赖显式 `--state` 或库调用方显式 `save_atomic`，没有自动 WAL。
-
-后续债按攻击面保留：
-
-1. DNS rebinding／pinning、解析器意见不一致、连接时 IP 绑定和 DNS 超时覆盖；
+1. DNS rebinding／pinning、解析器意见不一致、连接时 IP 绑定与 DNS 超时覆盖；
 2. 私网、loopback、link-local、cloud metadata 地址策略与外层 egress 隔离；
-3. Registry session 数、全轮询总 deadline、扇出及 JSON 深度／节点预算；
-4. 多写者锁、CAS、WAL 和原子 check-and-persist；
+3. 全轮询总 deadline、每请求剩余时间收缩、应用自定义 JSON 深度／节点数和进程级内存预算；
+4. 路径别名、非协作写者、跨主机锁语义、CAS、WAL 和原子 check-and-persist；
 5. 整份快照回滚、分裂视图、签名 checkpoint、独立 witness／quorum；
 6. 发布者与指令授权、可信时间；
 7. 完整 JCS V2、Merkle consistency proof、后量子 witness；
-8. 联盟 active、cisvr ACK、KEY-SYNC-01 和旧 PAT 撤销的外部回执。
+8. QF-OS 引擎执行、租约、回执、死信和结果证明；QIOS 正典定义与适配器；
+9. 联盟 active、cisvr ACK、KEY-SYNC-01、旧 PAT 撤销、本轮远端同步和外部 CI 回执；
+10. Boot／裸机内核、WASM、TEE、ZK-SNARK／STARK、HoTT-ZK、涌现类型系统、量子调度、神经网络推理、Holo-Lang 与完整形式化安全证明。
 
-原子 rename 不提供多写者互斥，禁重定向不等于完整 SSRF 防护，2 MiB 上限也不替代结构性资源预算。
+## 形式化内容边界
 
-## 网络与形式化内容边界
-
-临时 `*.ok.kimi.link` 端点只作遗留负例输入，不能作为常备通道。vinf 的 HTTP 200 不构成协议有效证据；其他 404 不推断角色离线或身份不存在。
-
-本线仓内 JSON 是正本；jsDelivr 仅作只读镜像。镜像返回 `Verified` 只代表其内容通过当前无签名链检查，不代表镜像运营者或发布者身份已认证。
-
-`formal/coq/Chain.v` 仅证明列表高度为零当且仅当列表为空。它不是哈希链安全性证明，更不是操作系统安全证明。历史 `Admitted` 占位文件已删除。
+`formal/coq/Chain.v` 仅证明列表高度为零当且仅当列表为空。它不是哈希链安全性证明，更不是操作系统或 QF-OS 波次执行的安全证明。历史 `Admitted` 占位文件已删除。

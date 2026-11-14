@@ -1,0 +1,156 @@
+{
+  "schema_version": "asfa-attack-consistency/v1",
+  "recorded_at": "2026-11-14T08:15:12.496843+00:00",
+  "implementation_commit": "88a92e3778a3664f62835aa1746f21b9b831433c",
+  "before_commit": "143668c20a79d2bcde5d555bee15be6cf8da2c91",
+  "clean_rebuild": {
+    "archive_sha256": "f25eefdcbd83f3bdbf8e9dcb592673d33ed39f310325dc0e45a92d8d53ea3602",
+    "binary_sha256": "e6cbf30c7cc47467696894f5ab1177f603e30ba3267e698b02be92b73ac4f2d6",
+    "rustc": "rustc 1.100.0 (0ef1bc386 2026-11-09)",
+    "source": "git archive of implementation commit; no .git; empty CARGO_TARGET_DIR",
+    "gate": "bash scripts/build-all.sh",
+    "verdict": "PASS",
+    "tests": {
+      "bridge_unit": 27,
+      "bridge_integration": 37,
+      "kernel": 11,
+      "userspace": 3,
+      "total": 78,
+      "failed": 0
+    },
+    "clippy": "zero warnings under -D warnings",
+    "credential_scan": "PASS",
+    "cognitive_demo": "skill_output={\"sum\":42}; edge=1; matches=[1]",
+    "smoke": {
+      "total": 3,
+      "verified": 1,
+      "failed": 2,
+      "policy_hash": "d7bb090c4022b10a3f46ca236315cd96a77091ca0edeac038fac4016245d6a19"
+    },
+    "wave_fixture_byte_compare": "PASS for regenerated state and plan"
+  },
+  "differential": {
+    "verdict": "PASS",
+    "before_binary_sha256": "c6aeef9eda9f3df0dbd59443ec29dd8654c7b3ed1dc3c6f386303dec694bbea1",
+    "after_binary_sha256": "e6cbf30c7cc47467696894f5ab1177f603e30ba3267e698b02be92b73ac4f2d6",
+    "cases": {
+      "SAT-01": {
+        "pass": true
+      },
+      "SAT-02": {
+        "pass": true
+      },
+      "SAT-03": {
+        "pass": true
+      },
+      "SAT-04": {
+        "pass": true
+      },
+      "LCK-01": {
+        "pass": true
+      }
+    },
+    "observations": {
+      "SAT-01": "before pending=5; after cap=4 returned 2 with no state/report",
+      "SAT-02": "before consumed=5; after cap=2 rejected third consume with unchanged state and pending=3",
+      "SAT-03": "before restored; after returned 2 before polling and preserved state bytes",
+      "SAT-04": "before transport_hits=65; after transport_hits=0",
+      "LCK-01": "before both returned 0 but consumed=1; after contender returned 2 with zero contender transport, explicit retry yielded consumed=2"
+    }
+  },
+  "wave_oracle": {
+    "verdict": "PASS",
+    "plan_hash": "fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302",
+    "jobs": [
+      "a1",
+      "b1",
+      "a2"
+    ],
+    "deferred": 2,
+    "self_tests": [
+      "tampered_admitted_job_rejected",
+      "tampered_ledger_binding_rejected"
+    ]
+  },
+  "public_cross_check": {
+    "schema_version": "asfa-public-oracle-evidence/v1",
+    "recorded_at": "2026-11-14T08:14:36.321547+00:00",
+    "poll_generated_at_epoch": 1794644045,
+    "poll_summary": {
+      "total": 7,
+      "verified": 1,
+      "failed": 6
+    },
+    "statuses": {
+      "asfa-ai": "verified",
+      "cfts": "http_status=404",
+      "cisvr": "http_status=404",
+      "qgl": "http_status=404",
+      "ucif2": "http_status=404",
+      "usrm": "http_status=404",
+      "vinf": "invalid_schema"
+    },
+    "mirror_local_byte_equal": true,
+    "outbox_sha256": "c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4",
+    "mirror_sha256": "c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4",
+    "python_verdict": "verified for both documents; duplicate-key and tampered-chain self-tests rejected",
+    "scope": "Current bytes and internal consistency only; no publisher, remote Git HEAD, alliance, or ACK claim."
+  },
+  "honest_corrections": [
+    "Rust mirror install initially timed out; direct mirror rustup-init completed. No test result was inferred from the timeout.",
+    "Initial build placed build scripts on a non-executable mount; CARGO_TARGET_DIR moved to an executable filesystem and the full gate was rerun.",
+    "Initial differential launch hit the same mount execution restriction; byte-identical binaries were staged on an executable filesystem before any case ran.",
+    "Wave oracle first treated serialized null expires_epoch as numeric; the oracle was corrected and rerun against the unchanged fixture. The failed oracle run was not counted as PASS."
+  ],
+  "not_proven": [
+    "publisher authentication or instruction authorization",
+    "distributed locking, non-cooperating writers, path aliases, CAS or WAL",
+    "whole-snapshot rollback resistance or independent witness/quorum",
+    "total poll deadline, custom JSON depth/node budget or process memory isolation",
+    "QF-OS engine execution, leases, receipts, poison-message dead letters or sandboxing",
+    "QIOS definition, adapter or compatibility",
+    "alliance active, cisvr ACK, KEY-SYNC-01, old PAT revocation or remote Git synchronization"
+  ],
+  "artifacts": {
+    "docs/evidence/qfos-fusion-preregister-2026-11-14.json": {
+      "bytes": 3255,
+      "sha256": "91bb29394cadd74234942ea3adc719f97ea11b2b7f559e529d5ef55de1ff53bc"
+    },
+    "docs/evidence/differential-2026-11-14.json": {
+      "bytes": 16100,
+      "sha256": "61d66e79c01b9433e9ac4ef3607a26ab699fa2ebfe50a23281e1a5e1b203d982"
+    },
+    "docs/evidence/clean-rebuild-2026-11-14.log": {
+      "bytes": 14964,
+      "sha256": "a829ad23770619eede261596ebe277fc6a043cc6e62ce5b62c399bb4a04809ca"
+    },
+    "docs/evidence/wave-oracle-2026-11-14.json": {
+      "bytes": 1567,
+      "sha256": "5bab3fa40cb75e0aa3c1313d210e1d15835cf91e0c118dd3e79cc088a458a96c"
+    },
+    "docs/evidence/public-python-oracle-2026-11-14.json": {
+      "bytes": 888,
+      "sha256": "b3f731b95f51ec0e6bd6a55d3b169fc48cfbc6add79e97d15141bcc46c466d97"
+    },
+    "docs/evidence/poll-2026-11-14.json": {
+      "bytes": 1948,
+      "sha256": "e303f1b73fcc2c10e0749c3c4d0c2275c1cb4714cb5c07cff3016dd387da2a30"
+    },
+    "docs/evidence/smoke-report-2026-11-14.json": {
+      "bytes": 1200,
+      "sha256": "5fde1432f9ff7ef5885e17be87395368c16e6553a34f9aa7ca39644d051301b6"
+    },
+    "docs/evidence/smoke-state-2026-11-14.json": {
+      "bytes": 374,
+      "sha256": "d8985877b6a676a3babd199053ad74abfc4d184656172a76986d8c970ab4a1be"
+    },
+    "fixtures/qfos-wave-plan.json": {
+      "bytes": 1261,
+      "sha256": "0b836990185ad1992d3c26c1e5ff8cbdb2ef98b209e527dc256d5582b57a5b98"
+    },
+    "fixtures/qfos-wave-state.json": {
+      "bytes": 1854,
+      "sha256": "80231669aade8aaa772edb04da97dda251318ffe8c51a035c29bd8fa56fd86a7"
+    }
+  }
+}

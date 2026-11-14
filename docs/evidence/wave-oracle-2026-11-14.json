@@ -1,0 +1,54 @@
+{
+  "schema_version": "asfa-wave-oracle-evidence/v1",
+  "recorded_at": "2026-11-14T08:14:36.308256+00:00",
+  "command": [
+    "python3",
+    "scripts/verify-wave-python.py",
+    "--expect-plan-hash",
+    "fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302"
+  ],
+  "stdout": "wave_oracle=PASS plan_hash=fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302 jobs=3 deferred=2 self_tests=2",
+  "verdict": "PASS",
+  "plan_hash": "fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302",
+  "jobs": [
+    "a1",
+    "b1",
+    "a2"
+  ],
+  "deferred": 2,
+  "source_stats": [
+    {
+      "session": "a",
+      "offered": 3,
+      "admitted": 2,
+      "deferred_wave_quota": 0,
+      "deferred_source_quota": 1
+    },
+    {
+      "session": "b",
+      "offered": 2,
+      "admitted": 1,
+      "deferred_wave_quota": 1,
+      "deferred_source_quota": 0
+    }
+  ],
+  "independent_self_tests": [
+    "tampered_admitted_job_rejected",
+    "tampered_ledger_binding_rejected"
+  ],
+  "scope": "qfos-wave-v1/no-floats/non-jcs; consistency only, not authentication or execution proof",
+  "artifacts": {
+    "config/sessions.wave.json": {
+      "sha256": "9511e46befae799bf1852d03f09e5cd79f2b5b968accc82841b79a19bd9360d9",
+      "bytes": 466
+    },
+    "fixtures/qfos-wave-state.json": {
+      "sha256": "80231669aade8aaa772edb04da97dda251318ffe8c51a035c29bd8fa56fd86a7",
+      "bytes": 1854
+    },
+    "fixtures/qfos-wave-plan.json": {
+      "sha256": "0b836990185ad1992d3c26c1e5ff8cbdb2ef98b209e527dc256d5582b57a5b98",
+      "bytes": 1261
+    }
+  }
+}
