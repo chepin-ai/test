@@ -1,7 +1,7 @@
 use asfa_bridge_poller::{
-    append_block, append_directives, ingest_outbox, strict_json, verified_directives, ChainError,
-    Directive, DirectiveLedger, IngestOutcome, Outbox, PollStatus, Poller, Registry, Session,
-    TrustMode,
+    append_block, append_directives, ingest_outbox, strict_json, verified_directives,
+    CapacityError, ChainError, Directive, DirectiveLedger, IngestError, IngestOutcome, Outbox,
+    PollStatus, Poller, Registry, ResourceLimits, Session, TrustMode,
 };
 use serde_json::json;
 use std::collections::BTreeMap;
@@ -344,7 +344,7 @@ fn verified_directive_cannot_reenter_ledger_after_consumption() {
         ledger.ingest("node", verified[0].clone(), 102),
         IngestOutcome::Inserted
     );
-    assert!(ledger.consume("node", "once").is_some());
+    assert!(ledger.consume("node", "once").unwrap().is_some());
     let mut restored = DirectiveLedger::from_snapshot(ledger.snapshot()).unwrap();
     assert_eq!(
         restored.ingest("node", verified[0].clone(), 102),
@@ -725,11 +725,11 @@ fn checkpoints_accept_extension_and_reject_rollback_and_forks_without_mutation()
     let genesis = Outbox::genesis("node", "file:///unused");
     assert!(matches!(
         ingest_outbox(&mut restored, &genesis, 103),
-        Err(ChainError::Rollback {
+        Err(IngestError::Chain(ChainError::Rollback {
             stored: 2,
             presented: 0,
             ..
-        })
+        }))
     ));
     assert_eq!(restored.len(), 2);
     assert_eq!(restored.checkpoint("node").unwrap().latest, second_head);
@@ -740,7 +740,7 @@ fn checkpoints_accept_extension_and_reject_rollback_and_forks_without_mutation()
     append_directives(&mut fork, vec![item("fork-two")], 101, 0).unwrap();
     assert!(matches!(
         ingest_outbox(&mut restored, &fork, 103),
-        Err(ChainError::Fork { height: 2, .. })
+        Err(IngestError::Chain(ChainError::Fork { height: 2, .. }))
     ));
     assert_eq!(restored.len(), 2);
     assert_eq!(restored.consumed_len(), 0);
@@ -749,7 +749,7 @@ fn checkpoints_accept_extension_and_reject_rollback_and_forks_without_mutation()
     append_directives(&mut fork, vec![item("fork-three")], 102, 0).unwrap();
     assert!(matches!(
         ingest_outbox(&mut restored, &fork, 103),
-        Err(ChainError::Fork { height: 2, .. })
+        Err(IngestError::Chain(ChainError::Fork { height: 2, .. }))
     ));
     assert_eq!(restored.len(), 2);
     assert_eq!(restored.checkpoint("node").unwrap().height, 2);
@@ -1092,4 +1092,265 @@ fn policy_digest_matches_independent_python_known_answer() {
         registry.policy_digest(),
         fixture["expected_policy_sha256"].as_str().unwrap()
     );
+}
+
+fn saturation_directive(session: &str, id: &str) -> Directive {
+    Directive {
+        id: id.into(),
+        from: session.into(),
+        to: "qfos".into(),
+        action: "engine.ping".into(),
+        payload: json!({"id": id}),
+        expires_epoch: None,
+    }
+}
+
+#[test]
+fn capacity_failures_discard_the_entire_staged_batch() {
+    let limits = ResourceLimits {
+        max_pending_directives: 1,
+        max_consumed_tombstones: 4,
+        max_directives_per_outbox: 4,
+    };
+    let mut ledger = DirectiveLedger::new().with_limits(limits);
+    let mut outbox = Outbox::genesis("node", "file:///unused");
+    append_directives(
+        &mut outbox,
+        vec![
+            saturation_directive("node", "one"),
+            saturation_directive("node", "two"),
+        ],
+        100,
+        0,
+    )
+    .unwrap();
+    assert!(matches!(
+        ingest_outbox(&mut ledger, &outbox, 100),
+        Err(IngestError::Capacity(CapacityError::PendingDirectives {
+            limit: 1
+        }))
+    ));
+    assert!(ledger.is_empty());
+    assert!(ledger.checkpoint("node").is_none());
+
+    let mut ledger = DirectiveLedger::new().with_limits(ResourceLimits {
+        max_directives_per_outbox: 1,
+        ..limits
+    });
+    assert!(matches!(
+        ingest_outbox(&mut ledger, &outbox, 100),
+        Err(IngestError::Capacity(CapacityError::DirectivesPerOutbox {
+            limit: 1,
+            actual: 2
+        }))
+    ));
+    assert!(ledger.is_empty());
+}
+
+#[test]
+fn cli_pending_capacity_does_not_create_state_or_report() {
+    let mut outbox = Outbox::genesis("node", "file:///unused");
+    append_directives(
+        &mut outbox,
+        vec![
+            saturation_directive("node", "one"),
+            saturation_directive("node", "two"),
+        ],
+        100,
+        0,
+    )
+    .unwrap();
+    let (outbox_path, outbox_url) = outbox_file(outbox);
+    let registry = Registry {
+        schema_version: "test".into(),
+        network_name: "alpha".into(),
+        trust_model: "unsigned-hash-chain".into(),
+        sessions: BTreeMap::from([("node".into(), session(outbox_url))]),
+    };
+    let config = temp_file(&serde_json::to_string(&registry).unwrap());
+    let state = unused_path("capacity-state");
+    let report = unused_path("capacity-report");
+    let output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--config", config.to_str().unwrap()])
+        .args(["--state", state.to_str().unwrap()])
+        .args(["--out", report.to_str().unwrap()])
+        .args(["--now", "100", "--max-pending", "1"])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr)
+        .contains("pending directive capacity exceeded: limit=1"));
+    assert!(!state.exists());
+    assert!(!report.exists());
+    let _ = fs::remove_file(format!("{}.lock", state.display()));
+    fs::remove_file(outbox_path).unwrap();
+    fs::remove_file(config).unwrap();
+}
+
+#[test]
+fn cli_tombstone_capacity_preserves_state_and_pending_job() {
+    let mut outbox = Outbox::genesis("node", "file:///unused");
+    append_directives(
+        &mut outbox,
+        vec![
+            saturation_directive("node", "one"),
+            saturation_directive("node", "two"),
+        ],
+        100,
+        0,
+    )
+    .unwrap();
+    let (outbox_path, outbox_url) = outbox_file(outbox);
+    let registry = Registry {
+        schema_version: "test".into(),
+        network_name: "alpha".into(),
+        trust_model: "unsigned-hash-chain".into(),
+        sessions: BTreeMap::from([("node".into(), session(outbox_url))]),
+    };
+    let config = temp_file(&serde_json::to_string(&registry).unwrap());
+    let state = unused_path("tombstone-state");
+    for id in ["one", "two"] {
+        let before = if id == "two" {
+            Some(fs::read(&state).unwrap())
+        } else {
+            None
+        };
+        let output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+            .args(["--config", config.to_str().unwrap()])
+            .args(["--state", state.to_str().unwrap()])
+            .args(["--now", "100", "--max-tombstones", "1"])
+            .args(["--consume-session", "node", "--consume-id", id])
+            .output()
+            .unwrap();
+        if id == "one" {
+            assert!(output.status.success());
+        } else {
+            assert!(!output.status.success());
+            assert!(String::from_utf8_lossy(&output.stderr)
+                .contains("consumed tombstone capacity exceeded: limit=1"));
+            assert_eq!(fs::read(&state).unwrap(), before.unwrap());
+        }
+    }
+    let snapshot: serde_json::Value =
+        strict_json::from_str(&fs::read_to_string(&state).unwrap()).unwrap();
+    assert_eq!(snapshot["consumed"].as_array().unwrap().len(), 1);
+    assert_eq!(snapshot["directives"].as_array().unwrap().len(), 1);
+    assert_eq!(snapshot["directives"][0]["directive"]["id"], "two");
+    fs::remove_file(outbox_path).unwrap();
+    fs::remove_file(config).unwrap();
+    fs::remove_file(&state).unwrap();
+    let _ = fs::remove_file(format!("{}.lock", state.display()));
+}
+
+#[test]
+fn cli_registry_fanout_fails_before_transport_or_outputs() {
+    let mut document = Outbox::genesis("node-0", "file:///unused");
+    let (url, hits) = serve_counted_outbox_once(&mut document);
+    let sessions = (0..65)
+        .map(|index| (format!("node-{index}"), session(url.clone())))
+        .collect();
+    let registry = Registry {
+        schema_version: "test".into(),
+        network_name: "alpha".into(),
+        trust_model: "unsigned-hash-chain".into(),
+        sessions,
+    };
+    let config = temp_file(&serde_json::to_string(&registry).unwrap());
+    let state = unused_path("fanout-state");
+    let report = unused_path("fanout-report");
+    let output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--config", config.to_str().unwrap()])
+        .args(["--state", state.to_str().unwrap()])
+        .args(["--out", report.to_str().unwrap()])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr)
+        .contains("registry session capacity exceeded: limit=64, actual=65"));
+    assert_eq!(hits.load(Ordering::SeqCst), 0);
+    assert!(!state.exists());
+    assert!(!report.exists());
+    fs::remove_file(config).unwrap();
+}
+
+#[test]
+fn cli_wave_plan_is_deterministic_fair_and_state_bound() {
+    let mut sessions = BTreeMap::new();
+    let mut paths = Vec::new();
+    for name in ["a", "b"] {
+        let mut outbox = Outbox::genesis(name, "file:///unused");
+        append_directives(
+            &mut outbox,
+            vec![
+                saturation_directive(name, &format!("{name}1")),
+                saturation_directive(name, &format!("{name}2")),
+            ],
+            100,
+            0,
+        )
+        .unwrap();
+        let (path, url) = outbox_file(outbox);
+        paths.push(path);
+        sessions.insert(name.into(), session(url));
+    }
+    let registry = Registry {
+        schema_version: "test".into(),
+        network_name: "alpha".into(),
+        trust_model: "unsigned-hash-chain".into(),
+        sessions,
+    };
+    let config = temp_file(&serde_json::to_string(&registry).unwrap());
+    let state = unused_path("wave-state");
+    let wave = unused_path("wave-plan");
+    for _ in 0..2 {
+        let output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+            .args(["--config", config.to_str().unwrap()])
+            .args(["--state", state.to_str().unwrap()])
+            .args(["--now", "100"])
+            .args(["--wave-out", wave.to_str().unwrap()])
+            .args(["--wave-max-jobs", "3", "--wave-max-per-source", "1"])
+            .output()
+            .unwrap();
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+    }
+    let plan: serde_json::Value =
+        strict_json::from_str(&fs::read_to_string(&wave).unwrap()).unwrap();
+    assert_eq!(plan["schema_version"], "qfos-wave-plan/v1");
+    assert_eq!(plan["mode"], "plan-only-no-execution");
+    assert_eq!(plan["jobs"].as_array().unwrap().len(), 2);
+    assert_eq!(plan["jobs"][0]["id"], "a1");
+    assert_eq!(plan["jobs"][1]["id"], "b1");
+    assert_eq!(plan["deferred"], 2);
+    assert_eq!(plan["plan_hash"].as_str().unwrap().len(), 64);
+    let snapshot: serde_json::Value =
+        strict_json::from_str(&fs::read_to_string(&state).unwrap()).unwrap();
+    assert_eq!(snapshot["directives"].as_array().unwrap().len(), 4);
+    assert!(snapshot["consumed"].as_array().unwrap().is_empty());
+    for path in paths {
+        fs::remove_file(path).unwrap();
+    }
+    fs::remove_file(config).unwrap();
+    fs::remove_file(&state).unwrap();
+    fs::remove_file(wave).unwrap();
+    let _ = fs::remove_file(format!("{}.lock", state.display()));
+}
+
+#[test]
+fn cli_capacity_flags_require_values_and_cannot_raise_hard_caps() {
+    let output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .arg("--max-pending")
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("--max-pending requires N"));
+    let output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--max-pending", "4097"])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("--max-pending must be in 1..=4096"));
 }

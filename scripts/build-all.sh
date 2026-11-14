@@ -13,6 +13,23 @@ python3 scripts/verify-outbox-python.py --self-test \
   fixtures/python-oracle-outbox.json \
   outbox/asfa-ai-outbox.json
 python3 scripts/verify-policy-python.py --fixture fixtures/policy-oracle.json
+python3 scripts/verify-wave-python.py \
+  --expect-plan-hash fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
+rm -f /tmp/asfa-wave-report.json /tmp/asfa-wave-state.json \
+  /tmp/asfa-wave-state.json.lock /tmp/asfa-wave-plan.json
+cargo run --locked -p asfa-bridge-poller -- \
+  --config config/sessions.wave.json \
+  --state /tmp/asfa-wave-state.json \
+  --out /tmp/asfa-wave-report.json \
+  --wave-out /tmp/asfa-wave-plan.json \
+  --now 100 --wave-max-jobs 3 --wave-max-per-source 2
+cmp fixtures/qfos-wave-state.json /tmp/asfa-wave-state.json
+cmp fixtures/qfos-wave-plan.json /tmp/asfa-wave-plan.json
+python3 scripts/verify-wave-python.py \
+  --registry config/sessions.wave.json \
+  --snapshot /tmp/asfa-wave-state.json \
+  --plan /tmp/asfa-wave-plan.json \
+  --expect-plan-hash fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 COGNITIVE_OUTPUT="$(cargo run --locked --quiet --example cognitive_demo -p asfa-userspace)"
 COGNITIVE_OUTPUT="$COGNITIVE_OUTPUT" python3 - <<'PY'
 import os

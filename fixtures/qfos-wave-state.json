@@ -1,0 +1,90 @@
+{
+  "schema_version": "asfa-directive-ledger/v3",
+  "network_name": "qfos-wave-fixture",
+  "policy_hash": "83ce6e4d52c99bcf6704a6e196b488b545ce0b57f362f008d644f0ff34747e12",
+  "directives": [
+    {
+      "session": "a",
+      "directive": {
+        "id": "a1",
+        "from": "a",
+        "to": "qfos",
+        "action": "engine.a",
+        "payload": {
+          "id": "a1",
+          "message": "跨域勾稽"
+        },
+        "expires_epoch": null
+      }
+    },
+    {
+      "session": "a",
+      "directive": {
+        "id": "a2",
+        "from": "a",
+        "to": "qfos",
+        "action": "engine.a",
+        "payload": {
+          "id": "a2",
+          "message": "a2"
+        },
+        "expires_epoch": null
+      }
+    },
+    {
+      "session": "a",
+      "directive": {
+        "id": "a3",
+        "from": "a",
+        "to": "qfos",
+        "action": "engine.a",
+        "payload": {
+          "id": "a3",
+          "message": "a3"
+        },
+        "expires_epoch": null
+      }
+    },
+    {
+      "session": "b",
+      "directive": {
+        "id": "b1",
+        "from": "b",
+        "to": "qfos",
+        "action": "engine.b",
+        "payload": {
+          "id": "b1",
+          "message": "b1"
+        },
+        "expires_epoch": null
+      }
+    },
+    {
+      "session": "b",
+      "directive": {
+        "id": "b2",
+        "from": "b",
+        "to": "*",
+        "action": "engine.b",
+        "payload": {
+          "id": "b2",
+          "message": "b2"
+        },
+        "expires_epoch": null
+      }
+    }
+  ],
+  "consumed": [],
+  "checkpoints": [
+    {
+      "session": "a",
+      "height": 1,
+      "latest": "8f308a11dafc9a376607ca87d415d90899ea9c1b995caa5d3f90c34d8bc73779"
+    },
+    {
+      "session": "b",
+      "height": 1,
+      "latest": "d59c5b4be134713b24f3002df2b64cce02ac845f41b7cfdf6acf90c714be6a73"
+    }
+  ]
+}

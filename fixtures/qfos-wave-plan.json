@@ -1,0 +1,58 @@
+{
+  "schema_version": "qfos-wave-plan/v1",
+  "mode": "plan-only-no-execution",
+  "network_name": "qfos-wave-fixture",
+  "policy_hash": "83ce6e4d52c99bcf6704a6e196b488b545ce0b57f362f008d644f0ff34747e12",
+  "ledger_hash": "5492dffd0ee63721b555b1dc2f9e34b8d956d896bede21456e0cb0908a1ed4e3",
+  "target": "qfos",
+  "generated_at_epoch": 100,
+  "max_jobs": 3,
+  "max_per_source": 2,
+  "jobs": [
+    {
+      "session": "a",
+      "id": "a1",
+      "action": "engine.a",
+      "payload": {
+        "id": "a1",
+        "message": "跨域勾稽"
+      }
+    },
+    {
+      "session": "b",
+      "id": "b1",
+      "action": "engine.b",
+      "payload": {
+        "id": "b1",
+        "message": "b1"
+      }
+    },
+    {
+      "session": "a",
+      "id": "a2",
+      "action": "engine.a",
+      "payload": {
+        "id": "a2",
+        "message": "a2"
+      }
+    }
+  ],
+  "deferred": 2,
+  "sources": [
+    {
+      "session": "a",
+      "offered": 3,
+      "admitted": 2,
+      "deferred_wave_quota": 0,
+      "deferred_source_quota": 1
+    },
+    {
+      "session": "b",
+      "offered": 2,
+      "admitted": 1,
+      "deferred_wave_quota": 1,
+      "deferred_source_quota": 0
+    }
+  ],
+  "plan_hash": "fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302"
+}

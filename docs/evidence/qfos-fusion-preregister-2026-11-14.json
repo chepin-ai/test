@@ -1,0 +1,60 @@
+{
+  "schema_version": "asfa-fusion-preregister/v1",
+  "registered_at": "2026-11-14",
+  "evidence_status": "pre-implementation; no outcome is asserted",
+  "scope": {
+    "qfos": "Bounded deterministic wave planning over verified pending directives; planning is not engine execution.",
+    "qios": "Unresolved identifier. No QIOS integration or compatibility claim is permitted without an external canonical definition.",
+    "single_writer": "Cooperating CLI processes sharing the same lexical state path must fail closed under an OS-backed sidecar lock."
+  },
+  "cases": [
+    {
+      "id": "LCK-01",
+      "attack": "Two processes load one snapshot concurrently and consume different directives.",
+      "old_expected": "Both can return success and the last rename can lose one consumed tombstone.",
+      "new_required": "At most one process owns the state lock; a later explicit retry preserves both tombstones and a valid snapshot."
+    },
+    {
+      "id": "SAT-01",
+      "attack": "Flood distinct directive IDs beyond the configured pending capacity.",
+      "old_expected": "All distinct IDs are inserted and persisted.",
+      "new_required": "The batch fails before state or report mutation; no partial prefix is committed."
+    },
+    {
+      "id": "SAT-02",
+      "attack": "Consume beyond the tombstone capacity to force unbounded replay-state growth.",
+      "old_expected": "Tombstones grow without a capacity decision.",
+      "new_required": "Consumption fails without removing the pending directive or mutating the persisted snapshot."
+    },
+    {
+      "id": "SAT-03",
+      "attack": "Restore a syntactically valid snapshot whose pending or consumed cardinality exceeds local limits.",
+      "old_expected": "The snapshot is accepted solely on schema, network and policy checks.",
+      "new_required": "Restoration fails before polling or output creation."
+    },
+    {
+      "id": "SAT-04",
+      "attack": "Declare more registry sessions than the hard fan-out limit and count transport hits.",
+      "old_expected": "Every declared session can be polled sequentially.",
+      "new_required": "Registry validation fails before any transport, state or report creation."
+    },
+    {
+      "id": "WAVE-01",
+      "attack": "One high-cardinality source attempts to monopolize a QF-OS wave.",
+      "old_expected": "No wave-planning interface exists.",
+      "new_required": "Deterministic source round-robin, global and per-source quotas, explicit deferred accounting, and no ledger mutation."
+    },
+    {
+      "id": "WAVE-02",
+      "attack": "Modify an admitted job, plan metadata or state binding after plan generation.",
+      "old_expected": "No independent wave oracle exists.",
+      "new_required": "An independent Python reconstruction rejects the modified plan and verifies the unmodified known-answer fixture."
+    },
+    {
+      "id": "WAVE-03",
+      "attack": "Treat a plan or state digest as publisher authentication, execution proof or QIOS compatibility.",
+      "old_expected": "No explicit downgrade statement exists for wave plans.",
+      "new_required": "Documentation and schema mark the artifact plan-only; digest verification remains consistency checking, not authentication or execution proof."
+    }
+  ]
+}

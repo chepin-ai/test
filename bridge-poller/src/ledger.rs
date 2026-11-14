@@ -11,7 +11,39 @@ use thiserror::Error;
 
 pub const LEDGER_SCHEMA_VERSION: &str = "asfa-directive-ledger/v3";
 pub const MAX_LEDGER_BYTES: u64 = 16 * 1024 * 1024;
+pub const DEFAULT_MAX_PENDING_DIRECTIVES: usize = 4096;
+pub const DEFAULT_MAX_CONSUMED_TOMBSTONES: usize = 16384;
+pub const DEFAULT_MAX_DIRECTIVES_PER_OUTBOX: usize = 1024;
 static NEXT_TEMP_FILE: AtomicU64 = AtomicU64::new(1);
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ResourceLimits {
+    pub max_pending_directives: usize,
+    pub max_consumed_tombstones: usize,
+    pub max_directives_per_outbox: usize,
+}
+
+impl Default for ResourceLimits {
+    fn default() -> Self {
+        Self {
+            max_pending_directives: DEFAULT_MAX_PENDING_DIRECTIVES,
+            max_consumed_tombstones: DEFAULT_MAX_CONSUMED_TOMBSTONES,
+            max_directives_per_outbox: DEFAULT_MAX_DIRECTIVES_PER_OUTBOX,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Error, PartialEq, Eq)]
+pub enum CapacityError {
+    #[error("pending directive capacity exceeded: limit={limit}")]
+    PendingDirectives { limit: usize },
+    #[error("consumed tombstone capacity exceeded: limit={limit}")]
+    ConsumedTombstones { limit: usize },
+    #[error("outbox directive capacity exceeded: limit={limit}, actual={actual}")]
+    DirectivesPerOutbox { limit: usize, actual: usize },
+    #[error("ledger snapshot exceeds {limit} bytes: actual={actual}")]
+    SnapshotBytes { limit: u64, actual: usize },
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum IngestOutcome {
@@ -21,6 +53,7 @@ pub enum IngestOutcome {
     Conflict,
     Expired,
     Invalid(String),
+    OverCapacity,
 }
 
 type DirectiveKey = (String, String);
@@ -81,18 +114,21 @@ pub enum RestoreError {
     DuplicateCheckpoint { session: String },
     #[error("consumed directive is also pending: {session}/{id}")]
     ConsumedPending { session: String, id: String },
+    #[error("ledger resource limit: {0}")]
+    ResourceLimit(#[from] CapacityError),
 }
 
 /// Idempotent directive store with consumption tombstones and per-session chain
 /// checkpoints. Persistence is explicit and supports a single writer; atomic
 /// rename prevents torn files but does not provide multi-process compare-and-swap.
-#[derive(Default)]
+#[derive(Clone, Debug, Default)]
 pub struct DirectiveLedger {
     network_name: Option<String>,
     policy_hash: Option<String>,
     directives: BTreeMap<DirectiveKey, Directive>,
     consumed: BTreeSet<DirectiveKey>,
     checkpoints: BTreeMap<String, ChainCheckpoint>,
+    limits: ResourceLimits,
 }
 
 impl DirectiveLedger {
@@ -123,6 +159,15 @@ impl DirectiveLedger {
 
     pub fn policy_hash(&self) -> Option<&str> {
         self.policy_hash.as_deref()
+    }
+
+    pub fn limits(&self) -> ResourceLimits {
+        self.limits
+    }
+
+    pub fn with_limits(mut self, limits: ResourceLimits) -> Self {
+        self.limits = limits;
+        self
     }
 
     pub fn len(&self) -> usize {
@@ -189,29 +234,49 @@ impl DirectiveLedger {
                 IngestOutcome::Conflict
             };
         }
+        if self.directives.len() >= self.limits.max_pending_directives {
+            return IngestOutcome::OverCapacity;
+        }
         self.directives.insert(key, directive);
         IngestOutcome::Inserted
     }
 
-    pub fn pending_for_at(&self, target: &str, now_epoch: u64) -> Vec<&Directive> {
+    pub fn pending_entries_for_at(&self, target: &str, now_epoch: u64) -> Vec<(&str, &Directive)> {
         self.directives
-            .values()
-            .filter(|directive| {
+            .iter()
+            .filter(|(_, directive)| {
                 (directive.to == target || directive.to == "*")
                     && directive
                         .expires_epoch
                         .is_none_or(|expires| expires > now_epoch)
             })
+            .map(|((session, _), directive)| (session.as_str(), directive))
+            .collect()
+    }
+
+    pub fn pending_for_at(&self, target: &str, now_epoch: u64) -> Vec<&Directive> {
+        self.pending_entries_for_at(target, now_epoch)
+            .into_iter()
+            .map(|(_, directive)| directive)
             .collect()
     }
 
     /// Consuming removes the directive and leaves a tombstone so replaying the
-    /// same session/ID cannot reinsert it during this ledger's lifetime.
-    pub fn consume(&mut self, session: &str, id: &str) -> Option<Directive> {
+    /// same session/ID cannot reinsert it during this ledger's lifetime. Capacity
+    /// failure occurs before removal, so a failed consume never loses the job.
+    pub fn consume(&mut self, session: &str, id: &str) -> Result<Option<Directive>, CapacityError> {
         let key = (session.to_owned(), id.to_owned());
-        let directive = self.directives.remove(&key)?;
+        if !self.directives.contains_key(&key) {
+            return Ok(None);
+        }
+        if self.consumed.len() >= self.limits.max_consumed_tombstones {
+            return Err(CapacityError::ConsumedTombstones {
+                limit: self.limits.max_consumed_tombstones,
+            });
+        }
+        let directive = self.directives.remove(&key).expect("checked pending key");
         self.consumed.insert(key);
-        Some(directive)
+        Ok(Some(directive))
     }
 
     pub fn is_consumed(&self, session: &str, id: &str) -> bool {
@@ -303,6 +368,13 @@ impl DirectiveLedger {
     }
 
     pub fn from_snapshot(snapshot: LedgerSnapshot) -> Result<Self, RestoreError> {
+        Self::from_snapshot_with_limits(snapshot, ResourceLimits::default())
+    }
+
+    pub fn from_snapshot_with_limits(
+        snapshot: LedgerSnapshot,
+        limits: ResourceLimits,
+    ) -> Result<Self, RestoreError> {
         if snapshot.schema_version != LEDGER_SCHEMA_VERSION {
             return Err(RestoreError::UnsupportedSchema(snapshot.schema_version));
         }
@@ -324,9 +396,22 @@ impl DirectiveLedger {
                 "policy_hash must be a lowercase SHA-256 digest when present".into(),
             ));
         }
+        if snapshot.directives.len() > limits.max_pending_directives {
+            return Err(CapacityError::PendingDirectives {
+                limit: limits.max_pending_directives,
+            }
+            .into());
+        }
+        if snapshot.consumed.len() > limits.max_consumed_tombstones {
+            return Err(CapacityError::ConsumedTombstones {
+                limit: limits.max_consumed_tombstones,
+            }
+            .into());
+        }
         let mut ledger = Self {
             network_name: snapshot.network_name,
             policy_hash: snapshot.policy_hash,
+            limits,
             ..Self::default()
         };
         for entry in snapshot.directives {
@@ -406,6 +491,16 @@ impl DirectiveLedger {
         let temporary = path.with_extension(format!("tmp-{}-{serial}", std::process::id()));
         let rendered =
             serde_json::to_string_pretty(&self.snapshot()).map_err(io::Error::other)? + "\n";
+        if rendered.len() as u64 > MAX_LEDGER_BYTES {
+            let _ = fs::remove_file(&temporary);
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                CapacityError::SnapshotBytes {
+                    limit: MAX_LEDGER_BYTES,
+                    actual: rendered.len(),
+                },
+            ));
+        }
         fs::write(&temporary, rendered)?;
         if let Err(error) = fs::rename(&temporary, path) {
             let _ = fs::remove_file(&temporary);
@@ -424,6 +519,14 @@ impl DirectiveLedger {
     }
 
     pub fn load_for_registry(path: &Path, registry: &Registry) -> io::Result<Self> {
+        Self::load_for_registry_with_limits(path, registry, ResourceLimits::default())
+    }
+
+    pub fn load_for_registry_with_limits(
+        path: &Path,
+        registry: &Registry,
+        limits: ResourceLimits,
+    ) -> io::Result<Self> {
         let snapshot = Self::read_snapshot(path)?;
         if snapshot.schema_version != LEDGER_SCHEMA_VERSION {
             return Err(io::Error::new(
@@ -454,7 +557,7 @@ impl DirectiveLedger {
                 ),
             ));
         }
-        Self::from_snapshot(snapshot)
+        Self::from_snapshot_with_limits(snapshot, limits)
             .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))
     }
 }
@@ -517,8 +620,8 @@ mod tests {
             ledger.ingest("a", item.clone(), 100),
             IngestOutcome::Inserted
         );
-        assert!(ledger.consume("a", "once").is_some());
-        assert!(ledger.consume("a", "once").is_none());
+        assert!(ledger.consume("a", "once").unwrap().is_some());
+        assert!(ledger.consume("a", "once").unwrap().is_none());
         assert!(ledger.is_consumed("a", "once"));
         assert_eq!(ledger.ingest("a", item, 100), IngestOutcome::Consumed);
         assert!(ledger.is_empty());
@@ -547,7 +650,7 @@ mod tests {
             IngestOutcome::Inserted
         );
         assert_eq!(ledger.len(), 2);
-        assert!(ledger.consume("a/b", "c").is_some());
+        assert!(ledger.consume("a/b", "c").unwrap().is_some());
         assert_eq!(ledger.pending_for_at("cisvr", 100).len(), 1);
     }
 
@@ -581,7 +684,7 @@ mod tests {
         let mut ledger = DirectiveLedger::for_network("alpha");
         ledger.ingest("a", directive("a", "pending", None), 100);
         ledger.ingest("a", directive("a", "done", None), 100);
-        ledger.consume("a", "done");
+        ledger.consume("a", "done").unwrap();
         ledger.commit_checkpoint(
             "a",
             ChainCheckpoint {
@@ -607,7 +710,7 @@ mod tests {
         let mut ledger = DirectiveLedger::for_registry(&registry("alpha"));
         let item = directive("a", "once", None);
         ledger.ingest("a", item.clone(), 100);
-        ledger.consume("a", "once");
+        ledger.consume("a", "once").unwrap();
         ledger.save_atomic(&path).unwrap();
         let mut restored = DirectiveLedger::load_for_registry(&path, &registry("alpha")).unwrap();
         assert_eq!(restored.ingest("a", item, 100), IngestOutcome::Consumed);
@@ -679,6 +782,63 @@ mod tests {
         assert!(matches!(
             DirectiveLedger::from_snapshot(malformed),
             Err(RestoreError::InvalidEntry(_))
+        ));
+    }
+
+    #[test]
+    fn resource_limits_preserve_pending_work_and_replay_tombstones() {
+        let limits = ResourceLimits {
+            max_pending_directives: 2,
+            max_consumed_tombstones: 1,
+            max_directives_per_outbox: 2,
+        };
+        let mut ledger = DirectiveLedger::new().with_limits(limits);
+        assert_eq!(
+            ledger.ingest("a", directive("a", "one", None), 100),
+            IngestOutcome::Inserted
+        );
+        assert_eq!(
+            ledger.ingest("a", directive("a", "two", None), 100),
+            IngestOutcome::Inserted
+        );
+        assert_eq!(
+            ledger.ingest("a", directive("a", "three", None), 100),
+            IngestOutcome::OverCapacity
+        );
+        assert!(ledger.consume("a", "one").unwrap().is_some());
+        assert_eq!(
+            ledger.consume("a", "two"),
+            Err(CapacityError::ConsumedTombstones { limit: 1 })
+        );
+        assert_eq!(ledger.pending_for_at("cisvr", 100)[0].id, "two");
+        assert_eq!(
+            ledger.ingest("a", directive("a", "one", None), 100),
+            IngestOutcome::Consumed
+        );
+    }
+
+    #[test]
+    fn restore_enforces_local_cardinality_limits() {
+        let snapshot = LedgerSnapshot {
+            schema_version: LEDGER_SCHEMA_VERSION.into(),
+            network_name: Some("alpha".into()),
+            policy_hash: None,
+            directives: vec![DirectiveEntry {
+                session: "a".into(),
+                directive: directive("a", "one", None),
+            }],
+            consumed: vec![],
+            checkpoints: vec![],
+        };
+        let limits = ResourceLimits {
+            max_pending_directives: 0,
+            ..ResourceLimits::default()
+        };
+        assert!(matches!(
+            DirectiveLedger::from_snapshot_with_limits(snapshot, limits),
+            Err(RestoreError::ResourceLimit(
+                CapacityError::PendingDirectives { limit: 0 }
+            ))
         ));
     }
 

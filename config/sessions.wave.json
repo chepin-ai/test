@@ -1,0 +1,19 @@
+{
+  "schema_version": "2026-11-14",
+  "network_name": "qfos-wave-fixture",
+  "trust_model": "unsigned-hash-chain",
+  "sessions": {
+    "a": {
+      "url": "file://fixtures/qfos-wave-a.json",
+      "role": "qfos-wave-fixture",
+      "trust": "unsigned-hash-chain",
+      "allow_file": true
+    },
+    "b": {
+      "url": "file://fixtures/qfos-wave-b.json",
+      "role": "qfos-wave-fixture",
+      "trust": "unsigned-hash-chain",
+      "allow_file": true
+    }
+  }
+}

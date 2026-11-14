@@ -1,0 +1,68 @@
+{
+  "session": "a",
+  "url": "file://fixtures/qfos-wave-a.json",
+  "trust": "unsigned-hash-chain",
+  "directives": [],
+  "mailbox": {},
+  "hash_chain": {
+    "genesis": "0000000000000000000000000000000000000000000000000000000000000000",
+    "latest": "8f308a11dafc9a376607ca87d415d90899ea9c1b995caa5d3f90c34d8bc73779",
+    "height": 1,
+    "blocks": [
+      {
+        "height": 1,
+        "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "payload": {
+          "kind": "directives",
+          "directives": [
+            {
+              "id": "a0",
+              "from": "a",
+              "to": "qfos",
+              "action": "engine.a",
+              "payload": {
+                "id": "a0",
+                "message": "a0"
+              },
+              "expires_epoch": 99
+            },
+            {
+              "id": "a1",
+              "from": "a",
+              "to": "qfos",
+              "action": "engine.a",
+              "payload": {
+                "id": "a1",
+                "message": "跨域勾稽"
+              }
+            },
+            {
+              "id": "a2",
+              "from": "a",
+              "to": "qfos",
+              "action": "engine.a",
+              "payload": {
+                "id": "a2",
+                "message": "a2"
+              }
+            },
+            {
+              "id": "a3",
+              "from": "a",
+              "to": "qfos",
+              "action": "engine.a",
+              "payload": {
+                "id": "a3",
+                "message": "a3"
+              }
+            }
+          ]
+        },
+        "payload_hash": "b1e5fcba20852920712086fe69adef02bdf55ba4aaa28c525dc88bec2b3ee1dc",
+        "timestamp": 100,
+        "nonce": 0,
+        "hash": "8f308a11dafc9a376607ca87d415d90899ea9c1b995caa5d3f90c34d8bc73779"
+      }
+    ]
+  }
+}

@@ -1,0 +1,469 @@
+{
+  "schema_version": "asfa-fusion-differential/v1",
+  "recorded_at": "2026-11-14T08:06:40.102525+00:00",
+  "before_commit": "143668c20a79d2bcde5d555bee15be6cf8da2c91",
+  "before_binary_sha256": "c6aeef9eda9f3df0dbd59443ec29dd8654c7b3ed1dc3c6f386303dec694bbea1",
+  "after_binary_sha256": "939275c09247921ef1626a3f944f2f625ac8ed087100d826694160d697bb6852",
+  "evidence_status": "executed old/new differential; not a distributed-lock or publisher-authentication claim",
+  "cases": {
+    "SAT-01": {
+      "before": {
+        "run": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat1-old-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat1-old-report.json"
+          ],
+          "returncode": 0,
+          "stderr": "polled=2 verified=2 failed=0\n",
+          "elapsed_ms": 185.807
+        },
+        "state": {
+          "pending": 5,
+          "consumed": 0,
+          "sha256": "80231669aade8aaa772edb04da97dda251318ffe8c51a035c29bd8fa56fd86a7"
+        }
+      },
+      "after": {
+        "run": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat1-new-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat1-new-report.json",
+            "--max-pending",
+            "4"
+          ],
+          "returncode": 2,
+          "stderr": "bridge-poller: pending directive capacity exceeded: limit=4\n",
+          "elapsed_ms": 3.11
+        },
+        "state_exists": false,
+        "report_exists": false
+      },
+      "pass": true
+    },
+    "SAT-02": {
+      "before": {
+        "runs": [
+          {
+            "argv_tail": [
+              "--config",
+              "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+              "--now",
+              "100",
+              "--state",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-state.json",
+              "--out",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-0.json",
+              "--consume-session",
+              "a",
+              "--consume-id",
+              "a1"
+            ],
+            "returncode": 0,
+            "stderr": "polled=2 verified=2 failed=0\n",
+            "elapsed_ms": 42.46
+          },
+          {
+            "argv_tail": [
+              "--config",
+              "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+              "--now",
+              "100",
+              "--state",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-state.json",
+              "--out",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-1.json",
+              "--consume-session",
+              "a",
+              "--consume-id",
+              "a2"
+            ],
+            "returncode": 0,
+            "stderr": "polled=2 verified=2 failed=0\n",
+            "elapsed_ms": 59.701
+          },
+          {
+            "argv_tail": [
+              "--config",
+              "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+              "--now",
+              "100",
+              "--state",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-state.json",
+              "--out",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-2.json",
+              "--consume-session",
+              "a",
+              "--consume-id",
+              "a3"
+            ],
+            "returncode": 0,
+            "stderr": "polled=2 verified=2 failed=0\n",
+            "elapsed_ms": 56.191
+          },
+          {
+            "argv_tail": [
+              "--config",
+              "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+              "--now",
+              "100",
+              "--state",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-state.json",
+              "--out",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-3.json",
+              "--consume-session",
+              "b",
+              "--consume-id",
+              "b1"
+            ],
+            "returncode": 0,
+            "stderr": "polled=2 verified=2 failed=0\n",
+            "elapsed_ms": 72.975
+          },
+          {
+            "argv_tail": [
+              "--config",
+              "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+              "--now",
+              "100",
+              "--state",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-state.json",
+              "--out",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-old-4.json",
+              "--consume-session",
+              "b",
+              "--consume-id",
+              "b2"
+            ],
+            "returncode": 0,
+            "stderr": "polled=2 verified=2 failed=0\n",
+            "elapsed_ms": 62.553
+          }
+        ],
+        "state": {
+          "pending": 0,
+          "consumed": 5,
+          "sha256": "e0eb66cf43d5a0b63c8c3b71a0804ff55485fd29018cee1cafc66da208ad5f6c"
+        }
+      },
+      "after": {
+        "runs": [
+          {
+            "argv_tail": [
+              "--config",
+              "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+              "--now",
+              "100",
+              "--state",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-new-state.json",
+              "--out",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-new-a1.json",
+              "--max-tombstones",
+              "2",
+              "--consume-session",
+              "a",
+              "--consume-id",
+              "a1"
+            ],
+            "returncode": 0,
+            "stderr": "polled=2 verified=2 failed=0\n",
+            "elapsed_ms": 60.786
+          },
+          {
+            "argv_tail": [
+              "--config",
+              "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+              "--now",
+              "100",
+              "--state",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-new-state.json",
+              "--out",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-new-a2.json",
+              "--max-tombstones",
+              "2",
+              "--consume-session",
+              "a",
+              "--consume-id",
+              "a2"
+            ],
+            "returncode": 0,
+            "stderr": "polled=2 verified=2 failed=0\n",
+            "elapsed_ms": 58.131
+          },
+          {
+            "argv_tail": [
+              "--config",
+              "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+              "--now",
+              "100",
+              "--state",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-new-state.json",
+              "--out",
+              "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat2-new-a3.json",
+              "--max-tombstones",
+              "2",
+              "--consume-session",
+              "a",
+              "--consume-id",
+              "a3"
+            ],
+            "returncode": 2,
+            "stderr": "bridge-poller: consumed tombstone capacity exceeded: limit=2\n",
+            "elapsed_ms": 2.858
+          }
+        ],
+        "state": {
+          "pending": 3,
+          "consumed": 2,
+          "sha256": "069721cb005de760ee25e32efe3a42f27bef0ef7a6f9198ce5b31fd4d855acaa"
+        },
+        "third_state_unchanged": true
+      },
+      "pass": true
+    },
+    "SAT-03": {
+      "before": {
+        "run": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat3-old-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat3-old-report.json"
+          ],
+          "returncode": 0,
+          "stderr": "polled=2 verified=2 failed=0\n",
+          "elapsed_ms": 54.985
+        },
+        "state": {
+          "pending": 5,
+          "consumed": 0,
+          "sha256": "80231669aade8aaa772edb04da97dda251318ffe8c51a035c29bd8fa56fd86a7"
+        }
+      },
+      "after": {
+        "run": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat3-new-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/sat3-new-report.json",
+            "--max-pending",
+            "4"
+          ],
+          "returncode": 2,
+          "stderr": "bridge-poller: ledger resource limit: pending directive capacity exceeded: limit=4\n",
+          "elapsed_ms": 2.183
+        },
+        "state_unchanged": true,
+        "report_exists": false
+      },
+      "pass": true
+    },
+    "SAT-04": {
+      "before": {
+        "run": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/fanout.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/fanout-old-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/fanout-old-report.json"
+          ],
+          "returncode": 0,
+          "stderr": "polled=65 verified=0 failed=65\n",
+          "elapsed_ms": 62.53
+        },
+        "transport_hits": 65,
+        "report_total": 65
+      },
+      "after": {
+        "run": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/fanout.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/fanout-new-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/fanout-new-report.json"
+          ],
+          "returncode": 2,
+          "stderr": "bridge-poller: registry session capacity exceeded: limit=64, actual=65\n",
+          "elapsed_ms": 1.883
+        },
+        "transport_hits": 0,
+        "state_exists": false,
+        "report_exists": false
+      },
+      "pass": true
+    },
+    "LCK-01": {
+      "before": {
+        "init": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-old-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-old-init.json"
+          ],
+          "returncode": 0,
+          "stderr": "polled=2 verified=2 failed=0\n",
+          "elapsed_ms": 40.862
+        },
+        "first": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-old-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-old-a.json",
+            "--consume-session",
+            "a",
+            "--consume-id",
+            "a1"
+          ],
+          "returncode": 0,
+          "stderr": "polled=2 verified=2 failed=0\n"
+        },
+        "second": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-old-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-old-b.json",
+            "--consume-session",
+            "b",
+            "--consume-id",
+            "b1"
+          ],
+          "returncode": 0,
+          "stderr": "polled=2 verified=2 failed=0\n"
+        },
+        "state": {
+          "pending": 4,
+          "consumed": 1,
+          "sha256": "f26de201c848576617f1356ce38ab4d0b6600450addc4511a349f90b857ee0cf"
+        }
+      },
+      "after": {
+        "init": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-init.json"
+          ],
+          "returncode": 0,
+          "stderr": "polled=2 verified=2 failed=0\n",
+          "elapsed_ms": 45.016
+        },
+        "first": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-a.json",
+            "--consume-session",
+            "a",
+            "--consume-id",
+            "a1"
+          ],
+          "returncode": 0,
+          "stderr": "polled=2 verified=2 failed=0\n"
+        },
+        "contender": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-b.json",
+            "--consume-session",
+            "b",
+            "--consume-id",
+            "b1"
+          ],
+          "returncode": 2,
+          "stderr": "bridge-poller: state is already locked: /mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-state.json.lock\n"
+        },
+        "contender_transport_hits": 0,
+        "state_after_contention": {
+          "pending": 4,
+          "consumed": 1,
+          "sha256": "f85324996ae2857977a0929075f284c9e871163463367f92fef04a41f5cf08e4"
+        },
+        "retry": {
+          "argv_tail": [
+            "--config",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/registry.json",
+            "--now",
+            "100",
+            "--state",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-state.json",
+            "--out",
+            "/mnt/agents/work/asfa-fusion-2026-11-14/asfa-fusion-dgi0scx3/lock-new-retry.json",
+            "--consume-session",
+            "b",
+            "--consume-id",
+            "b1"
+          ],
+          "returncode": 0,
+          "stderr": "polled=2 verified=2 failed=0\n",
+          "elapsed_ms": 45.123
+        },
+        "final_state": {
+          "pending": 3,
+          "consumed": 2,
+          "sha256": "b26dda63e386adfb5a886179cc583e298544dbb23493b0308b5eef91c91cdbd8"
+        }
+      },
+      "pass": true
+    }
+  },
+  "verdict": "PASS"
+}

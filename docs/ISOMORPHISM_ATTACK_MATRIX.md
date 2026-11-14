@@ -1,4 +1,4 @@
-# 形式化结构、同构映射与攻击矩阵（2026-11-11）
+# 形式化结构、同构映射与攻击矩阵（2026-11-14）
 
 ## 1. 当前绑定的结构
 
@@ -60,7 +60,25 @@ h' > h ∧ h > 0
 
 ### 1.5 资源边界
 
-Outbox 与 Registry 上限均为 2 MiB，LedgerSnapshot 上限为 16 MiB；文件读取同时检查 metadata 与实际读回字节，HTTP 读取也有响应上限。单会话 15 秒超时继续保留。字节上限不能替代 Registry session 数、全轮询 deadline、JSON 节点数、并发扇出或内存预算。
+Outbox 与 Registry 上限均为 2 MiB，LedgerSnapshot 上限为 16 MiB；文件读取同时检查 metadata 与实际读回字节，HTTP 读取也有响应上限。Registry 会话数硬上限为 64；pending、tombstone 与单 Outbox 指令数分别硬限 4096、16384、1024，CLI 只能调低。入库在暂存账本执行，容量失败整批丢弃；快照恢复和写出也执行基数／字节门禁。单会话 15 秒超时继续保留。全轮询 deadline、JSON 节点／深度预算和完整内存预算仍未关闭。
+
+### 1.6 协作写者互斥与消费容量
+
+对同一词法状态路径 `s`，CLI 在任何状态加载前取得 `s.lock` 的 OS 排他锁，并持有到状态、报告和波次输出结束。竞争返回 `WouldBlock` 和非零退出；锁文件是稳定 sidecar，不因状态原子 rename 改变 inode。消费先检查 tombstone 容量，再删除 pending，因此容量失败不会丢失待办。
+
+这只实现协作进程的单写入者门禁，不是分布式锁；路径别名、非协作写者、跨主机文件系统语义、CAS 和 WAL 不在保证内。
+
+### 1.7 QF-OS 有界波次计划
+
+令 `E(t,T)` 为账本中目标为 `t` 或 `*` 且未过期的指令集合，按 `(session,id)` 排序并以来源分组。选择器按来源轮转，满足：
+
+```text
+jobs ≤ max_jobs
+∀source. admitted(source) ≤ max_per_source
+offered = admitted + deferred_wave_quota + deferred_source_quota
+```
+
+计划绑定网络、策略、完整账本快照、目标、时间输入、配额、Job 和来源计数；相同账本与参数产生相同计划字节。生成计划不修改账本，也不执行 action。`plan-only-no-execution` 是能力边界，不允许把 `plan_hash` 解释为引擎执行证明、发布者签名或 QIOS 兼容证书。
 
 ## 2. 规范同构与真实覆盖边界
 
@@ -73,6 +91,8 @@ Outbox 与 Registry 上限均为 2 MiB，LedgerSnapshot 上限为 16 MiB；文�
 | [C2SP tlog-witness](https://github.com/C2SP/C2SP/blob/main/tlog-witness.md) | witness 保存旧 checkpoint，验证新旧一致性后才更新 | 本地 `(height,latest)` 对拍与原子快照 | 独立 witness、签名与 cosignature、并发原子更新、分裂视图抑制 |
 | [C2SP tlog-policy](https://github.com/C2SP/C2SP/blob/main/tlog-policy.md) | log／witness／quorum 是显式信任策略 | 当前只能表达“无 witness 的本地模式” | quorum；不能把 `quorum none` 包装成分裂视图防护 |
 | [A2A 官方规范](https://github.com/a2aproject/A2A/blob/main/docs/specification.md) | Agent Card 可选 JWS；签名前使用 JCS；每次操作需要授权边界；Webhook 需要 SSRF 与重放考虑 | 正典 URL、传输授权、禁重定向与来源字段对拍提供局部协议映射 | 本仓不是 A2A 实现，没有 Agent Card、JWS、任务授权、完整 SSRF 或 Webhook 安全模块 |
+| [OWASP API4:2023](https://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption/) | 执行超时、批操作数、记录数、内存与存储都需限制 | 文档／快照字节、64 会话、pending／tombstone／单 Outbox 基数与单会话 timeout | 全轮询 deadline、进程级内存／CPU／文件描述符硬隔离与动态费率策略 |
+| [Azure Queue-Based Load Leveling](https://learn.microsoft.com/en-us/azure/architecture/patterns/queue-based-load-leveling)、[Competing Consumers](https://learn.microsoft.com/en-us/azure/architecture/patterns/competing-consumers) | 持续生产快于消费时须容量决策；消费者应幂等并处理 poison message | 有界账本、显式容量失败、消费 tombstone、冲突／非法事件分类 | 持久 broker、租约、delivery count、死信队列与分布式消费者协调 |
 
 C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 也只能证明相应卡片的签名完整性，不能自动证明后续任务、指令或履约结果可信。
 
@@ -114,6 +134,21 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 | 256 层嵌套输入 | 解析失败关闭，不 panic、不接受 | `strict_json::tests::excessive_nesting_fails_closed` |
 | Rust／Python 策略投影漂移 | 独立 Python 从原始 Registry 重算同一 SHA-256；三项自证通过 | `policy_digest_matches_independent_python_known_answer`；`scripts/verify-policy-python.py` |
 
+### 3.3 2026-11-14 饱和攻击、写者与 QF-OS 门禁
+
+| 攻击／碰撞 | 预注册拒绝条件 | 自动化与实测对应 |
+|---|---|---|
+| 唯一 ID 洪泛超过 pending 上限 | 整批失败，不提交成功前缀，不创建 state／report | `capacity_failures_discard_the_entire_staged_batch`；SAT-01：旧端 pending=5，新端 cap=4 返回 2 且零输出 |
+| tombstone 无限增长 | 第 limit+1 次消费失败，pending 不删除，状态字节不变 | `cli_tombstone_capacity_preserves_state_and_pending_job`；SAT-02：旧端 consumed=5，新端 cap=2 后第三消费返回 2 |
+| 超基数 snapshot 恢复 | 轮询与输出前失败，原状态不变 | `restore_enforces_local_cardinality_limits`；SAT-03 通过 |
+| 65 会话扇出 | 任何 socket I/O 前失败 | `cli_registry_fanout_fails_before_transport_or_outputs`；SAT-04：旧端 65 次命中，新端 0 次 |
+| 两 CLI 消费不同 ID | 协作写者竞争必须失败关闭；显式重试后不得丢 tombstone | LCK-01：旧端双成功但只剩 1 个 tombstone；新端竞争者返回 2、零网络命中，重试后 consumed=2 |
+| 单来源垄断波次 | 来源轮转、双配额和 deferred 守恒；计划不改账本 | `wave_is_fair_bounded_deterministic_and_non_mutating`；`cli_wave_plan_is_deterministic_fair_and_state_bound` |
+| 篡改 Job 或账本绑定 | 独立 Python 从原始 snapshot 重建并拒绝 | `scripts/verify-wave-python.py` 两项自证负例；静态计划 `fefb2704…3302` |
+| 把计划当执行或 QIOS 证明 | schema 固定 `plan-only-no-execution`，文档拒绝升级解释 | WAVE-03；QIOS 正典定义未解析，无适配器声称 |
+
+预注册与原始结果分别见 `evidence/qfos-fusion-preregister-2026-11-14.json` 和 `evidence/differential-2026-11-14.json`。PASS 只覆盖预注册差分，不证明非协作写者、分布式锁或下游引擎安全。
+
 ## 4. JCS 候选包评估与不采用结论
 
 检索到 `serde_jcs 0.2.0`、`jcs-canonicalize 0.2.1`、`serde_json_canonicalizer 0.4.1`。目前只评估，没有把任何候选加入本仓依赖。
@@ -131,8 +166,8 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 1. **DNS 与连接层 SSRF**：DNS rebinding／pinning、解析器意见不一致、连接时 IP 绑定尚未实现；解析过程也不一定受单会话总 timeout 中断。
 2. **地址与出口策略**：私网、loopback、link-local、cloud metadata 等地址没有应用层分类拒绝，仍需外层 egress 隔离；禁重定向和默认 HTTPS 不等于完整 SSRF 防护。
-3. **轮询资源预算**：Registry session 数、全轮询总 deadline、扇出上限、应用自定义 JSON 深度／节点数预算未实现。
-4. **多写者协调**：`save_atomic` 只避免撕裂写，不提供锁、CAS、WAL 或原子 check-and-persist；两个 CLI 同时读旧状态仍可能丢失更新。当前契约是单写者。
+3. **轮询资源预算**：64 会话与账本基数已限；全轮询总 deadline、每请求剩余时间收缩、应用自定义 JSON 深度／节点数和进程级内存预算未实现。
+4. **多写者协调**：协作 CLI 的 sidecar 排他锁已实测；路径别名、非协作写者、跨主机语义、CAS、WAL 和原子 check-and-persist 未实现，不能称为分布式单写者。
 5. **整份快照回滚与分裂视图**：攻击者若能同时替换 state 和旧链，本地检查点与策略摘要也会回到旧值。需要外部单调计数器、签名 checkpoint、独立 witness／quorum 及并发原子更新。
 6. **发布者与指令授权**：无签名链不认证发布者；后续可映射 A2A/JWS 或 SCITT Signed Statement，但签名对象必须覆盖指令及授权范围，而非只签 Agent Card。
 7. **可信时间**：`--now` 是可测试的本地输入，不是可信时间源；过期检查不能替代 TUF 式签名根和时间策略。
@@ -140,6 +175,7 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 9. **紧凑证明与后量子 witness**：Merkle consistency proof、witness cosignature、ML-DSA-44 均只属后续研究，不在当前代码路径。
 10. **系统级研究目标**：原始 ZK、HoTT、WASM、TEE、完整形式化安全证明和完整 OS 目标不在本轮实现范围。
 11. **外部协作状态**：联盟 active、cisvr ACK、KEY-SYNC-01 和旧 PAT 撤销均需独立外部回执，不能由本地测试、outbox 写入或公网 `verified` 推导。
+12. **QF-OS／QIOS 下游语义**：当前只有计划接口，没有引擎租约、执行回执、poison-message 死信、结果签名或真实 Skill 沙箱；QIOS 定义未解析，适配与兼容性均为零声称。
 
 ## 6. 独立判读器范围
 
@@ -147,14 +183,20 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 `scripts/verify-policy-python.py` 独立重建 Registry 安全投影和策略摘要，并自证：说明字段变化不改变摘要、显式默认 canonical 不改变摘要、URL 变化必须改变摘要。它可检查 v3 snapshot 的 `network_name` 与 `policy_hash`，但不验证签名、外部信任或状态文件未被整体替换。
 
+`scripts/verify-wave-python.py` 从 Registry 和原始 snapshot 独立重建分组、过期过滤、来源轮转、双配额、deferred 计数、ledger hash 与 plan hash，并拒绝 Job 篡改和账本绑定篡改。其范围为 qfos-wave-v1 无浮点子集，不是 JCS、发布者认证、执行证明或 QIOS 判读器。
+
 ## 7. 可复算证据入口
 
-- `evidence/attack-consistency-2026-11-11.json`：本轮干净归档、67 项测试、五组旧新 CLI 差分、策略已知答案、公网正典迁移和未覆盖边界。
+- `evidence/qfos-fusion-preregister-2026-11-14.json`：实现前登记的五项进程攻击与三项波次判据。
+- `evidence/differential-2026-11-14.json`：pending、tombstone、恢复、65 会话扇出及并发消费的旧新原始差分。
+- `evidence/poll-2026-11-14.json`：当前实现采集的七端点公网报告。
+- `evidence/attack-consistency-2026-11-11.json`：上一轮干净归档、67 项测试、五组旧新 CLI 差分、策略已知答案、公网正典迁移和未覆盖边界。
 - `evidence/differential-2026-11-11.json`：五组攻击的旧／新进程级原始结果。
 - `evidence/poll-2026-11-11.json`：干净归档产物对七个公网端点的原始轮询报告。
 - `evidence/attack-consistency-2026-11-10.json`：上一轮历史证据，保留当时的公网 URL 差异，不回写为本轮结果。
 - `../scripts/verify-outbox-python.py`：独立 Python 链判读与已知答案／篡改负例自证入口。
 - `../scripts/verify-policy-python.py`：独立 Python 策略投影、fixture 与 live snapshot 对拍入口。
-- `../scripts/build-all.sh`：格式、Clippy、全部测试、凭据扫描、双 Python 判读、认知示例和 CLI 烟测的统一重建门禁。
+- `../scripts/verify-wave-python.py`：独立 Python 波次重建、静态已知答案与篡改负例入口。
+- `../scripts/build-all.sh`：格式、Clippy、全部测试、凭据扫描、三类 Python 判读、认知示例、波次字节对拍和 CLI 烟测的统一重建门禁。
 
 本轮公网正典已明确迁移到实际发布的 `.../main/...` 形式；当前字节一致只适用于本轮采集时点，不能回改 2026-11-10 的历史差异。镜像 `verified` 也不等于发布者认证。所有外部状态（推送、CI、ACK、正典 active、KEY-SYNC-01）均需要独立回执。
