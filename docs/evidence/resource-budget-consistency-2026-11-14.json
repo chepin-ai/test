@@ -1,0 +1,126 @@
+{
+  "schema_version": "asfa-resource-budget-consistency/v1",
+  "recorded_at": "2026-11-14T15:18:45.070856+00:00",
+  "implementation_commit": "33ff4a63d9dfd7e20c6d34b79296cd400d5e07f4",
+  "before_commit": "26853b7ce510b5438d2b80619deb45fcc09a0ccd",
+  "clean_rebuild": {
+    "source": "git archive; no .git; empty CARGO_TARGET_DIR; locked dependencies",
+    "archive_sha256": "f77faa8aca8395bcec297397165dde315ee96b023092f411e2b71df216ac552b",
+    "binary_sha256": "95a75c596363242c674e8b4ab1a17a6ac40a053d3d28d9b5f348b1c25b48db77",
+    "verdict": "PASS",
+    "tests": {
+      "bridge_unit": 29,
+      "bridge_integration": 42,
+      "kernel": 11,
+      "userspace": 3,
+      "total": 85,
+      "failed": 0
+    },
+    "clippy": "zero warnings under -D warnings",
+    "credential_scan": "PASS",
+    "json_oracle": "json_budget_oracle=PASS depth_limit=64 node_limit=16384 self_tests=5",
+    "wave_plan_hash": "fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302",
+    "smoke": {
+      "total": 3,
+      "verified": 1,
+      "failed": 2
+    }
+  },
+  "differential": {
+    "verdict": "PASS",
+    "before_binary_sha256": "66211621fe01b3eff5762a252d47a72a7ae90168c1489088ad9b374ace535d23",
+    "after_binary_sha256": "95a75c596363242c674e8b4ab1a17a6ac40a053d3d28d9b5f348b1c25b48db77",
+    "cases": {
+      "TIME-01": {
+        "pass": true
+      },
+      "TIME-02": {
+        "pass": true
+      },
+      "JSON-01": {
+        "pass": true
+      },
+      "JSON-02": {
+        "pass": true
+      },
+      "JSON-03": {
+        "pass": true
+      }
+    },
+    "time_01": {
+      "before_elapsed_ms": 354.46,
+      "after_elapsed_ms": 44.06,
+      "before_summary": {
+        "total": 2,
+        "verified": 2,
+        "failed": 0
+      },
+      "after_second_hop_requests": 0,
+      "after_report_exists": false
+    },
+    "harness_corrections": [
+      "Initial run verdict was FAIL and was not counted: the hand-written Outbox omitted hash_chain genesis/latest/height and added an unknown schema_version, so the baseline rejected JSON-01/02 as invalid_schema and TIME-01 was not verified. The fixture was corrected to canonical zero-height Outbox JSON and every case was rerun.",
+      "Report paths are unlinked before every invocation so a no-output assertion cannot inherit a stale report."
+    ]
+  },
+  "public_poll": {
+    "generated_at_epoch": 1794669462,
+    "summary": {
+      "total": 7,
+      "verified": 1,
+      "failed": 6
+    },
+    "statuses": {
+      "asfa-ai": "verified",
+      "cfts": "http_status=404",
+      "cisvr": "http_status=404",
+      "qgl": "http_status=404",
+      "ucif2": "http_status=404",
+      "usrm": "http_status=404",
+      "vinf": "invalid_schema"
+    },
+    "scope": "Point-in-time transport and internal consistency only; no publisher, remote Git, alliance, or ACK claim."
+  },
+  "honest_corrections": [
+    "Initial malformed-fixture differential FAIL is retained in the differential harness corrections and was rerun only after canonical genesis correction.",
+    "Rust toolchain restoration first timed out and left a missing manifest; stable was uninstalled/reinstalled before compilation. No security verdict was inferred.",
+    "Crate downloads initially stalled; locked dependencies were fetched from the configured mirror and subsequent builds ran offline. This changed infrastructure, not protocol rules."
+  ],
+  "not_proven": [
+    "DNS resolution completely bounded by the HTTP client timeout or rebinding/pinning resistance",
+    "process-level memory, CPU, file-descriptor, or wall-clock isolation outside the CLI poll phase",
+    "distributed locking, non-cooperating writers, path aliases, CAS, WAL, whole-snapshot rollback resistance",
+    "publisher authentication, trusted time, QF-OS execution receipts, dead letters, QIOS compatibility",
+    "remote Git synchronization, alliance active, cisvr ACK, KEY-SYNC-01, or old PAT revocation"
+  ],
+  "artifacts": {
+    "docs/evidence/resource-budget-preregister-2026-11-14.json": {
+      "bytes": 2841,
+      "sha256": "3086e2bed90c994d049d7e08636dd1c18ffcd66bb2f69b28ee917c39a15ee235"
+    },
+    "docs/evidence/resource-budget-differential-2026-11-14.json": {
+      "bytes": 8570,
+      "sha256": "99981b538d53764dd005691c73f8c7562f911158e803e9d7083d44f2f8e77e50"
+    },
+    "docs/evidence/resource-budget-clean-rebuild-2026-11-14.log": {
+      "bytes": 15539,
+      "sha256": "3b0b3f3b13610f374d0358babc0e88aebe74f6df6a3839d7a5fdf0c9ced19b5f"
+    },
+    "docs/evidence/json-budget-oracle-2026-11-14.json": {
+      "bytes": 737,
+      "sha256": "96ba209744f8d6780665a0f5479ab918d7723bdb9f1fcc58ff373da695b97494"
+    },
+    "docs/evidence/resource-budget-poll-2026-11-14.json": {
+      "bytes": 1948,
+      "sha256": "bfba3414301984d4da48706a494fb014c0a29d3c30a4ef8bae422a68c2533188"
+    },
+    "docs/evidence/resource-budget-smoke.json": {
+      "bytes": 1200,
+      "sha256": "5fde1432f9ff7ef5885e17be87395368c16e6553a34f9aa7ca39644d051301b6"
+    },
+    "docs/evidence/resource-budget-smoke-state.json": {
+      "bytes": 374,
+      "sha256": "d8985877b6a676a3babd199053ad74abfc4d184656172a76986d8c970ab4a1be"
+    }
+  }
+}

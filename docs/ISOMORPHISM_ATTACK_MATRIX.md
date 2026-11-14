@@ -202,7 +202,11 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 ## 7. 可复算证据入口
 
 - `evidence/resource-budget-preregister-2026-11-14.json`：全轮询与 JSON 深度／节点攻击的实现前判据。
+- `evidence/resource-budget-consistency-2026-11-14.json`：实现提交、85 项测试、干净归档、五组差分、独立 JSON 判读、公网复核和七项 artifact 校验的综合证据。
 - `evidence/resource-budget-differential-2026-11-14.json`：TIME-01／02、JSON-01／02／03 的旧新真实进程结果及独立判读。
+- `evidence/resource-budget-clean-rebuild-2026-11-14.log`：无 `.git`、空 target 的完整统一门禁重建输出。
+- `evidence/json-budget-oracle-2026-11-14.json`：独立 Python 的精确深度／节点边界与五个已知答案自证。
+- `evidence/resource-budget-poll-2026-11-14.json`：干净二进制在显式 60 秒总预算下采集的七端点公网报告。
 - `evidence/qfos-fusion-preregister-2026-11-14.json`：实现前登记的五项进程攻击与三项波次判据。
 - `evidence/attack-consistency-2026-11-14.json`：实现提交、78 项测试、干净归档、五组差分、独立判读和公网复核的综合证据。
 - `evidence/differential-2026-11-14.json`：pending、tombstone、恢复、65 会话扇出及并发消费的旧新原始差分。

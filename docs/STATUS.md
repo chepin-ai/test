@@ -1,6 +1,17 @@
 # 实现状态（本轮实测证据：2026-11-14）
 
-## 已有实测
+## 最新续拍：全轮询与 JSON 资源预算
+
+- 实现提交为 `33ff4a63d9dfd7e20c6d34b79296cd400d5e07f4`（`feat(bridge): enforce poll and JSON resource budgets`）。85 个 Rust 测试通过：bridge 单元 29、bridge 集成 42、kernel 11、userspace 3，失败为 0；Clippy 零警告。
+- 从该提交的 Git 归档在无 `.git`、空 target 环境完整重建，统一门禁全部通过。归档 SHA-256 为 `f77faa8aca8395bcec297397165dde315ee96b023092f411e2b71df216ac552b`，干净二进制 SHA-256 为 `95a75c596363242c674e8b4ab1a17a6ac40a053d3d28d9b5f348b1c25b48db77`。
+- CLI 默认全轮询预算为 60000ms，`--poll-timeout-ms` 只能调低。活动 HTTP 请求使用单请求 15 秒与剩余预算的较小值；会话间和状态保存前复核 deadline。旧库兼容入口仍只有逐请求超时，不可信 Registry 必须调用 `poll_registry_detailed_with_deadline`。
+- Registry、Outbox、LedgerSnapshot 共用 64 层与 16384 个 JSON 值节点硬顶。根深度为 1，容器与标量各计一个节点，对象键不另计，所有分支共享计数；开放 `mailbox` 和 `payload` 同样受限。
+- 五组预注册差分全部通过：TIME-01 旧端 354.46ms 两跳均 verified，新端 44.06ms 非零退出、第二跳零请求且无报告；TIME-02 四种非法预算参数均在 I/O 前拒绝；JSON-01／02 旧端接受深层／超节点 mailbox，新端显式拒绝；JSON-03 旧端接受深层 Snapshot，新端轮询前拒绝且状态字节不变。
+- 差分证据 SHA-256 为 `99981b538d53764dd005691c73f8c7562f911158e803e9d7083d44f2f8e77e50`。首轮手工 genesis 夹具缺字段导致 FAIL，已作为 `harness_corrections` 保留，修正后整组重跑，没有把 FAIL 计入通过。
+- 独立 `verify-json-budget-python.py` 以显式栈迭代复算深度／节点，并对精确边界、跨分支计数和转义重复键执行五个已知答案自证。综合证据为 `evidence/resource-budget-consistency-2026-11-14.json`，SHA-256 为 `14b50a84cbacc1291bcb7ccc2ed18df4c79d51c8ff368693f4ec21a8c1b214f9`，七项 artifact 已复算。
+- 干净二进制于 2026-11-14T15:17:42Z 在 60 秒总预算下重采七端点，仍为 `total=7, verified=1, failed=6`；原始报告为 `evidence/resource-budget-poll-2026-11-14.json`。这不证明远端 Git 同步、发布者身份或联盟状态。
+
+## 上一轮 QF-OS 融合实测（历史证据）
 
 - 实现提交为 `88a92e3778a3664f62835aa1746f21b9b831433c`（`feat(bridge): add bounded QF-OS wave planning`）。78 个 Rust 单元／集成测试通过：bridge 单元 27、bridge 集成 37、kernel 11、userspace 3，失败为 0。
 - 从该提交的 Git 归档解到无 `.git` 的干净目录，并使用空 `CARGO_TARGET_DIR` 完整执行 `scripts/build-all.sh`。格式检查、Clippy 零警告、78 项测试、凭据扫描、Outbox／Policy／Wave Python 独立判读、波次临时重建与 fixture 字节对拍、认知示例和 CLI 烟测均通过。
@@ -66,13 +77,13 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 
 最后已核验正典状态仍为历史记录 `asfa-ai = conditional`（2026-11-09）。本轮没有 cisvr ACK、正典升 active 或 KEY-SYNC-01 relay 完成回执；写入 Outbox 不等于真实投递或对方 ACK。
 
-本地 remote 为 `https://github.com/chepin-ai/test.git`，不含明文凭证。此前泄露的 PAT 仍应撤销／轮换，当前没有 GitHub 侧撤销证据。最后成功远端读回仍是 2026-11-11 的 `c573dc496dc3caeab1f0f143373c80859ccd93d4`；本轮两次 `ls-remote` 分别出现 TLS 非正确终止和超时，不能声称已刷新远端状态。按最后本地跟踪引用，实现提交为 `ahead_by=8, behind_by=0`；最终推送与 evidence 提交后的对拍另以实际命令结果为准。没有本轮外部 CI 回执。
+本地 remote 为 `https://github.com/chepin-ai/test.git`，不含明文凭证。此前泄露的 PAT 仍应撤销／轮换，当前没有 GitHub 侧撤销证据。最后成功远端读回仍是 2026-11-11 的 `c573dc496dc3caeab1f0f143373c80859ccd93d4`；本轮两次 `ls-remote` 分别出现 TLS 非正确终止和超时，不能声称已刷新远端状态。按最后本地跟踪引用，QF-OS 实现提交当时为 `ahead_by=8, behind_by=0`；资源预算实现提交后该本地分叉为 `ahead_by=10, behind_by=0`，本证据提交及最终推送对拍另以实际命令结果为准。没有本轮外部 CI 回执。
 
 ## 明确未实现与后续债
 
 1. DNS rebinding／pinning、解析器意见不一致、连接时 IP 绑定与 DNS 超时覆盖；
 2. 私网、loopback、link-local、cloud metadata 地址策略与外层 egress 隔离；
-3. 全轮询总 deadline、每请求剩余时间收缩、应用自定义 JSON 深度／节点数和进程级内存预算；
+3. 进程级内存、CPU、文件描述符硬隔离、CLI 轮询阶段外的整体执行预算，以及 DNS 解析完整受控证明；全轮询 deadline、逐请求剩余时间和 JSON 深度／节点预算已实现；
 4. 路径别名、非协作写者、跨主机锁语义、CAS、WAL 和原子 check-and-persist；
 5. 整份快照回滚、分裂视图、签名 checkpoint、独立 witness／quorum；
 6. 发布者与指令授权、可信时间；

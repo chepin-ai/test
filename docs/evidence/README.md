@@ -44,3 +44,13 @@
 - `poll-2026-11-14.json`：干净二进制于 2026-11-14T08:14:05Z 采集的七端点报告。asfa-ai 为 `verified`，cfts／cisvr／qgl／ucif2／usrm 为 404，vinf 为 `invalid_schema`。
 - `public-python-oracle-2026-11-14.json`：公网镜像与仓内 Outbox 字节相等，双方 SHA-256 均为 `c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4`，独立判读通过；不据此推导远端 Git 同步、发布者身份或联盟状态。
 - 本轮远端读回出现 TLS 错误与超时；最后成功远端 main 仍为历史值 `c573dc496dc3caeab1f0f143373c80859ccd93d4`。cisvr ACK、正典 active、KEY-SYNC-01、旧 PAT 撤销和本轮外部 CI 均无完成证据；最终推送结果另以实际推送与读回为准。
+
+### 全轮询与 JSON 资源预算续拍
+
+- `resource-budget-preregister-2026-11-14.json`：实现前登记的 TIME-01／02 与 JSON-01／02／03 判据，不含结果声称。
+- `resource-budget-consistency-2026-11-14.json`：实现提交 `33ff4a63d9dfd7e20c6d34b79296cd400d5e07f4` 的综合证据。无 `.git`、空 target 干净重建全门禁通过，85／85 测试分解为 bridge 单元 29、bridge 集成 42、kernel 11、userspace 3；归档 SHA-256 为 `f77faa8aca8395bcec297397165dde315ee96b023092f411e2b71df216ac552b`，干净二进制 SHA-256 为 `95a75c596363242c674e8b4ab1a17a6ac40a053d3d28d9b5f348b1c25b48db77`。七项 artifact 的路径、字节数与 SHA-256 已复算。
+- `resource-budget-differential-2026-11-14.json`：五组旧新真实进程结果及首轮夹具 FAIL 的公开修正。TIME-01 新端在首会话耗尽总预算后非零退出，第二会话零请求且不生成报告；TIME-02 四种非法参数均在 I/O 前拒绝；JSON-01／02 旧端接受深层／超节点开放 mailbox，新端显式拒绝；JSON-03 新端在轮询前拒绝深层 Registry／Snapshot，原状态字节不变。最终 `differential_verdict=PASS`，其 SHA-256 为 `99981b538d53764dd005691c73f8c7562f911158e803e9d7083d44f2f8e77e50`。
+- `resource-budget-clean-rebuild-2026-11-14.log`：上述干净归档的完整重建输出；`resource-budget-smoke.json` 与 `resource-budget-smoke-state.json` 保存原始烟测报告和状态。认知示例、Wave 计划哈希和 `total=3, verified=1, failed=2` 烟测均未漂移。
+- `json-budget-oracle-2026-11-14.json`：独立 Python 以显式栈迭代复算深度与全文档节点；64 层接受、65 层拒绝、16384 节点接受、16385 节点拒绝、跨分支计数与转义重复键五个已知答案自证通过，不读取 Rust 中间结果。
+- `resource-budget-poll-2026-11-14.json`：干净二进制于 2026-11-14T15:17:42Z、显式 60 秒总预算下采集的七端点报告。asfa-ai 为 `verified`，cfts／cisvr／qgl／ucif2／usrm 为 404，vinf 为 `invalid_schema`；只描述采集时点，不证明远端实现提交、发布者身份或联盟状态。
+- PASS 只覆盖本轮预注册判据，不证明 DNS 完整受控、进程级内存／CPU／文件描述符隔离、分布式锁、QF-OS 执行或 QIOS 兼容。cisvr ACK、正典 active、KEY-SYNC-01、旧 PAT 撤销、远端同步和外部 CI 均无完成证据；最终推送结果另以实际推送与读回为准。

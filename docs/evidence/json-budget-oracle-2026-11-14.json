@@ -1,0 +1,16 @@
+{
+  "schema_version": "asfa-json-budget-oracle-evidence/v1",
+  "recorded_at": "2026-11-14T15:18:45.040593+00:00",
+  "stdout": "json_budget_oracle=PASS depth_limit=64 node_limit=16384 self_tests=5",
+  "verdict": "PASS",
+  "max_depth": 64,
+  "max_nodes": 16384,
+  "known_answers": [
+    "63 arrays plus scalar = depth 64 and accepted",
+    "64 arrays plus scalar = depth 65 and rejected",
+    "root array plus 16383 scalars = 16384 nodes and accepted",
+    "root array plus 16384 scalars = 16385 nodes and rejected",
+    "escaped duplicate member rejected; cross-branch [[1,2],[3,4]] = 7 nodes, depth 3"
+  ],
+  "scope": "Independent strict parsing and iterative traversal; object keys excluded from node count; no process-memory proof."
+}

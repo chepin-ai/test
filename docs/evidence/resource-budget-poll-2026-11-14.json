@@ -1,0 +1,77 @@
+{
+  "schema_version": "asfa-bridge-report/v1",
+  "network_name": "asfa-xi-sessions",
+  "generated_at_epoch": 1794669462,
+  "summary": {
+    "total": 7,
+    "verified": 1,
+    "failed": 6
+  },
+  "records": [
+    {
+      "session": "asfa-ai",
+      "url": "https://cdn.jsdelivr.net/gh/chepin-ai/test@main/outbox/asfa-ai-outbox.json",
+      "fetched_at_epoch": 1794669462,
+      "status": {
+        "kind": "verified",
+        "verified_blocks": 0,
+        "verified_directives": 0,
+        "untrusted_directives": 0
+      }
+    },
+    {
+      "session": "cfts",
+      "url": "https://3ay75hdbfrqe4.ok.kimi.link/outbox.json",
+      "fetched_at_epoch": 1794669462,
+      "status": {
+        "kind": "http_status",
+        "code": 404
+      }
+    },
+    {
+      "session": "cisvr",
+      "url": "https://sh22uxjhdpz5q.ok.kimi.link/outbox.json",
+      "fetched_at_epoch": 1794669462,
+      "status": {
+        "kind": "http_status",
+        "code": 404
+      }
+    },
+    {
+      "session": "qgl",
+      "url": "https://rdkm3tzqlgnj6.ok.kimi.link/outbox.json",
+      "fetched_at_epoch": 1794669462,
+      "status": {
+        "kind": "http_status",
+        "code": 404
+      }
+    },
+    {
+      "session": "ucif2",
+      "url": "https://2regf437xvotk.ok.kimi.link/outbox.json",
+      "fetched_at_epoch": 1794669462,
+      "status": {
+        "kind": "http_status",
+        "code": 404
+      }
+    },
+    {
+      "session": "usrm",
+      "url": "https://62q3nd73zxf52.ok.kimi.link/outbox.json",
+      "fetched_at_epoch": 1794669462,
+      "status": {
+        "kind": "http_status",
+        "code": 404
+      }
+    },
+    {
+      "session": "vinf",
+      "url": "https://stgdle5yj3o7s.ok.kimi.link/vinf-outbox.json",
+      "fetched_at_epoch": 1794669462,
+      "status": {
+        "kind": "invalid_schema",
+        "message": "unknown field `chain_len`, expected one of `session`, `url`, `trust`, `directives`, `mailbox`, `hash_chain`"
+      }
+    }
+  ]
+}

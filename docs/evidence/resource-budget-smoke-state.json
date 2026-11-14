@@ -1,0 +1,14 @@
+{
+  "schema_version": "asfa-directive-ledger/v3",
+  "network_name": "asfa-smoke-test",
+  "policy_hash": "d7bb090c4022b10a3f46ca236315cd96a77091ca0edeac038fac4016245d6a19",
+  "directives": [],
+  "consumed": [],
+  "checkpoints": [
+    {
+      "session": "good",
+      "height": 0,
+      "latest": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}

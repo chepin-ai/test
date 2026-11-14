@@ -1,9 +1,9 @@
 {
   "schema_version": "asfa-resource-budget-differential/v1",
-  "recorded_at": "2026-11-14T15:10:07Z",
+  "recorded_at": "2026-11-14T15:17:43Z",
   "before_commit": "26853b7ce510b5438d2b80619deb45fcc09a0ccd",
   "before_binary_sha256": "66211621fe01b3eff5762a252d47a72a7ae90168c1489088ad9b374ace535d23",
-  "after_binary_sha256": "4be4e35557234a0097b86af75c9caf6403d15833b509f1be4457822c812f7afd",
+  "after_binary_sha256": "95a75c596363242c674e8b4ab1a17a6ac40a053d3d28d9b5f348b1c25b48db77",
   "harness_corrections": [
     "Initial run verdict was FAIL and was not counted: the hand-written Outbox omitted hash_chain genesis/latest/height and added an unknown schema_version, so the baseline rejected JSON-01/02 as invalid_schema and TIME-01 was not verified. The fixture was corrected to canonical zero-height Outbox JSON and every case was rerun.",
     "Report paths are unlinked before every invocation so a no-output assertion cannot inherit a stale report."
@@ -20,7 +20,7 @@
           "/mnt/agents/work/asfa-resource-2026-11-14/time-before-report.json"
         ],
         "exit": 0,
-        "elapsed_ms": 355.107,
+        "elapsed_ms": 354.46,
         "stderr": "polled=2 verified=2 failed=0",
         "report_exists": true,
         "hits": {
@@ -44,7 +44,7 @@
           "40"
         ],
         "exit": 2,
-        "elapsed_ms": 49.068,
+        "elapsed_ms": 44.06,
         "stderr": "bridge-poller: whole-poll deadline exceeded after session a",
         "report_exists": false,
         "hits_delta": {
@@ -70,7 +70,7 @@
             "--poll-timeout-ms"
           ],
           "exit": 2,
-          "elapsed_ms": 1.389,
+          "elapsed_ms": 1.32,
           "stderr": "bridge-poller: --poll-timeout-ms requires N",
           "report_exists": false
         },
@@ -89,7 +89,7 @@
             "0"
           ],
           "exit": 2,
-          "elapsed_ms": 1.058,
+          "elapsed_ms": 1.029,
           "stderr": "bridge-poller: --poll-timeout-ms must be in 1..=60000",
           "report_exists": false
         },
@@ -108,7 +108,7 @@
             "60001"
           ],
           "exit": 2,
-          "elapsed_ms": 0.96,
+          "elapsed_ms": 0.922,
           "stderr": "bridge-poller: --poll-timeout-ms must be in 1..=60000",
           "report_exists": false
         },
@@ -127,7 +127,7 @@
             "not-a-number"
           ],
           "exit": 2,
-          "elapsed_ms": 0.926,
+          "elapsed_ms": 0.904,
           "stderr": "bridge-poller: invalid digit found in string",
           "report_exists": false
         }
@@ -202,7 +202,7 @@
           "/mnt/agents/work/asfa-resource-2026-11-14/snapshot-before.json"
         ],
         "exit": 0,
-        "elapsed_ms": 73.055,
+        "elapsed_ms": 138.066,
         "stderr": "polled=2 verified=2 failed=0",
         "report_exists": true
       },
@@ -217,7 +217,7 @@
           "/mnt/agents/work/asfa-resource-2026-11-14/snapshot-after.json"
         ],
         "exit": 2,
-        "elapsed_ms": 2.124,
+        "elapsed_ms": 1.897,
         "stderr": "bridge-poller: JSON depth budget exceeded: limit=64, next_depth=65 at line 1 column 368",
         "report_exists": false,
         "state_sha256_before": "3d4504973f355c7993d0c4b3f7f2b491e4e0c3853e9ed6ea89a17b8657ec48ed",
@@ -233,7 +233,7 @@
           "/mnt/agents/work/asfa-resource-2026-11-14/deep-registry-before-report.json"
         ],
         "exit": 2,
-        "elapsed_ms": 1.441,
+        "elapsed_ms": 1.379,
         "stderr": "bridge-poller: unknown field `extension`, expected one of `schema_version`, `network_name`, `trust_model`, `sessions`",
         "report_exists": false
       },
@@ -246,7 +246,7 @@
           "/mnt/agents/work/asfa-resource-2026-11-14/deep-registry-after-report.json"
         ],
         "exit": 2,
-        "elapsed_ms": 1.316,
+        "elapsed_ms": 1.279,
         "stderr": "bridge-poller: JSON depth budget exceeded: limit=64, next_depth=65 at line 1 column 193",
         "report_exists": false
       },
