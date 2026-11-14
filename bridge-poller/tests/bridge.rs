@@ -12,6 +12,7 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 static NEXT_FILE: AtomicU64 = AtomicU64::new(1);
 
@@ -1353,4 +1354,207 @@ fn cli_capacity_flags_require_values_and_cannot_raise_hard_caps() {
         .unwrap();
     assert!(!output.status.success());
     assert!(String::from_utf8_lossy(&output.stderr).contains("--max-pending must be in 1..=4096"));
+}
+
+fn nested_arrays(depth: usize) -> serde_json::Value {
+    (0..depth).fold(json!(0), |value, _| json!([value]))
+}
+
+fn delayed_outbox_server(name: &str, delay: Duration) -> (String, Arc<AtomicU64>) {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let address = listener.local_addr().unwrap();
+    let url = format!("http://{address}");
+    let body = serde_json::to_string(&Outbox::genesis(name, &url)).unwrap();
+    let hits = Arc::new(AtomicU64::new(0));
+    let server_hits = Arc::clone(&hits);
+    std::thread::spawn(move || {
+        if let Ok((mut stream, _)) = listener.accept() {
+            server_hits.fetch_add(1, Ordering::SeqCst);
+            let mut request = [0_u8; 2048];
+            let _ = stream.read(&mut request);
+            std::thread::sleep(delay);
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                body.len()
+            );
+            let _ = stream.write_all(response.as_bytes());
+        }
+    });
+    (url, hits)
+}
+
+#[test]
+fn whole_poll_deadline_shrinks_the_active_request() {
+    let (url, _hits) = delayed_outbox_server("a", Duration::from_secs(1));
+    let registry = Registry {
+        schema_version: "test".into(),
+        network_name: "deadline-unit".into(),
+        trust_model: "unsigned-hash-chain".into(),
+        sessions: BTreeMap::from([("a".into(), session(url))]),
+    };
+    let started = Instant::now();
+    let error = Poller::new()
+        .poll_registry_detailed_with_deadline(
+            &registry,
+            100,
+            Instant::now() + Duration::from_millis(40),
+        )
+        .unwrap_err();
+    assert!(error.to_string().contains("whole-poll deadline exceeded"));
+    assert!(
+        started.elapsed() < Duration::from_millis(500),
+        "request did not shrink to the remaining budget: {:?}",
+        started.elapsed()
+    );
+}
+
+#[test]
+fn cli_whole_poll_deadline_prevents_later_transport_and_report() {
+    let (first_url, first_hits) = delayed_outbox_server("a", Duration::from_millis(500));
+    let (second_url, second_hits) = {
+        let mut outbox = Outbox::genesis("b", "http://unused");
+        serve_counted_outbox_once(&mut outbox)
+    };
+    let registry = Registry {
+        schema_version: "test".into(),
+        network_name: "deadline-cli".into(),
+        trust_model: "unsigned-hash-chain".into(),
+        sessions: BTreeMap::from([
+            ("a".into(), session(first_url)),
+            ("b".into(), session(second_url)),
+        ]),
+    };
+    let config = temp_file(&serde_json::to_string(&registry).unwrap());
+    let report = unused_path("deadline-report");
+    let output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--config", config.to_str().unwrap()])
+        .args(["--out", report.to_str().unwrap()])
+        .args(["--poll-timeout-ms", "40"])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("whole-poll deadline exceeded"));
+    assert_eq!(first_hits.load(Ordering::SeqCst), 1);
+    assert_eq!(second_hits.load(Ordering::SeqCst), 0);
+    assert!(!report.exists());
+    fs::remove_file(config).unwrap();
+}
+
+#[test]
+fn cli_json_depth_and_node_budgets_reject_open_outbox_payloads() {
+    for (label, mailbox, expected) in [
+        ("depth", nested_arrays(64), "JSON depth budget exceeded"),
+        (
+            "nodes",
+            serde_json::Value::Array((0..16_384).map(|_| json!(0)).collect()),
+            "JSON node budget exceeded",
+        ),
+    ] {
+        let mut outbox = Outbox::genesis("node", "file:///unused");
+        outbox.mailbox = mailbox;
+        let (outbox_path, outbox_url) = outbox_file(outbox);
+        let registry = Registry {
+            schema_version: "test".into(),
+            network_name: format!("json-budget-{label}"),
+            trust_model: "unsigned-hash-chain".into(),
+            sessions: BTreeMap::from([("node".into(), session(outbox_url))]),
+        };
+        let config = temp_file(&serde_json::to_string(&registry).unwrap());
+        let report = unused_path("json-budget-report");
+        let output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+            .args(["--config", config.to_str().unwrap()])
+            .args(["--out", report.to_str().unwrap()])
+            .arg("--fail-on-error")
+            .output()
+            .unwrap();
+        assert!(!output.status.success());
+        let report: serde_json::Value =
+            serde_json::from_slice(&fs::read(&report).unwrap()).unwrap();
+        let message = report["records"][0]["status"]["message"].as_str().unwrap();
+        assert!(message.contains(expected), "{message}");
+        assert_eq!(report["records"][0]["status"]["kind"], "invalid_json");
+        fs::remove_file(config).unwrap();
+        fs::remove_file(outbox_path).unwrap();
+    }
+}
+
+#[test]
+fn cli_json_budget_also_covers_registry_and_snapshot_restore() {
+    let registry = Registry {
+        schema_version: "test".into(),
+        network_name: "json-registry".into(),
+        trust_model: "unsigned-hash-chain".into(),
+        sessions: BTreeMap::new(),
+    };
+    let mut registry_value = serde_json::to_value(&registry).unwrap();
+    registry_value["extension"] = nested_arrays(64);
+    let config = temp_file(&registry_value.to_string());
+    let output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--config", config.to_str().unwrap()])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("JSON depth budget exceeded"));
+
+    let mut outbox = Outbox::genesis("node", "file:///unused");
+    append_directives(
+        &mut outbox,
+        vec![Directive {
+            id: "snapshot".into(),
+            from: "node".into(),
+            to: "peer".into(),
+            action: "Ping".into(),
+            payload: json!({}),
+            expires_epoch: None,
+        }],
+        100,
+        0,
+    )
+    .unwrap();
+    let (outbox_path, outbox_url) = outbox_file(outbox);
+    let registry = Registry {
+        schema_version: "test".into(),
+        network_name: "json-snapshot".into(),
+        trust_model: "unsigned-hash-chain".into(),
+        sessions: BTreeMap::from([("node".into(), session(outbox_url))]),
+    };
+    let snapshot_config = temp_file(&serde_json::to_string(&registry).unwrap());
+    let state = unused_path("json-snapshot-state");
+    let first = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--config", snapshot_config.to_str().unwrap()])
+        .args(["--state", state.to_str().unwrap()])
+        .output()
+        .unwrap();
+    assert!(first.status.success());
+    let mut snapshot: serde_json::Value =
+        serde_json::from_slice(&fs::read(&state).unwrap()).unwrap();
+    snapshot["directives"][0]["directive"]["payload"]["deep"] = nested_arrays(64);
+    fs::write(&state, snapshot.to_string()).unwrap();
+    let before = fs::read(&state).unwrap();
+    let second = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--config", snapshot_config.to_str().unwrap()])
+        .args(["--state", state.to_str().unwrap()])
+        .output()
+        .unwrap();
+    assert!(!second.status.success());
+    assert!(String::from_utf8_lossy(&second.stderr).contains("JSON depth budget exceeded"));
+    assert_eq!(fs::read(&state).unwrap(), before);
+    for path in [config, outbox_path, snapshot_config, state] {
+        fs::remove_file(path).unwrap();
+    }
+}
+
+#[test]
+fn cli_poll_timeout_flag_requires_a_bounded_value() {
+    for args in [
+        vec!["--poll-timeout-ms"],
+        vec!["--poll-timeout-ms", "0"],
+        vec!["--poll-timeout-ms", "60001"],
+    ] {
+        let output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+            .args(args)
+            .output()
+            .unwrap();
+        assert!(!output.status.success());
+    }
 }

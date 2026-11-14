@@ -26,6 +26,8 @@
   - 任一后续区块伪造时整份 Outbox 不入库，不用前面的合法块制造部分应用；
   - 注册表／会话／文档 trust 交叉核对，HMAC 和完整签名明确返回“未支持”；
   - Outbox 与 Registry 均按 2 MiB 上限读取，Snapshot 上限 16 MiB；同时检查 metadata 和实际读回字节；
+  - 三类 JSON 入口共用 64 层深度与 16384 个值节点的全文档预算，开放 `mailbox`／`payload` 也不能绕过；
+  - CLI 默认 60 秒全轮询墙钟预算，`--poll-timeout-ms` 只能调低；会话间检查 deadline，活动 HTTP 请求只获得剩余时间；
   - Registry 最多 64 个会话；pending、消费 tombstone、单 Outbox 指令数与 Snapshot 写字节均有硬上限，容量失败整批回滚；
   - `--state` 使用稳定 sidecar 的 OS 排他锁，协作写者竞争时失败关闭，不再以原子 rename 冒充多写者互斥；
   - QF-OS `qfos-wave-plan/v1`：从已验证账本生成确定性、按来源轮转、全局／来源双配额的计划，绑定 network、policy、snapshot 与 plan 摘要；只规划，不执行引擎。
@@ -40,6 +42,7 @@ cargo run --example cognitive_demo -p asfa-userspace
 python3 scripts/verify-outbox-python.py --self-test \
   fixtures/python-oracle-outbox.json outbox/asfa-ai-outbox.json
 python3 scripts/verify-policy-python.py --fixture fixtures/policy-oracle.json
+python3 scripts/verify-json-budget-python.py
 python3 scripts/verify-wave-python.py \
   --expect-plan-hash fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 cargo run -p asfa-bridge-poller -- \
@@ -73,7 +76,7 @@ cargo run -p asfa-bridge-poller -- \
   --now 100 --wave-max-jobs 3 --wave-max-per-source 2
 ```
 
-`--fail-on-error` 会把轮询失败、入库冲突／非法指令和消费目标不存在变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v3 状态同时绑定 `network_name` 与 Registry 安全策略摘要 `policy_hash`；旧 v1／v2、跨网络及同网络策略变化均不做隐式迁移，说明性 `role`／`note` 变化不影响兼容性。CLI 容量参数只能把硬上限调低，不能调高；sidecar 锁只约束使用相同词法状态路径的协作进程，不是分布式锁。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、非协作写者与全轮询总 deadline 仍不在保障范围内。
+`--fail-on-error` 会把轮询失败、入库冲突／非法指令和消费目标不存在变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v3 状态同时绑定 `network_name` 与 Registry 安全策略摘要 `policy_hash`；旧 v1／v2、跨网络及同网络策略变化均不做隐式迁移，说明性 `role`／`note` 变化不影响兼容性。CLI 容量参数只能把硬上限调低，不能调高；sidecar 锁只约束使用相同词法状态路径的协作进程，不是分布式锁。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、非协作写者、DNS 完整超时覆盖与进程级内存／CPU 隔离仍不在保障范围内。
 
 一键全部门禁（`/mnt` 等禁止执行位挂载下也能构建）：
 
@@ -81,7 +84,7 @@ cargo run -p asfa-bridge-poller -- \
 bash scripts/build-all.sh
 ```
 
-预期：78 项 Rust 测试通过；烟测汇总为 `total=3, verified=1, failed=2`，两个失败分别是故意设置的非法 JSON 和缺失文件。QF-OS 静态向量准入 `a1 → b1 → a2`，两个延后项分别由来源配额和全局配额解释，Python 独立重建与字节对拍通过。
+预期：85 项 Rust 测试通过；烟测汇总为 `total=3, verified=1, failed=2`，两个失败分别是故意设置的非法 JSON 和缺失文件。QF-OS 静态向量准入 `a1 → b1 → a2`，两个延后项分别由来源配额和全局配额解释，Python 独立重建与字节对拍通过。独立 JSON 判读以迭代遍历复核深度、全文档节点数、转义重复键及五个已知答案负例。
 
 ## 证据与协议
 

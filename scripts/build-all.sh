@@ -13,6 +13,7 @@ python3 scripts/verify-outbox-python.py --self-test \
   fixtures/python-oracle-outbox.json \
   outbox/asfa-ai-outbox.json
 python3 scripts/verify-policy-python.py --fixture fixtures/policy-oracle.json
+python3 scripts/verify-json-budget-python.py
 python3 scripts/verify-wave-python.py \
   --expect-plan-hash fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 rm -f /tmp/asfa-wave-report.json /tmp/asfa-wave-state.json \

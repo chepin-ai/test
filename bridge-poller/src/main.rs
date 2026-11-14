@@ -11,10 +11,11 @@ use std::error::Error;
 use std::fs;
 use std::io;
 use std::path::PathBuf;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 const MAX_REGISTRY_BYTES: u64 = 2 * 1024 * 1024;
 const MAX_REGISTRY_SESSIONS: usize = 64;
+const DEFAULT_POLL_TIMEOUT_MS: usize = 60_000;
 
 fn now_epoch() -> Result<u64, Box<dyn Error>> {
     Ok(SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs())
@@ -24,7 +25,7 @@ fn usage() {
     println!(
         "asfa-bridge-poller --config <sessions.json> [--out report.json] [--now EPOCH] \
          [--state ledger.json] [--consume-session NAME --consume-id ID] [--fail-on-error] \
-         [--max-pending N] [--max-tombstones N] [--max-outbox-directives N] \
+         [--max-pending N] [--max-tombstones N] [--max-outbox-directives N] [--poll-timeout-ms N] \
          [--wave-out plan.json --wave-target NAME] [--wave-max-jobs N] [--wave-max-per-source N]"
     );
 }
@@ -58,6 +59,7 @@ fn run() -> Result<(), Box<dyn Error>> {
     let mut max_pending = None;
     let mut max_tombstones = None;
     let mut max_outbox_directives = None;
+    let mut poll_timeout_ms = None;
     let mut wave_out: Option<PathBuf> = None;
     let mut wave_target = "qfos".to_owned();
     let mut wave_max_jobs = None;
@@ -81,6 +83,9 @@ fn run() -> Result<(), Box<dyn Error>> {
             "--max-outbox-directives" => {
                 max_outbox_directives =
                     Some(args.next().ok_or("--max-outbox-directives requires N")?)
+            }
+            "--poll-timeout-ms" => {
+                poll_timeout_ms = Some(args.next().ok_or("--poll-timeout-ms requires N")?)
             }
             "--wave-out" => {
                 wave_out = Some(args.next().ok_or("--wave-out requires a path")?.into())
@@ -141,10 +146,16 @@ fn run() -> Result<(), Box<dyn Error>> {
         DEFAULT_WAVE_MAX_PER_SOURCE,
         "--wave-max-per-source",
     )?;
+    let poll_timeout_ms = parse_cap(
+        poll_timeout_ms,
+        DEFAULT_POLL_TIMEOUT_MS,
+        "--poll-timeout-ms",
+    )?;
     let now = match now {
         Some(value) => value,
         None => now_epoch()?,
     };
+    let poll_deadline = Instant::now() + Duration::from_millis(poll_timeout_ms as u64);
 
     let registry: Registry = strict_json::from_path(&config, MAX_REGISTRY_BYTES)?;
     if registry.network_name.trim().is_empty() {
@@ -176,7 +187,8 @@ fn run() -> Result<(), Box<dyn Error>> {
             };
         let mut ingestion = IngestionReport::default();
         let mut records = Vec::new();
-        for SessionPoll { record, outbox } in poller.poll_registry_detailed(&registry, now) {
+        let polls = poller.poll_registry_detailed_with_deadline(&registry, now, poll_deadline)?;
+        for SessionPoll { record, outbox } in polls {
             records.push(record);
             if let Some(outbox) = outbox {
                 ingestion.merge(ingest_outbox(&mut ledger, &outbox, now)?);
@@ -200,13 +212,19 @@ fn run() -> Result<(), Box<dyn Error>> {
                 )
             })
             .transpose()?;
+        Poller::ensure_deadline(poll_deadline, "after ingestion and wave planning")?;
         ledger.save_atomic(&state_path)?;
         ingestion.state_saved = true;
         let mut report = BridgeReport::new(registry.network_name.clone(), now, records);
         report.ingestion = Some(ingestion);
         (report, wave_plan)
     } else {
-        (poller.poll_registry(&registry, now), None)
+        let polls = poller.poll_registry_detailed_with_deadline(&registry, now, poll_deadline)?;
+        let records = polls.into_iter().map(|result| result.record).collect();
+        (
+            BridgeReport::new(registry.network_name.clone(), now, records),
+            None,
+        )
     };
 
     let rendered = serde_json::to_string_pretty(&report)? + "\n";

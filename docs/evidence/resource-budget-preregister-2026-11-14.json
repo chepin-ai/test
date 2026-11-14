@@ -1,0 +1,44 @@
+{
+  "schema_version": "asfa-attack-preregister/v1",
+  "registered_at": "2026-11-14",
+  "phase": "pre-implementation; no outcome is asserted",
+  "baseline_commit": "26853b7ce510b5438d2b80619deb45fcc09a0ccd",
+  "cases": {
+    "TIME-01": {
+      "attack": "Two HTTP sessions: the first delays longer than the new whole-poll budget; the second counts requests.",
+      "before": "Without the new CLI flag, the baseline waits for the first response and requests both sessions.",
+      "after_required": "With --poll-timeout-ms below the first response delay, exit 2; the second endpoint receives zero requests; no report is created.",
+      "forbidden_pass": "Treating a per-record transport error as a successful whole-poll budget, or starting the second request after deadline expiry."
+    },
+    "TIME-02": {
+      "attack": "Missing, zero, non-numeric, or above-cap --poll-timeout-ms values.",
+      "after_required": "Reject before registry or network I/O; accepted values may only lower the hard cap.",
+      "forbidden_pass": "Silently selecting the default after a missing value or raising the cap."
+    },
+    "JSON-01": {
+      "attack": "A schema-valid genesis Outbox carries mailbox nesting deeper than 64 JSON values.",
+      "before": "The baseline accepts the open mailbox and reports verified.",
+      "after_required": "Reject as invalid_json with an explicit depth-budget error before schema acceptance; with --fail-on-error exit 2.",
+      "forbidden_pass": "Relying on serde_json's default recursion error or rejecting only closed schema fields."
+    },
+    "JSON-02": {
+      "attack": "A schema-valid genesis Outbox carries 16384 scalar mailbox values, so the root container makes 16385 nodes.",
+      "before": "The baseline accepts the document and reports verified.",
+      "after_required": "Reject as invalid_json with an explicit node-budget error; 16383 scalars plus the root remain valid.",
+      "forbidden_pass": "Counting only containers, resetting the budget per branch, or relying on the byte cap."
+    },
+    "JSON-03": {
+      "attack": "The same over-budget document reaches Registry, Outbox, and LedgerSnapshot entry points.",
+      "after_required": "All three strict entry points enforce the same depth and global node limits; duplicate-member behavior remains unchanged.",
+      "forbidden_pass": "Protecting only HTTP documents while leaving config or snapshot restore unbounded."
+    }
+  },
+  "evidence_required": [
+    "old/new real-process results",
+    "request hit counters and elapsed-time observations",
+    "unit tests at exact depth and node boundaries",
+    "independent Python iterative depth/node oracle with known-answer self-tests",
+    "clean git-archive rebuild with an empty target directory",
+    "artifact hashes and explicit remaining DNS, process-memory, and execution debts"
+  ]
+}

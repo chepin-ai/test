@@ -2,7 +2,7 @@
 
 ## 1. 文档
 
-`Outbox` 必填字段：`session`、`url`、`trust`、`hash_chain`；`directives`、`mailbox` 可省略。文档必须是 UTF-8 JSON，最大 2 MiB；Registry 最大 2 MiB 且最多 64 个会话，LedgerSnapshot 最大 16 MiB，均在读取时同时检查 metadata 和实际读回字节。注册表键名必须与文档 `session` 完全一致。Outbox、Registry 与 LedgerSnapshot 在 schema 转换前共用严格 JSON 入口，递归拒绝所有对象层级的重复成员；键名在 JSON 转义解码后比较，因此 `a` 与 `\u0061` 也判重。协议结构使用 `deny_unknown_fields`，未知字段不会被静默当作“已验证签名”或其他扩展语义；`mailbox` 与区块 `payload` 仍是明确开放的数据字段。
+`Outbox` 必填字段：`session`、`url`、`trust`、`hash_chain`；`directives`、`mailbox` 可省略。文档必须是 UTF-8 JSON，最大 2 MiB；Registry 最大 2 MiB 且最多 64 个会话，LedgerSnapshot 最大 16 MiB，均在读取时同时检查 metadata 和实际读回字节。注册表键名必须与文档 `session` 完全一致。Outbox、Registry 与 LedgerSnapshot 在 schema 转换前共用严格 JSON 入口，递归拒绝所有对象层级的重复成员；键名在 JSON 转义解码后比较，因此 `a` 与 `\u0061` 也判重。同一入口还强制根深度为 1、最大深度 64，以及全文档最多 16384 个 JSON 值节点；容器和标量各计一个节点，对象键不另计，所有分支共享计数器。协议结构使用 `deny_unknown_fields`，未知字段不会被静默当作“已验证签名”或其他扩展语义；`mailbox` 与区块 `payload` 仍是明确开放的数据字段，但同样不能绕过深度和节点预算。
 
 文档自报 `Outbox.url` 必须等于会话的 `canonical_url`。未填写 `canonical_url` 时，正典 URL 默认就是读取 `url`；只有显式声明后，jsDelivr 等只读镜像地址才允许与正典地址不同。该检查是精确字符串身份对拍，不做 URL 语义归一化，也不认证镜像或发布者。
 
@@ -14,7 +14,7 @@
 payload_hash = SHA256(serde_json::to_vec(payload))
 ```
 
-这是 V1 的确定性序列化契约，**不是完整 RFC 8785 JCS**。严格 JSON 只消除重复键歧义，不改变 V1 哈希域、数字格式或键排序规则。独立 Python 判读器仅覆盖无浮点、整数处于 `serde_json` 整数范围内的 V1 子集。
+这是 V1 的确定性序列化契约，**不是完整 RFC 8785 JCS**。严格 JSON 消除重复键歧义并限制解析资源，不改变 V1 哈希域、数字格式或键排序规则。独立 Python 判读器仅覆盖无浮点、整数处于 `serde_json` 整数范围内的 V1 子集。
 
 区块哈希的规范输入为 UTF-8 文本：
 
@@ -37,7 +37,7 @@ ASFA-OS-XI/UNSIGNED-HASH-CHAIN/V1\n
 
 注册表顶层 `trust_model`、会话 `trust` 和文档 `trust` 必须一致且均为 `unsigned-hash-chain`。不支持的会话模式在发起网络读取前即拒绝。HTTP 200、JSON 可解析或字段自报 `active` 均不等于验证通过。
 
-传输默认只接受 HTTPS。`http://` 必须显式设置 `allow_insecure_http=true`，`file://` 必须显式设置 `allow_file=true`；其他 scheme 和 URL fragment 在任何 I/O 前拒绝，HTTP(S) 还拒绝缺失主机与 URL userinfo。HTTP client 禁用自动重定向，300–399 均作为 `http_status` 负结果，第二跳不会被请求。15 秒超时和 2 MiB 响应上限继续保留。这些门禁不等于完整 SSRF 防护：DNS rebinding／pinning、私网与 metadata 地址、连接时 IP 绑定、出口防火墙和 DNS 超时仍需外层或后续实现。
+传输默认只接受 HTTPS。`http://` 必须显式设置 `allow_insecure_http=true`，`file://` 必须显式设置 `allow_file=true`；其他 scheme 和 URL fragment 在任何 I/O 前拒绝，HTTP(S) 还拒绝缺失主机与 URL userinfo。HTTP client 禁用自动重定向，300–399 均作为 `http_status` 负结果，第二跳不会被请求。单请求 15 秒超时和 2 MiB 响应上限继续保留。CLI 另在读取 Registry 前建立默认 60000ms 的全轮询 deadline，`--poll-timeout-ms` 只能调低到 1..=60000；每个 HTTP 请求的超时取单请求上限与当前剩余时间的较小值，会话之间及入库／波次保存前再次检查 deadline，超时整次运行非零失败。库 API 的旧 `poll_registry_detailed` 兼容入口只提供逐请求超时，处理不可信 Registry 必须调用 `poll_registry_detailed_with_deadline`。这些门禁不等于完整 SSRF 防护：DNS rebinding／pinning、私网与 metadata 地址、连接时 IP 绑定、出口防火墙和 DNS 超时仍需外层或后续实现。
 
 ## 4. 指令
 
@@ -81,15 +81,16 @@ policy_hash = SHA256(
 
 ## 5. CLI 入库与消费闭环
 
-`poll_registry_detailed` 只在传输、严格 JSON、schema、trust 和完整哈希链全部通过时返回 `Outbox`。`ingest_outbox` 在修改账本前再次执行完整验证和本地检查点对拍，随后在克隆的暂存账本逐条执行并检查容量；任一伪造指令、链头冲突或容量超限都会丢弃整个暂存批次，原账本不变。只有全部成功才一次性替换内存账本并生成 `IngestionEvent`。
+CLI 使用的 `poll_registry_detailed_with_deadline` 只在传输、严格 JSON、schema、trust 和完整哈希链全部通过时返回 `Outbox`，并在统一墙钟预算内完成全部会话。`ingest_outbox` 在修改账本前再次执行完整验证和本地检查点对拍，随后在克隆的暂存账本逐条执行并检查容量；任一伪造指令、链头冲突或容量超限都会丢弃整个暂存批次，原账本不变。只有全部成功才一次性替换内存账本并生成 `IngestionEvent`。
 
 ```text
 StateLock.acquire(<state>.lock)
   → load_for_registry_with_limits(--state, network_name + policy_hash + local caps)
-  → poll_registry_detailed
+  → poll_registry_detailed_with_deadline（逐请求剩余时间＋会话间 deadline）
   → ingest_outbox（完整复验＋链头对拍＋暂存账本容量门禁）
   → 可选 consume(session, id)
   → 可选 plan_wave（只读）
+  → deadline 复核
   → save_atomic(--state)
   → 输出 BridgeReport.ingestion / qfos-wave-plan/v1
 ```
@@ -115,6 +116,6 @@ plan_hash = SHA256(
 
 ## 6. 负结果
 
-`http_status`、`transport`、`invalid_json`、`invalid_schema`、`invalid_trust`、`unsupported_trust` 都保留在报告中。重定向、正典 URL 错配、未知字段、未授权 scheme、超限输入、解析失败均不得静默跳过。策略／版本恢复失败发生在轮询之前，因此不生成新报告、不覆盖原状态。
+`http_status`、`transport`、`invalid_json`、`invalid_schema`、`invalid_trust`、`unsupported_trust` 都保留在报告中。重定向、正典 URL 错配、未知字段、未授权 scheme、超限输入、解析失败均不得静默跳过。策略／版本恢复失败发生在轮询之前，因此不生成新报告、不覆盖原状态。全轮询 deadline 是整次 CLI 错误而非降级为普通成功报告；超时发生在状态保存前时不生成报告或新状态。开放 Outbox 字段的深度／节点超限分类为 `invalid_json`，配合 `--fail-on-error` 返回非零。
 
-当前还以 256 层嵌套负例验证 serde_json 的递归限制会失败关闭，但应用自身尚未定义独立的深度／节点数预算；全轮询总 deadline 与每会话最小剩余时间预算也未实现。session 数、pending／tombstone／单 Outbox 基数和协作 CLI 写者锁已具备门禁，但不能替代非协作写者防护、路径规范化、CAS、WAL 或分布式协调。
+64 层与 16384 节点是应用自身预算，不再依赖 serde_json 默认递归限制充当安全边界。session 数、pending／tombstone／单 Outbox 基数和协作 CLI 写者锁也已具备门禁；这些仍不能替代非协作写者防护、路径规范化、CAS、WAL、分布式协调、完整 DNS 超时覆盖或进程级内存／CPU 隔离。

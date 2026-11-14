@@ -1,0 +1,260 @@
+{
+  "schema_version": "asfa-resource-budget-differential/v1",
+  "recorded_at": "2026-11-14T15:10:07Z",
+  "before_commit": "26853b7ce510b5438d2b80619deb45fcc09a0ccd",
+  "before_binary_sha256": "66211621fe01b3eff5762a252d47a72a7ae90168c1489088ad9b374ace535d23",
+  "after_binary_sha256": "4be4e35557234a0097b86af75c9caf6403d15833b509f1be4457822c812f7afd",
+  "harness_corrections": [
+    "Initial run verdict was FAIL and was not counted: the hand-written Outbox omitted hash_chain genesis/latest/height and added an unknown schema_version, so the baseline rejected JSON-01/02 as invalid_schema and TIME-01 was not verified. The fixture was corrected to canonical zero-height Outbox JSON and every case was rerun.",
+    "Report paths are unlinked before every invocation so a no-output assertion cannot inherit a stale report."
+  ],
+  "cases": {
+    "TIME-01": {
+      "pass": true,
+      "before": {
+        "command": [
+          "/tmp/bridge-resource-before",
+          "--config",
+          "/mnt/agents/work/asfa-resource-2026-11-14/time-registry.json",
+          "--out",
+          "/mnt/agents/work/asfa-resource-2026-11-14/time-before-report.json"
+        ],
+        "exit": 0,
+        "elapsed_ms": 355.107,
+        "stderr": "polled=2 verified=2 failed=0",
+        "report_exists": true,
+        "hits": {
+          "/a": 1,
+          "/b": 1
+        },
+        "summary": {
+          "total": 2,
+          "verified": 2,
+          "failed": 0
+        }
+      },
+      "after": {
+        "command": [
+          "/tmp/bridge-resource-after",
+          "--config",
+          "/mnt/agents/work/asfa-resource-2026-11-14/time-registry.json",
+          "--out",
+          "/mnt/agents/work/asfa-resource-2026-11-14/time-after-report.json",
+          "--poll-timeout-ms",
+          "40"
+        ],
+        "exit": 2,
+        "elapsed_ms": 49.068,
+        "stderr": "bridge-poller: whole-poll deadline exceeded after session a",
+        "report_exists": false,
+        "hits_delta": {
+          "/a": 1,
+          "/b": 0
+        }
+      },
+      "after_elapsed_below_delayed_response": true
+    },
+    "TIME-02": {
+      "pass": true,
+      "results": [
+        {
+          "args": [
+            "--poll-timeout-ms"
+          ],
+          "command": [
+            "/tmp/bridge-resource-after",
+            "--config",
+            "/mnt/agents/work/asfa-resource-2026-11-14/does-not-exist.json",
+            "--out",
+            "/mnt/agents/work/asfa-resource-2026-11-14/flag-report.json",
+            "--poll-timeout-ms"
+          ],
+          "exit": 2,
+          "elapsed_ms": 1.389,
+          "stderr": "bridge-poller: --poll-timeout-ms requires N",
+          "report_exists": false
+        },
+        {
+          "args": [
+            "--poll-timeout-ms",
+            "0"
+          ],
+          "command": [
+            "/tmp/bridge-resource-after",
+            "--config",
+            "/mnt/agents/work/asfa-resource-2026-11-14/does-not-exist.json",
+            "--out",
+            "/mnt/agents/work/asfa-resource-2026-11-14/flag-report.json",
+            "--poll-timeout-ms",
+            "0"
+          ],
+          "exit": 2,
+          "elapsed_ms": 1.058,
+          "stderr": "bridge-poller: --poll-timeout-ms must be in 1..=60000",
+          "report_exists": false
+        },
+        {
+          "args": [
+            "--poll-timeout-ms",
+            "60001"
+          ],
+          "command": [
+            "/tmp/bridge-resource-after",
+            "--config",
+            "/mnt/agents/work/asfa-resource-2026-11-14/does-not-exist.json",
+            "--out",
+            "/mnt/agents/work/asfa-resource-2026-11-14/flag-report.json",
+            "--poll-timeout-ms",
+            "60001"
+          ],
+          "exit": 2,
+          "elapsed_ms": 0.96,
+          "stderr": "bridge-poller: --poll-timeout-ms must be in 1..=60000",
+          "report_exists": false
+        },
+        {
+          "args": [
+            "--poll-timeout-ms",
+            "not-a-number"
+          ],
+          "command": [
+            "/tmp/bridge-resource-after",
+            "--config",
+            "/mnt/agents/work/asfa-resource-2026-11-14/does-not-exist.json",
+            "--out",
+            "/mnt/agents/work/asfa-resource-2026-11-14/flag-report.json",
+            "--poll-timeout-ms",
+            "not-a-number"
+          ],
+          "exit": 2,
+          "elapsed_ms": 0.926,
+          "stderr": "bridge-poller: invalid digit found in string",
+          "report_exists": false
+        }
+      ]
+    },
+    "JSON-01": {
+      "pass": true,
+      "document_bytes": 470,
+      "document_sha256": "5074053a2f44782de2235e81620922ee4336f84530d49bd9479ae8774d11db20",
+      "before": {
+        "exit": 0,
+        "status": {
+          "kind": "verified",
+          "verified_blocks": 0,
+          "verified_directives": 0,
+          "untrusted_directives": 0
+        }
+      },
+      "after": {
+        "exit": 2,
+        "status": {
+          "kind": "invalid_json",
+          "message": "JSON depth budget exceeded: limit=64, next_depth=65 at line 1 column 211"
+        }
+      },
+      "independent_oracle": {
+        "exit": 2,
+        "output": {
+          "verdict": "rejected",
+          "reason": "JSON depth budget exceeded: limit=64, next_depth=65"
+        }
+      }
+    },
+    "JSON-02": {
+      "pass": true,
+      "document_bytes": 33111,
+      "document_sha256": "1dcaa09fa5dc7bac0597a7b7fe9af34b1768e056b8cfdc28c097e7b6edc04fd1",
+      "before": {
+        "exit": 0,
+        "status": {
+          "kind": "verified",
+          "verified_blocks": 0,
+          "verified_directives": 0,
+          "untrusted_directives": 0
+        }
+      },
+      "after": {
+        "exit": 2,
+        "status": {
+          "kind": "invalid_json",
+          "message": "JSON node budget exceeded: limit=16384, next_node=16385 at line 1 column 32906"
+        }
+      },
+      "independent_oracle": {
+        "exit": 2,
+        "output": {
+          "verdict": "rejected",
+          "reason": "JSON node budget exceeded: limit=16384, next_node=16385"
+        }
+      }
+    },
+    "JSON-03": {
+      "pass": true,
+      "snapshot_before": {
+        "command": [
+          "/tmp/bridge-resource-before",
+          "--config",
+          "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+          "--out",
+          "/mnt/agents/work/asfa-resource-2026-11-14/snapshot-before-report.json",
+          "--state",
+          "/mnt/agents/work/asfa-resource-2026-11-14/snapshot-before.json"
+        ],
+        "exit": 0,
+        "elapsed_ms": 73.055,
+        "stderr": "polled=2 verified=2 failed=0",
+        "report_exists": true
+      },
+      "snapshot_after": {
+        "command": [
+          "/tmp/bridge-resource-after",
+          "--config",
+          "/mnt/agents/output/asfa-os-xi/config/sessions.wave.json",
+          "--out",
+          "/mnt/agents/work/asfa-resource-2026-11-14/snapshot-after-report.json",
+          "--state",
+          "/mnt/agents/work/asfa-resource-2026-11-14/snapshot-after.json"
+        ],
+        "exit": 2,
+        "elapsed_ms": 2.124,
+        "stderr": "bridge-poller: JSON depth budget exceeded: limit=64, next_depth=65 at line 1 column 368",
+        "report_exists": false,
+        "state_sha256_before": "3d4504973f355c7993d0c4b3f7f2b491e4e0c3853e9ed6ea89a17b8657ec48ed",
+        "state_sha256_after": "3d4504973f355c7993d0c4b3f7f2b491e4e0c3853e9ed6ea89a17b8657ec48ed",
+        "state_unchanged": true
+      },
+      "registry_before": {
+        "command": [
+          "/tmp/bridge-resource-before",
+          "--config",
+          "/mnt/agents/work/asfa-resource-2026-11-14/deep-registry.json",
+          "--out",
+          "/mnt/agents/work/asfa-resource-2026-11-14/deep-registry-before-report.json"
+        ],
+        "exit": 2,
+        "elapsed_ms": 1.441,
+        "stderr": "bridge-poller: unknown field `extension`, expected one of `schema_version`, `network_name`, `trust_model`, `sessions`",
+        "report_exists": false
+      },
+      "registry_after": {
+        "command": [
+          "/tmp/bridge-resource-after",
+          "--config",
+          "/mnt/agents/work/asfa-resource-2026-11-14/deep-registry.json",
+          "--out",
+          "/mnt/agents/work/asfa-resource-2026-11-14/deep-registry-after-report.json"
+        ],
+        "exit": 2,
+        "elapsed_ms": 1.316,
+        "stderr": "bridge-poller: JSON depth budget exceeded: limit=64, next_depth=65 at line 1 column 193",
+        "report_exists": false
+      },
+      "outbox_entry_covered_by": [
+        "JSON-01",
+        "JSON-02"
+      ]
+    }
+  },
+  "verdict": "PASS"
+}

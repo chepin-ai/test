@@ -4,7 +4,7 @@ use crate::model::{
 };
 use std::fs;
 use std::io::Read;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use thiserror::Error;
 
 pub const MAX_DOCUMENT_BYTES: u64 = 2 * 1024 * 1024;
@@ -22,8 +22,15 @@ enum FetchError {
     InvalidUtf8,
 }
 
+#[derive(Debug, Error)]
+#[error("whole-poll deadline exceeded {phase}")]
+pub struct PollDeadlineError {
+    phase: String,
+}
+
 pub struct Poller {
     agent: ureq::Agent,
+    timeout: Duration,
 }
 
 impl Default for Poller {
@@ -43,6 +50,7 @@ impl Poller {
                 .timeout(timeout)
                 .redirects(0)
                 .build(),
+            timeout,
         }
     }
 
@@ -55,31 +63,74 @@ impl Poller {
         BridgeReport::new(registry.network_name.clone(), now_epoch, records)
     }
 
+    /// Compatibility helper with only per-request timeouts. Callers handling
+    /// untrusted registries should use the whole-poll deadline variant below.
     pub fn poll_registry_detailed(&self, registry: &Registry, now_epoch: u64) -> Vec<SessionPoll> {
         registry
             .sessions
             .iter()
             .map(|(name, session)| {
-                if registry.trust_model != SUPPORTED_TRUST_MODEL {
-                    SessionPoll {
-                        record: Self::record(
-                            name,
-                            session,
-                            now_epoch,
-                            PollStatus::InvalidTrust {
-                                message: format!(
-                                    "unsupported registry trust_model: {}",
-                                    registry.trust_model
-                                ),
-                            },
-                        ),
-                        outbox: None,
-                    }
-                } else {
-                    self.poll_session_detailed(name, session, now_epoch)
-                }
+                self.poll_registry_session(registry, name, session, now_epoch, self.timeout)
             })
             .collect()
+    }
+
+    /// Poll all sessions under one wall-clock deadline. Each request receives
+    /// only the remaining time, and expiry between sessions aborts the batch.
+    pub fn poll_registry_detailed_with_deadline(
+        &self,
+        registry: &Registry,
+        now_epoch: u64,
+        deadline: Instant,
+    ) -> Result<Vec<SessionPoll>, PollDeadlineError> {
+        let mut results = Vec::with_capacity(registry.sessions.len());
+        for (name, session) in &registry.sessions {
+            let remaining = Self::remaining(deadline, &format!("before session {name}"))?;
+            results.push(self.poll_registry_session(registry, name, session, now_epoch, remaining));
+            Self::ensure_deadline(deadline, &format!("after session {name}"))?;
+        }
+        Ok(results)
+    }
+
+    pub fn ensure_deadline(deadline: Instant, phase: &str) -> Result<(), PollDeadlineError> {
+        Self::remaining(deadline, phase).map(|_| ())
+    }
+
+    fn remaining(deadline: Instant, phase: &str) -> Result<Duration, PollDeadlineError> {
+        deadline
+            .checked_duration_since(Instant::now())
+            .filter(|remaining| !remaining.is_zero())
+            .ok_or_else(|| PollDeadlineError {
+                phase: phase.to_owned(),
+            })
+    }
+
+    fn poll_registry_session(
+        &self,
+        registry: &Registry,
+        name: &str,
+        session: &Session,
+        now_epoch: u64,
+        request_timeout: Duration,
+    ) -> SessionPoll {
+        if registry.trust_model != SUPPORTED_TRUST_MODEL {
+            SessionPoll {
+                record: Self::record(
+                    name,
+                    session,
+                    now_epoch,
+                    PollStatus::InvalidTrust {
+                        message: format!(
+                            "unsupported registry trust_model: {}",
+                            registry.trust_model
+                        ),
+                    },
+                ),
+                outbox: None,
+            }
+        } else {
+            self.poll_session_detailed_within(name, session, now_epoch, request_timeout)
+        }
     }
 
     pub fn poll_session(&self, name: &str, session: &Session, now_epoch: u64) -> PollRecord {
@@ -91,6 +142,16 @@ impl Poller {
         name: &str,
         session: &Session,
         now_epoch: u64,
+    ) -> SessionPoll {
+        self.poll_session_detailed_within(name, session, now_epoch, self.timeout)
+    }
+
+    fn poll_session_detailed_within(
+        &self,
+        name: &str,
+        session: &Session,
+        now_epoch: u64,
+        request_timeout: Duration,
     ) -> SessionPoll {
         if session.trust != TrustMode::UnsignedHashChain {
             return SessionPoll {
@@ -105,7 +166,7 @@ impl Poller {
                 outbox: None,
             };
         }
-        let (status, outbox) = match self.fetch(session) {
+        let (status, outbox) = match self.fetch(session, request_timeout) {
             Err(FetchError::HttpStatus(code)) => (PollStatus::HttpStatus { code }, None),
             Err(FetchError::Transport(message)) => (PollStatus::Transport { message }, None),
             Err(FetchError::TooLarge) => (
@@ -199,7 +260,7 @@ impl Poller {
         ))
     }
 
-    fn fetch(&self, session: &Session) -> Result<String, FetchError> {
+    fn fetch(&self, session: &Session, request_timeout: Duration) -> Result<String, FetchError> {
         let url = &session.url;
         let parsed = url::Url::parse(url)
             .map_err(|error| FetchError::Transport(format!("invalid URL: {error}")))?;
@@ -253,10 +314,15 @@ impl Poller {
             return String::from_utf8(bytes).map_err(|_| FetchError::InvalidUtf8);
         }
 
-        let response = self.agent.get(url).call().map_err(|error| match error {
-            ureq::Error::Status(code, _) => FetchError::HttpStatus(code),
-            ureq::Error::Transport(transport) => FetchError::Transport(transport.to_string()),
-        })?;
+        let response = self
+            .agent
+            .get(url)
+            .timeout(self.timeout.min(request_timeout))
+            .call()
+            .map_err(|error| match error {
+                ureq::Error::Status(code, _) => FetchError::HttpStatus(code),
+                ureq::Error::Transport(transport) => FetchError::Transport(transport.to_string()),
+            })?;
         if (300..400).contains(&response.status()) {
             return Err(FetchError::HttpStatus(response.status()));
         }

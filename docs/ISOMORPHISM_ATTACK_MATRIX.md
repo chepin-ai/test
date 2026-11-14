@@ -13,7 +13,7 @@ Unique({k₁:v₁, …, kₙ:vₙ}) ⇔ ∀i,j. decode(kᵢ)=decode(kⱼ) → i=
 
 `strict_json` 在 schema 转换前执行此检查。Outbox、Registry 和 LedgerSnapshot 共用该入口；因此 `a` 与 `\u0061` 不能作为两个键绕过检查。核心协议结构另用 `deny_unknown_fields`，未知扩展不会被静默解释为安全语义；`mailbox` 与区块 `payload` 是明确开放的数据字段。
 
-该性质只表示成员名唯一和已声明 schema 封闭，不表示数字、键排序和字符串转义已经满足完整 RFC 8785。当前 256 层嵌套负例证明 serde_json 的现有限制会失败关闭，但应用自身尚无独立深度／节点预算。
+同一入口定义 `Depth(root)=1`、子值深度为父值深度加一，并要求 `Depth≤64`；每个容器与标量计一个节点，全文档共享 `Nodes≤16384`，对象键不另计。计数在任何 schema 转换前完成，开放 `mailbox`／`payload` 与 Registry、Snapshot 走同一预算。这些性质不表示数字、键排序和字符串转义已经满足完整 RFC 8785，也不等于进程级内存隔离。
 
 ### 1.2 传输授权与正典身份
 
@@ -60,7 +60,7 @@ h' > h ∧ h > 0
 
 ### 1.5 资源边界
 
-Outbox 与 Registry 上限均为 2 MiB，LedgerSnapshot 上限为 16 MiB；文件读取同时检查 metadata 与实际读回字节，HTTP 读取也有响应上限。Registry 会话数硬上限为 64；pending、tombstone 与单 Outbox 指令数分别硬限 4096、16384、1024，CLI 只能调低。入库在暂存账本执行，容量失败整批丢弃；快照恢复和写出也执行基数／字节门禁。单会话 15 秒超时继续保留。全轮询 deadline、JSON 节点／深度预算和完整内存预算仍未关闭。
+Outbox 与 Registry 上限均为 2 MiB，LedgerSnapshot 上限为 16 MiB；文件读取同时检查 metadata 与实际读回字节，HTTP 读取也有响应上限。三类 JSON 入口统一限制 64 层与 16384 个值节点。Registry 会话数硬上限为 64；pending、tombstone 与单 Outbox 指令数分别硬限 4096、16384、1024，CLI 只能调低。入库在暂存账本执行，容量失败整批丢弃；快照恢复和写出也执行基数／字节门禁。单会话 15 秒超时继续保留，CLI 另有默认 60 秒全轮询 deadline；活动 HTTP 请求只获得剩余时间，会话间及保存前复核。进程级内存、CPU 和文件描述符硬隔离仍未关闭。
 
 ### 1.6 协作写者互斥与消费容量
 
@@ -91,7 +91,7 @@ offered = admitted + deferred_wave_quota + deferred_source_quota
 | [C2SP tlog-witness](https://github.com/C2SP/C2SP/blob/main/tlog-witness.md) | witness 保存旧 checkpoint，验证新旧一致性后才更新 | 本地 `(height,latest)` 对拍与原子快照 | 独立 witness、签名与 cosignature、并发原子更新、分裂视图抑制 |
 | [C2SP tlog-policy](https://github.com/C2SP/C2SP/blob/main/tlog-policy.md) | log／witness／quorum 是显式信任策略 | 当前只能表达“无 witness 的本地模式” | quorum；不能把 `quorum none` 包装成分裂视图防护 |
 | [A2A 官方规范](https://github.com/a2aproject/A2A/blob/main/docs/specification.md) | Agent Card 可选 JWS；签名前使用 JCS；每次操作需要授权边界；Webhook 需要 SSRF 与重放考虑 | 正典 URL、传输授权、禁重定向与来源字段对拍提供局部协议映射 | 本仓不是 A2A 实现，没有 Agent Card、JWS、任务授权、完整 SSRF 或 Webhook 安全模块 |
-| [OWASP API4:2023](https://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption/) | 执行超时、批操作数、记录数、内存与存储都需限制 | 文档／快照字节、64 会话、pending／tombstone／单 Outbox 基数与单会话 timeout | 全轮询 deadline、进程级内存／CPU／文件描述符硬隔离与动态费率策略 |
+| [OWASP API4:2023](https://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption/) | 执行超时、批操作数、记录数、内存与存储都需限制 | 文档／快照字节、JSON 深度／节点、64 会话、账本基数、全轮询 deadline 与逐请求剩余时间 | 进程级内存／CPU／文件描述符硬隔离与动态费率策略 |
 | [Azure Queue-Based Load Leveling](https://learn.microsoft.com/en-us/azure/architecture/patterns/queue-based-load-leveling)、[Competing Consumers](https://learn.microsoft.com/en-us/azure/architecture/patterns/competing-consumers) | 持续生产快于消费时须容量决策；消费者应幂等并处理 poison message | 有界账本、显式容量失败、消费 tombstone、冲突／非法事件分类 | 持久 broker、租约、delivery count、死信队列与分布式消费者协调 |
 
 C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 也只能证明相应卡片的签名完整性，不能自动证明后续任务、指令或履约结果可信。
@@ -131,7 +131,7 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 | v2 状态直接交给新 CLI | 先报 `unsupported ledger schema`，不做字段补全式迁移 | `cli_v2_snapshot_is_not_implicitly_migrated` |
 | Registry 超过 2 MiB | 轮询前非零失败，state／report 均不创建 | `cli_oversized_registry_fails_before_state_or_report_creation` |
 | 文件读取期间增长绕过 metadata | 实际读回超过上限仍失败 | `strict_json::tests::bounded_file_reader_rejects_oversize_input` |
-| 256 层嵌套输入 | 解析失败关闭，不 panic、不接受 | `strict_json::tests::excessive_nesting_fails_closed` |
+| 64／65 层精确边界与跨分支节点洪泛 | 应用级预算失败关闭，不依赖解析器默认递归限制 | `strict_json::tests::exact_default_depth_boundary_is_enforced`、`exact_default_node_boundary_is_enforced`、`node_budget_is_shared_across_branches` |
 | Rust／Python 策略投影漂移 | 独立 Python 从原始 Registry 重算同一 SHA-256；三项自证通过 | `policy_digest_matches_independent_python_known_answer`；`scripts/verify-policy-python.py` |
 
 ### 3.3 2026-11-14 饱和攻击、写者与 QF-OS 门禁
@@ -148,6 +148,18 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 | 把计划当执行或 QIOS 证明 | schema 固定 `plan-only-no-execution`，文档拒绝升级解释 | WAVE-03；QIOS 正典定义未解析，无适配器声称 |
 
 预注册与原始结果分别见 `evidence/qfos-fusion-preregister-2026-11-14.json` 和 `evidence/differential-2026-11-14.json`。PASS 只覆盖预注册差分，不证明非协作写者、分布式锁或下游引擎安全。
+
+### 3.4 2026-11-14 全轮询与 JSON 资源预算门禁
+
+| 攻击／碰撞 | 预注册拒绝条件 | 自动化与实测对应 |
+|---|---|---|
+| 首会话延迟耗尽总预算 | 活动请求按剩余时间收缩；第二会话零请求；无成功报告 | `whole_poll_deadline_shrinks_the_active_request`、`cli_whole_poll_deadline_prevents_later_transport_and_report`；TIME-01：旧端两跳均 verified，新端约 44ms 非零退出 |
+| 缺值、零、非数字或超过 60 秒 | Registry／网络 I/O 前拒绝 | `cli_poll_timeout_flag_requires_a_bounded_value`；TIME-02 四组负例 |
+| 开放 mailbox 深度超过 64 | `invalid_json` 深度错误，不作 verified | `cli_json_depth_and_node_budgets_reject_open_outbox_payloads`；JSON-01 旧端 verified、新端拒绝 |
+| 全文档节点超过 16384 | 共享计数器在第 16385 个值拒绝 | 精确边界单元测试；JSON-02 旧端 verified、新端拒绝 |
+| Registry／Snapshot 绕过 | 与 Outbox 使用同一严格入口；恢复失败不覆盖状态 | `cli_json_budget_also_covers_registry_and_snapshot_restore`；JSON-03 旧端接受深层 Snapshot，新端轮询前拒绝且字节不变 |
+
+预注册与原始结果见 `evidence/resource-budget-preregister-2026-11-14.json`、`evidence/resource-budget-differential-2026-11-14.json`。独立 `verify-json-budget-python.py` 以迭代遍历复算深度与节点并执行五个已知答案自证。首轮攻击夹具因 genesis 字段错误得到 FAIL，已公开记录并修正重跑；该 FAIL 不计为实现通过。
 
 ## 4. JCS 候选包评估与不采用结论
 
@@ -166,7 +178,7 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 1. **DNS 与连接层 SSRF**：DNS rebinding／pinning、解析器意见不一致、连接时 IP 绑定尚未实现；解析过程也不一定受单会话总 timeout 中断。
 2. **地址与出口策略**：私网、loopback、link-local、cloud metadata 等地址没有应用层分类拒绝，仍需外层 egress 隔离；禁重定向和默认 HTTPS 不等于完整 SSRF 防护。
-3. **轮询资源预算**：64 会话与账本基数已限；全轮询总 deadline、每请求剩余时间收缩、应用自定义 JSON 深度／节点数和进程级内存预算未实现。
+3. **进程级资源隔离**：64 会话、全轮询 deadline、逐请求剩余时间、JSON 深度／节点与账本基数已限；进程级内存、CPU、文件描述符硬隔离和动态费率策略未实现，DNS 解析也不因本轮门禁而被证明完整受控。
 4. **多写者协调**：协作 CLI 的 sidecar 排他锁已实测；路径别名、非协作写者、跨主机语义、CAS、WAL 和原子 check-and-persist 未实现，不能称为分布式单写者。
 5. **整份快照回滚与分裂视图**：攻击者若能同时替换 state 和旧链，本地检查点与策略摘要也会回到旧值。需要外部单调计数器、签名 checkpoint、独立 witness／quorum 及并发原子更新。
 6. **发布者与指令授权**：无签名链不认证发布者；后续可映射 A2A/JWS 或 SCITT Signed Statement，但签名对象必须覆盖指令及授权范围，而非只签 Agent Card。
@@ -183,10 +195,14 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 `scripts/verify-policy-python.py` 独立重建 Registry 安全投影和策略摘要，并自证：说明字段变化不改变摘要、显式默认 canonical 不改变摘要、URL 变化必须改变摘要。它可检查 v3 snapshot 的 `network_name` 与 `policy_hash`，但不验证签名、外部信任或状态文件未被整体替换。
 
+`scripts/verify-json-budget-python.py` 使用独立严格重复键解析与显式栈迭代遍历，复算根深度、最大深度和全文档值节点；对象键不另计。它对 64 层接受、65 层拒绝、16384 节点接受、16385 节点拒绝、跨分支计数和转义重复键进行已知答案自证，不读取 Rust 中间结果，也不证明进程内存上限。
+
 `scripts/verify-wave-python.py` 从 Registry 和原始 snapshot 独立重建分组、过期过滤、来源轮转、双配额、deferred 计数、ledger hash 与 plan hash，并拒绝 Job 篡改和账本绑定篡改。其范围为 qfos-wave-v1 无浮点子集，不是 JCS、发布者认证、执行证明或 QIOS 判读器。
 
 ## 7. 可复算证据入口
 
+- `evidence/resource-budget-preregister-2026-11-14.json`：全轮询与 JSON 深度／节点攻击的实现前判据。
+- `evidence/resource-budget-differential-2026-11-14.json`：TIME-01／02、JSON-01／02／03 的旧新真实进程结果及独立判读。
 - `evidence/qfos-fusion-preregister-2026-11-14.json`：实现前登记的五项进程攻击与三项波次判据。
 - `evidence/attack-consistency-2026-11-14.json`：实现提交、78 项测试、干净归档、五组差分、独立判读和公网复核的综合证据。
 - `evidence/differential-2026-11-14.json`：pending、tombstone、恢复、65 会话扇出及并发消费的旧新原始差分。
@@ -198,7 +214,8 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 - `evidence/attack-consistency-2026-11-10.json`：上一轮历史证据，保留当时的公网 URL 差异，不回写为本轮结果。
 - `../scripts/verify-outbox-python.py`：独立 Python 链判读与已知答案／篡改负例自证入口。
 - `../scripts/verify-policy-python.py`：独立 Python 策略投影、fixture 与 live snapshot 对拍入口。
+- `../scripts/verify-json-budget-python.py`：独立迭代 JSON 深度／节点判读与已知答案入口。
 - `../scripts/verify-wave-python.py`：独立 Python 波次重建、静态已知答案与篡改负例入口。
-- `../scripts/build-all.sh`：格式、Clippy、全部测试、凭据扫描、三类 Python 判读、认知示例、波次字节对拍和 CLI 烟测的统一重建门禁。
+- `../scripts/build-all.sh`：格式、Clippy、全部测试、凭据扫描、四类 Python 判读、认知示例、波次字节对拍和 CLI 烟测的统一重建门禁。
 
 本轮公网正典已明确迁移到实际发布的 `.../main/...` 形式；当前字节一致只适用于本轮采集时点，不能回改 2026-11-10 的历史差异。镜像 `verified` 也不等于发布者认证。所有外部状态（推送、CI、ACK、正典 active、KEY-SYNC-01）均需要独立回执。

@@ -20,6 +20,6 @@ pub use ledger::{
     IngestOutcome, LedgerSnapshot, ResourceLimits, RestoreError,
 };
 pub use model::*;
-pub use poller::Poller;
+pub use poller::{PollDeadlineError, Poller};
 pub use state_lock::StateLock;
 pub use wave::{plan_wave, WaveError, WaveJob, WavePlan, WaveSourceStats};
