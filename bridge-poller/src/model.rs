@@ -293,6 +293,9 @@ pub enum PollStatus {
     Transport {
         message: String,
     },
+    BlockedEgress {
+        message: String,
+    },
     InvalidJson {
         message: String,
     },

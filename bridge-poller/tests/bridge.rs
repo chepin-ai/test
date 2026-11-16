@@ -1,8 +1,8 @@
 use asfa_bridge_poller::{
     append_block, append_directives, execute_wave, ingest_outbox, strict_json, verified_directives,
-    CapacityError, ChainError, Directive, DirectiveLedger, IngestError, IngestOutcome,
-    LedgerSnapshot, Outbox, PollStatus, Poller, Registry, ResourceLimits, Session, TrustMode,
-    WaveExecutionReport, WavePlan,
+    CapacityError, ChainError, Directive, DirectiveLedger, EgressPolicy, IngestError,
+    IngestOutcome, LedgerSnapshot, Outbox, PollStatus, Poller, Registry, ResourceLimits, Session,
+    TrustMode, WaveExecutionReport, WavePlan,
 };
 use serde_json::json;
 use std::collections::BTreeMap;
@@ -129,7 +129,11 @@ fn serve_redirect_once(location: &str) -> String {
 fn file_transport_verifies_genesis_document() {
     let outbox = Outbox::genesis("node", "file:///unused");
     let (path, url) = outbox_file(outbox);
-    let record = Poller::new().poll_session("node", &session(url), 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(url),
+        100,
+    );
     assert_eq!(
         record.status,
         PollStatus::Verified {
@@ -144,8 +148,11 @@ fn file_transport_verifies_genesis_document() {
 #[test]
 fn malformed_json_is_an_observable_negative_result() {
     let path = temp_file("not-json");
-    let record =
-        Poller::new().poll_session("node", &session(format!("file://{}", path.display())), 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(format!("file://{}", path.display())),
+        100,
+    );
     assert!(matches!(record.status, PollStatus::InvalidJson { .. }));
     fs::remove_file(path).unwrap();
 }
@@ -153,8 +160,11 @@ fn malformed_json_is_an_observable_negative_result() {
 #[test]
 fn valid_json_with_wrong_schema_is_not_accepted() {
     let path = temp_file("{\"hello\":\"world\"}");
-    let record =
-        Poller::new().poll_session("node", &session(format!("file://{}", path.display())), 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(format!("file://{}", path.display())),
+        100,
+    );
     assert!(matches!(record.status, PollStatus::InvalidSchema { .. }));
     fs::remove_file(path).unwrap();
 }
@@ -163,7 +173,11 @@ fn valid_json_with_wrong_schema_is_not_accepted() {
 fn registry_and_document_session_must_match() {
     let outbox = Outbox::genesis("someone-else", "file:///unused");
     let (path, url) = outbox_file(outbox);
-    let record = Poller::new().poll_session("node", &session(url), 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(url),
+        100,
+    );
     assert!(matches!(record.status, PollStatus::InvalidSchema { .. }));
     fs::remove_file(path).unwrap();
 }
@@ -171,8 +185,32 @@ fn registry_and_document_session_must_match() {
 #[test]
 fn http_404_is_not_silently_skipped() {
     let url = serve_once("404 Not Found", "missing".into());
-    let record = Poller::new().poll_session("node", &session(url), 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(url),
+        100,
+    );
     assert_eq!(record.status, PollStatus::HttpStatus { code: 404 });
+}
+
+#[test]
+fn default_public_only_policy_blocks_loopback_before_tcp_accept() {
+    let mut outbox = Outbox::genesis("node", "http://unused");
+    let (url, hits) = serve_counted_outbox_once(&mut outbox);
+    let record = Poller::new().poll_session("node", &session(url), 100);
+    assert!(matches!(
+        record.status,
+        PollStatus::BlockedEgress { message } if message.contains("loopback")
+    ));
+    assert_eq!(hits.load(Ordering::SeqCst), 0);
+}
+
+#[test]
+fn untrusted_session_json_cannot_enable_non_public_egress() {
+    let mut value = serde_json::to_value(session("http://127.0.0.1/outbox".into())).unwrap();
+    value["allow_non_public_egress"] = json!(true);
+    let error = serde_json::from_value::<Session>(value).unwrap_err();
+    assert!(error.to_string().contains("unknown field"));
 }
 
 #[test]
@@ -181,7 +219,11 @@ fn http_transport_verifies_two_linked_blocks() {
     append_block(&mut outbox, json!({"sequence": 1}), 100, 0).unwrap();
     append_block(&mut outbox, json!({"sequence": 2}), 101, 0).unwrap();
     let url = serve_outbox_once(&mut outbox);
-    let record = Poller::new().poll_session("node", &session(url), 102);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(url),
+        102,
+    );
     assert_eq!(
         record.status,
         PollStatus::Verified {
@@ -198,7 +240,11 @@ fn tampered_http_payload_fails_chain_verification() {
     append_block(&mut outbox, json!({"sequence": 1}), 100, 0).unwrap();
     outbox.hash_chain.blocks[0].payload = json!({"sequence": 99});
     let url = serve_outbox_once(&mut outbox);
-    let record = Poller::new().poll_session("node", &session(url), 102);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(url),
+        102,
+    );
     assert!(matches!(record.status, PollStatus::InvalidTrust { .. }));
 }
 
@@ -207,7 +253,11 @@ fn hmac_is_explicitly_unsupported_not_treated_as_valid() {
     let mut outbox = Outbox::genesis("node", "file:///unused");
     outbox.trust = TrustMode::Hmac;
     let (path, url) = outbox_file(outbox);
-    let record = Poller::new().poll_session("node", &session(url), 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(url),
+        100,
+    );
     assert_eq!(
         record.status,
         PollStatus::UnsupportedTrust {
@@ -243,7 +293,11 @@ fn poll_reports_verified_and_legacy_directives_separately() {
     )
     .unwrap();
     let url = serve_outbox_once(&mut outbox);
-    let record = Poller::new().poll_session("node", &session(url), 102);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(url),
+        102,
+    );
     assert_eq!(
         record.status,
         PollStatus::Verified {
@@ -257,8 +311,11 @@ fn poll_reports_verified_and_legacy_directives_separately() {
 #[test]
 fn oversized_document_is_rejected() {
     let path = temp_file(&"x".repeat(2 * 1024 * 1024 + 1));
-    let record =
-        Poller::new().poll_session("node", &session(format!("file://{}", path.display())), 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(format!("file://{}", path.display())),
+        100,
+    );
     assert!(matches!(record.status, PollStatus::Transport { .. }));
     fs::remove_file(path).unwrap();
 }
@@ -267,7 +324,8 @@ fn oversized_document_is_rejected() {
 fn session_trust_is_enforced_before_transport() {
     let mut config = session("file:///definitely-not-present.json".into());
     config.trust = TrustMode::Hmac;
-    let record = Poller::new().poll_session("node", &config, 100);
+    let record =
+        Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session("node", &config, 100);
     assert_eq!(
         record.status,
         PollStatus::UnsupportedTrust {
@@ -286,7 +344,8 @@ fn registry_trust_model_is_enforced_for_every_session() {
         trust_model: "hmac".into(),
         sessions: BTreeMap::from([("node".into(), session(url))]),
     };
-    let report = Poller::new().poll_registry(&registry, 100);
+    let report =
+        Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_registry(&registry, 100);
     assert_eq!(report.summary.failed, 1);
     assert!(matches!(
         report.records[0].status,
@@ -315,7 +374,11 @@ fn forged_directive_source_is_an_observable_failure() {
     )
     .unwrap();
     let url = serve_outbox_once(&mut outbox);
-    let record = Poller::new().poll_session("node", &session(url), 102);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(url),
+        102,
+    );
     assert!(matches!(record.status, PollStatus::InvalidTrust { .. }));
 }
 
@@ -337,7 +400,11 @@ fn verified_directive_cannot_reenter_ledger_after_consumption() {
     )
     .unwrap();
     let url = serve_outbox_once(&mut outbox);
-    let record = Poller::new().poll_session("node", &session(url), 102);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(url),
+        102,
+    );
     assert!(record.status.is_verified());
 
     let verified = verified_directives(&outbox).unwrap();
@@ -512,7 +579,8 @@ fn python_generated_non_ascii_chain_verifies_in_rust() {
     let path = temp_file(include_str!("../../fixtures/python-oracle-outbox.json"));
     let mut mirror = session(format!("file://{}", path.display()));
     mirror.canonical_url = Some("file://fixtures/python-oracle-outbox.json".into());
-    let record = Poller::new().poll_session("oracle", &mirror, 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic)
+        .poll_session("oracle", &mirror, 100);
     assert_eq!(
         record.status,
         PollStatus::Verified {
@@ -534,8 +602,11 @@ fn duplicate_json_members_are_rejected_before_schema_or_chain_processing() {
         1,
     );
     let path = temp_file(&duplicate_session);
-    let record =
-        Poller::new().poll_session("node", &session(format!("file://{}", path.display())), 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(format!("file://{}", path.display())),
+        100,
+    );
     assert!(matches!(
         record.status,
         PollStatus::InvalidJson { message } if message.contains("duplicate JSON object member")
@@ -565,8 +636,11 @@ fn duplicate_json_members_are_rejected_before_schema_or_chain_processing() {
     );
     assert_ne!(rendered, duplicate_nested_action);
     let path = temp_file(&duplicate_nested_action);
-    let record =
-        Poller::new().poll_session("node", &session(format!("file://{}", path.display())), 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(format!("file://{}", path.display())),
+        100,
+    );
     assert!(matches!(
         record.status,
         PollStatus::InvalidJson { message } if message.contains("duplicate JSON object member")
@@ -768,7 +842,11 @@ fn redirects_are_explicit_failures_and_never_reach_the_second_hop() {
     let mut target = Outbox::genesis("node", "http://unused");
     let (target_url, target_hits) = serve_counted_outbox_once(&mut target);
     let entry_url = serve_redirect_once(&target_url);
-    let record = Poller::new().poll_session("node", &session(entry_url), 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(entry_url),
+        100,
+    );
     assert_eq!(record.status, PollStatus::HttpStatus { code: 302 });
     assert_eq!(target_hits.load(Ordering::SeqCst), 0);
 }
@@ -779,7 +857,8 @@ fn outbox_url_must_match_the_declared_canonical_url() {
     let (path, url) = outbox_file(outbox);
     let mut mirror = session(url);
     mirror.canonical_url = Some("https://canonical.example/outbox.json".into());
-    let record = Poller::new().poll_session("node", &mirror, 100);
+    let record =
+        Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session("node", &mirror, 100);
     assert!(matches!(
         record.status,
         PollStatus::InvalidTrust { message } if message.contains("canonical URL mismatch")
@@ -791,7 +870,8 @@ fn outbox_url_must_match_the_declared_canonical_url() {
 fn insecure_transports_require_explicit_opt_in_before_io() {
     let mut file = session("file:///definitely-not-present.json".into());
     file.allow_file = false;
-    let record = Poller::new().poll_session("node", &file, 100);
+    let record =
+        Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session("node", &file, 100);
     assert!(matches!(
         record.status,
         PollStatus::Transport { message } if message.contains("allow_file=true")
@@ -801,7 +881,8 @@ fn insecure_transports_require_explicit_opt_in_before_io() {
     let (target_url, target_hits) = serve_counted_outbox_once(&mut target);
     let mut http = session(target_url);
     http.allow_insecure_http = false;
-    let record = Poller::new().poll_session("node", &http, 100);
+    let record =
+        Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session("node", &http, 100);
     assert!(matches!(
         record.status,
         PollStatus::Transport { message } if message.contains("allow_insecure_http=true")
@@ -809,7 +890,8 @@ fn insecure_transports_require_explicit_opt_in_before_io() {
     assert_eq!(target_hits.load(Ordering::SeqCst), 0);
 
     let userinfo = session("https://user:password@example.com/outbox.json".into());
-    let record = Poller::new().poll_session("node", &userinfo, 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic)
+        .poll_session("node", &userinfo, 100);
     assert!(matches!(
         record.status,
         PollStatus::Transport { message } if message.contains("userinfo")
@@ -827,7 +909,11 @@ fn unknown_protocol_fields_are_rejected_instead_of_silently_ignored() {
         .unwrap()
         .insert("trusted".into(), json!(true));
     fs::write(&path, serde_json::to_vec(&polluted).unwrap()).unwrap();
-    let record = Poller::new().poll_session("node", &session(url.clone()), 100);
+    let record = Poller::with_egress_policy(EgressPolicy::AllowNonPublic).poll_session(
+        "node",
+        &session(url.clone()),
+        100,
+    );
     assert!(matches!(
         record.status,
         PollStatus::InvalidSchema { message } if message.contains("unknown field")
@@ -1394,7 +1480,7 @@ fn whole_poll_deadline_shrinks_the_active_request() {
         sessions: BTreeMap::from([("a".into(), session(url))]),
     };
     let started = Instant::now();
-    let error = Poller::new()
+    let error = Poller::with_egress_policy(EgressPolicy::AllowNonPublic)
         .poll_registry_detailed_with_deadline(
             &registry,
             100,
@@ -1431,6 +1517,7 @@ fn cli_whole_poll_deadline_prevents_later_transport_and_report() {
         .args(["--config", config.to_str().unwrap()])
         .args(["--out", report.to_str().unwrap()])
         .args(["--poll-timeout-ms", "40"])
+        .arg("--allow-non-public-egress")
         .output()
         .unwrap();
     assert!(!output.status.success());

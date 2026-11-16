@@ -14,6 +14,7 @@ python3 scripts/verify-outbox-python.py --self-test \
   fixtures/qfos-exec-outbox.json \
   outbox/asfa-ai-outbox.json
 python3 scripts/verify-policy-python.py --fixture fixtures/policy-oracle.json
+python3 scripts/verify-egress-python.py --self-test
 python3 scripts/verify-json-budget-python.py
 python3 scripts/verify-wave-python.py \
   --expect-plan-hash 5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34

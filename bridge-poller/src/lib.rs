@@ -3,6 +3,7 @@
 #![forbid(unsafe_code)]
 
 pub mod chain;
+pub mod egress;
 pub mod execution;
 pub mod ingest;
 pub mod ledger;
@@ -15,6 +16,7 @@ pub mod wave;
 pub use chain::{
     append_block, append_directives, make_block, verified_directives, verify_chain, ChainError,
 };
+pub use egress::{address_class, validate_ip, EgressError, EgressPolicy, Resolve, SystemResolver};
 pub use execution::{
     execute_wave, ExecutionError, ExecutionResult, ExecutionSummary, WaveExecutionReport,
 };

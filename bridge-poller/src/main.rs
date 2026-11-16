@@ -5,8 +5,8 @@ use asfa_bridge_poller::ledger::{
 use asfa_bridge_poller::wave::{DEFAULT_WAVE_MAX_JOBS, DEFAULT_WAVE_MAX_PER_SOURCE};
 use asfa_bridge_poller::{
     execute_wave, ingest_outbox, ledger_digest, plan_wave, strict_json, verify_wave_plan,
-    BridgeReport, DirectiveLedger, IngestionReport, Poller, Registry, ResourceLimits, SessionPoll,
-    StateLock, WaveExecutionReport, WavePlan,
+    BridgeReport, DirectiveLedger, EgressPolicy, IngestionReport, Poller, Registry, ResourceLimits,
+    SessionPoll, StateLock, WaveExecutionReport, WavePlan,
 };
 use std::error::Error;
 use std::fs;
@@ -28,7 +28,7 @@ fn usage() {
          [--state ledger.json] [--consume-session NAME --consume-id ID] [--fail-on-error] \
          [--max-pending N] [--max-tombstones N] [--max-outbox-directives N] [--poll-timeout-ms N] \
          [--wave-out plan.json --wave-target NAME] [--wave-max-jobs N] [--wave-max-per-source N] \
-         [--execute-wave --execution-out execution.json]"
+         [--execute-wave --execution-out execution.json] [--allow-non-public-egress]"
     );
 }
 
@@ -68,6 +68,7 @@ fn run() -> Result<(), Box<dyn Error>> {
     let mut wave_max_per_source = None;
     let mut execute_wave_mode = false;
     let mut execution_out: Option<PathBuf> = None;
+    let mut allow_non_public_egress = false;
     let mut args = std::env::args().skip(1);
     while let Some(arg) = args.next() {
         match arg.as_str() {
@@ -102,6 +103,7 @@ fn run() -> Result<(), Box<dyn Error>> {
                 wave_max_per_source = Some(args.next().ok_or("--wave-max-per-source requires N")?)
             }
             "--execute-wave" => execute_wave_mode = true,
+            "--allow-non-public-egress" => allow_non_public_egress = true,
             "--execution-out" => {
                 execution_out = Some(args.next().ok_or("--execution-out requires a path")?.into())
             }
@@ -197,7 +199,11 @@ fn run() -> Result<(), Box<dyn Error>> {
         .as_ref()
         .map(|path| StateLock::acquire(path))
         .transpose()?;
-    let poller = Poller::new();
+    let poller = if allow_non_public_egress {
+        Poller::with_egress_policy(EgressPolicy::AllowNonPublic)
+    } else {
+        Poller::new()
+    };
     let (report, wave_plan, execution_report): (
         BridgeReport,
         Option<WavePlan>,

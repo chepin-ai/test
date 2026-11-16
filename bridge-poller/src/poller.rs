@@ -1,9 +1,14 @@
 use crate::chain::{verified_directives, verify_chain};
+use crate::egress::{
+    resolve_validated, validate_addresses, EgressError, EgressPolicy, Resolve, SystemResolver,
+};
 use crate::model::{
     BridgeReport, Outbox, PollRecord, PollStatus, Registry, Session, SessionPoll, TrustMode,
 };
 use std::fs;
 use std::io::Read;
+use std::net::{IpAddr, SocketAddr};
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 use thiserror::Error;
 
@@ -16,6 +21,8 @@ enum FetchError {
     HttpStatus(u16),
     #[error("transport error: {0}")]
     Transport(String),
+    #[error("{0}")]
+    Egress(#[from] EgressError),
     #[error("document exceeds {MAX_DOCUMENT_BYTES} bytes")]
     TooLarge,
     #[error("document is not valid UTF-8")]
@@ -29,8 +36,9 @@ pub struct PollDeadlineError {
 }
 
 pub struct Poller {
-    agent: ureq::Agent,
     timeout: Duration,
+    egress_policy: EgressPolicy,
+    resolver: Arc<dyn Resolve>,
 }
 
 impl Default for Poller {
@@ -46,11 +54,31 @@ impl Poller {
 
     pub fn with_timeout(timeout: Duration) -> Self {
         Self {
-            agent: ureq::AgentBuilder::new()
-                .timeout(timeout)
-                .redirects(0)
-                .build(),
             timeout,
+            egress_policy: EgressPolicy::PublicOnly,
+            resolver: Arc::new(SystemResolver),
+        }
+    }
+
+    /// Explicit process-level escape hatch for local tests and controlled
+    /// legacy deployments. It is intentionally absent from Session JSON.
+    pub fn with_egress_policy(policy: EgressPolicy) -> Self {
+        Self {
+            egress_policy: policy,
+            ..Self::new()
+        }
+    }
+
+    #[cfg(test)]
+    fn with_resolver_for_test(
+        timeout: Duration,
+        egress_policy: EgressPolicy,
+        resolver: Arc<dyn Resolve>,
+    ) -> Self {
+        Self {
+            timeout,
+            egress_policy,
+            resolver,
         }
     }
 
@@ -169,6 +197,18 @@ impl Poller {
         let (status, outbox) = match self.fetch(session, request_timeout) {
             Err(FetchError::HttpStatus(code)) => (PollStatus::HttpStatus { code }, None),
             Err(FetchError::Transport(message)) => (PollStatus::Transport { message }, None),
+            Err(FetchError::Egress(error @ EgressError::NonPublic { .. })) => (
+                PollStatus::BlockedEgress {
+                    message: error.to_string(),
+                },
+                None,
+            ),
+            Err(FetchError::Egress(error)) => (
+                PollStatus::Transport {
+                    message: error.to_string(),
+                },
+                None,
+            ),
             Err(FetchError::TooLarge) => (
                 PollStatus::Transport {
                     message: format!("document exceeds {MAX_DOCUMENT_BYTES} bytes"),
@@ -314,15 +354,55 @@ impl Poller {
             return String::from_utf8(bytes).map_err(|_| FetchError::InvalidUtf8);
         }
 
-        let response = self
-            .agent
-            .get(url)
-            .timeout(self.timeout.min(request_timeout))
-            .call()
-            .map_err(|error| match error {
-                ureq::Error::Status(code, _) => FetchError::HttpStatus(code),
-                ureq::Error::Transport(transport) => FetchError::Transport(transport.to_string()),
+        let budget = self.timeout.min(request_timeout);
+        let started = Instant::now();
+        let port = parsed
+            .port_or_known_default()
+            .ok_or_else(|| FetchError::Transport("URL port is required".into()))?;
+        let addresses = match parsed.host() {
+            Some(url::Host::Domain(host)) => resolve_validated(
+                Arc::clone(&self.resolver),
+                host,
+                port,
+                self.egress_policy,
+                budget,
+            )?,
+            Some(url::Host::Ipv4(ip)) => validate_addresses(
+                vec![SocketAddr::new(IpAddr::V4(ip), port)],
+                port,
+                self.egress_policy,
+            )?,
+            Some(url::Host::Ipv6(ip)) => validate_addresses(
+                vec![SocketAddr::new(IpAddr::V6(ip), port)],
+                port,
+                self.egress_policy,
+            )?,
+            None => return Err(FetchError::Transport("URL host is required".into())),
+        };
+        let remaining = budget
+            .checked_sub(started.elapsed())
+            .filter(|remaining| !remaining.is_zero())
+            .ok_or_else(|| {
+                FetchError::Transport("request budget exhausted during DNS resolution".into())
             })?;
+        // The resolver installed on this one-shot agent returns only the
+        // validated addresses above. The URL itself is unchanged, preserving
+        // the original Host header and TLS server name while preventing a
+        // second DNS lookup from rebinding the actual connection.
+        let agent = ureq::AgentBuilder::new()
+            .timeout(remaining)
+            .timeout_connect(remaining)
+            .timeout_read(remaining)
+            .timeout_write(remaining)
+            .redirects(0)
+            .try_proxy_from_env(false)
+            .max_idle_connections(0)
+            .resolver(move |_netloc: &str| Ok::<Vec<SocketAddr>, std::io::Error>(addresses.clone()))
+            .build();
+        let response = agent.get(url).call().map_err(|error| match error {
+            ureq::Error::Status(code, _) => FetchError::HttpStatus(code),
+            ureq::Error::Transport(transport) => FetchError::Transport(transport.to_string()),
+        })?;
         if (300..400).contains(&response.status()) {
             return Err(FetchError::HttpStatus(response.status()));
         }
@@ -336,5 +416,102 @@ impl Poller {
             return Err(FetchError::TooLarge);
         }
         String::from_utf8(bytes).map_err(|_| FetchError::InvalidUtf8)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::Outbox;
+    use std::io::Write;
+    use std::net::TcpListener;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    fn session(url: String) -> Session {
+        Session {
+            url,
+            canonical_url: None,
+            role: None,
+            trust: TrustMode::UnsignedHashChain,
+            note: None,
+            allow_insecure_http: true,
+            allow_file: false,
+        }
+    }
+
+    #[test]
+    fn hostname_resolving_to_loopback_is_blocked_before_any_dial() {
+        let resolutions = Arc::new(AtomicUsize::new(0));
+        let observed = Arc::clone(&resolutions);
+        let resolver: Arc<dyn Resolve> = Arc::new(move |host: &str, port: u16| {
+            assert_eq!(host, "internal.test");
+            observed.fetch_add(1, Ordering::SeqCst);
+            Ok(vec![SocketAddr::new("127.0.0.1".parse().unwrap(), port)])
+        });
+        let poller = Poller::with_resolver_for_test(
+            Duration::from_secs(1),
+            EgressPolicy::PublicOnly,
+            resolver,
+        );
+        let record =
+            poller.poll_session("node", &session("http://internal.test/outbox".into()), 100);
+        assert!(matches!(
+            record.status,
+            PollStatus::BlockedEgress { message } if message.contains("loopback")
+        ));
+        assert_eq!(resolutions.load(Ordering::SeqCst), 1);
+    }
+
+    #[test]
+    fn validated_resolution_is_the_only_resolution_and_the_actual_dial_target() {
+        let listener_a = TcpListener::bind("127.0.0.1:0").unwrap();
+        let listener_b = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address_a = listener_a.local_addr().unwrap();
+        let address_b = listener_b.local_addr().unwrap();
+        let url = format!("http://pinned.test:{}/outbox", address_a.port());
+        let body = serde_json::to_string(&Outbox::genesis("node", &url)).unwrap();
+        let server_a = std::thread::spawn(move || {
+            let (mut stream, _) = listener_a.accept().unwrap();
+            let mut request = [0_u8; 2048];
+            let count = stream.read(&mut request).unwrap();
+            let request = String::from_utf8_lossy(&request[..count]).into_owned();
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                body.len()
+            );
+            stream.write_all(response.as_bytes()).unwrap();
+            request
+        });
+        let other_hits = Arc::new(AtomicUsize::new(0));
+        let observed_hits = Arc::clone(&other_hits);
+        std::thread::spawn(move || {
+            if let Ok((_stream, _)) = listener_b.accept() {
+                observed_hits.fetch_add(1, Ordering::SeqCst);
+            }
+        });
+
+        let resolutions = Arc::new(AtomicUsize::new(0));
+        let observed_resolutions = Arc::clone(&resolutions);
+        let resolver: Arc<dyn Resolve> = Arc::new(move |host: &str, port: u16| {
+            assert_eq!(host, "pinned.test");
+            assert_eq!(port, address_a.port());
+            let sequence = observed_resolutions.fetch_add(1, Ordering::SeqCst);
+            let address = if sequence == 0 { address_a } else { address_b };
+            Ok(vec![address])
+        });
+        let poller = Poller::with_resolver_for_test(
+            Duration::from_secs(1),
+            EgressPolicy::AllowNonPublic,
+            resolver,
+        );
+        let record = poller.poll_session("node", &session(url), 100);
+        assert!(record.status.is_verified(), "{:?}", record.status);
+        assert_eq!(resolutions.load(Ordering::SeqCst), 1);
+        assert_eq!(other_hits.load(Ordering::SeqCst), 0);
+        let request = server_a.join().unwrap();
+        assert!(
+            request.contains(&format!("Host: pinned.test:{}\r\n", address_a.port())),
+            "request did not preserve original authority: {request}"
+        );
     }
 }

@@ -1,0 +1,40 @@
+{
+  "schema_version": "asfa-egress-preregister/v1",
+  "recorded_at": "2026-11-17",
+  "baseline_commit": "03cf7d8b7ee71e97fa35f25c6ab9af3ec7a3af26",
+  "target": "Close application-layer DNS rebinding and non-public destination SSRF gaps in the existing bridge poller without claiming network-namespace or egress-proxy isolation.",
+  "criteria": [
+    {
+      "id": "EGR-01",
+      "pass": "Rust and an independent Python oracle agree on preregistered public and non-public IPv4/IPv6 known answers, including loopback, private, link-local, shared, benchmarking, documentation, multicast, reserved, IPv4-mapped, NAT64, Teredo, 6to4, ULA and non-global IPv6 cases."
+    },
+    {
+      "id": "EGR-02",
+      "pass": "The default CLI rejects a loopback HTTP URL before any TCP accept; the old binary connects and verifies the same served Outbox, while the new binary emits blocked_egress and zero server hits."
+    },
+    {
+      "id": "EGR-03",
+      "pass": "A hostname whose actual resolver answer is non-public is rejected before connection; an empty answer, excessive answer count or any non-public member of a mixed answer set fails closed."
+    },
+    {
+      "id": "EGR-04",
+      "pass": "The HTTP client performs exactly one policy resolution, dials only the validated SocketAddr set, preserves the original URL authority in the HTTP Host header, and never invokes a scripted second resolution."
+    },
+    {
+      "id": "EGR-05",
+      "pass": "A deliberately blocked resolver exceeds its small remaining budget without blocking the caller or dialing an HTTP server; the residual resolver worker cannot itself initiate HTTP."
+    },
+    {
+      "id": "EGR-06",
+      "pass": "Session JSON cannot enable non-public egress because unknown fields remain rejected; only an explicit process-level test/legacy option can construct the allow-non-public poller."
+    },
+    {
+      "id": "EGR-07",
+      "pass": "Existing file transport, public-address classification, chain verification, execution fixtures and whole-poll deadline behavior remain valid, and a clean archive rebuild passes the complete gate."
+    }
+  ],
+  "not_proven": [
+    "No claim of kernel/network-namespace egress enforcement, protection against a hostile OS or non-cooperative process, complete DNS resolver cancellation, or universal SSRF prevention outside this HTTP client.",
+    "No new publisher authentication, remote Git synchronization, QF-OS canonical compatibility, QIOS compatibility, zero-knowledge proof or distributed exactly-once claim."
+  ]
+}
