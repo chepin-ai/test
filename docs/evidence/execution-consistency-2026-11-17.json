@@ -1,0 +1,154 @@
+{
+  "schema_version": "asfa-execution-consistency/v1",
+  "recorded_at": "2026-11-17T01:15:09.766683+08:00",
+  "implementation_commit": "098dab63c3d449bc21a43f79d138b156624b7b15",
+  "implementation_subject": "feat(bridge): add bounded wave execution and recovery",
+  "before_commit": "320b226ca7b605f41744f50e970b2371077bebdb",
+  "clean_rebuild": {
+    "source": "git archive of implementation_commit; no .git; empty CARGO_TARGET_DIR; locked dependencies",
+    "archive_format": "tar.gz",
+    "archive_bytes": 137167,
+    "archive_sha256": "c645bedeb4496703417e1d47de689884d6d2089cb8e545d279ea5a9fb871bd89",
+    "no_git_in_extracted_source": true,
+    "empty_target_before_build": true,
+    "binary_profile": "debug",
+    "binary_sha256": "a16bc5e9ea360e078def92d87da9606468771f98af027caa2546f6dedf3ceb6e",
+    "rustc": "rustc 1.100.0 (0ef1bc386 2026-11-09)",
+    "cargo": "cargo 1.100.0 (3acc79c0c 2026-11-05)",
+    "command": "bash scripts/build-all.sh",
+    "verdict": "PASS",
+    "tests": {
+      "bridge_unit": 32,
+      "bridge_integration": 46,
+      "kernel": 11,
+      "userspace": 3,
+      "total": 92,
+      "failed": 0
+    },
+    "rustfmt": "PASS",
+    "clippy": "zero warnings under -D warnings",
+    "credential_scan": "PASS",
+    "independent_oracles": {
+      "outbox": "PASS; three documents; escaped duplicate and tampered chain rejected for each",
+      "policy": "PASS; three self-tests and live snapshot match",
+      "json_budget": "PASS; five self-tests; depth=64 nodes=16384",
+      "wave": "PASS; two self-tests; current v4 plan hash matched",
+      "execution": "PASS; five self-tests including rehashed false semantics"
+    },
+    "wave_plan_hash": "5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34",
+    "smoke": {
+      "total": 3,
+      "verified": 1,
+      "failed": 2
+    }
+  },
+  "execution_fixture": {
+    "profile": "qfos-exec-v1",
+    "outbox_sha256": "d1f31f00cd34926de7c0a38045f3f04f5d17f370b5c5463846164ec771067352",
+    "outbox_chain_head": "4997c61f4cc4a52b0851b2b29d0bd15e8872271ed64bf81a28f0332b2f93a5f4",
+    "plan_hash": "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a",
+    "execution_hash": "4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c",
+    "replay_execution_hash": "9dce14b4b357f72851dff2d67af085bd8c10e560aca51c414fd07ffe416be36f",
+    "initial_summary": {
+      "offered": 7,
+      "succeeded": 2,
+      "dead_lettered": 5,
+      "skipped_succeeded": 0,
+      "skipped_dead_lettered": 0
+    },
+    "replay_summary": {
+      "offered": 7,
+      "succeeded": 0,
+      "dead_lettered": 0,
+      "skipped_succeeded": 2,
+      "skipped_dead_lettered": 5
+    },
+    "ledger_schema": "asfa-directive-ledger/v4",
+    "pending_after_execution": 0,
+    "consumed_after_execution": 7,
+    "receipt_outputs": {
+      "sha": {
+        "bytes": 12,
+        "sha256": "ce088755bce61c36c1da693f5101eba681521b69281ee4d5e1856c28526feecc"
+      },
+      "sum": {
+        "count": 3,
+        "sum": 42
+      }
+    },
+    "dead_letter_codes": {
+      "expired": "expired",
+      "invalid": "invalid_payload",
+      "overflow": "arithmetic_overflow",
+      "too-many": "input_limit",
+      "unknown": "unknown_action"
+    },
+    "replay_ledger_sha256_before": "ceafc719fd670a0b418afefb7230fa040494756b853e5d382eb4f7aebec202a5",
+    "replay_ledger_sha256_after": "ceafc719fd670a0b418afefb7230fa040494756b853e5d382eb4f7aebec202a5"
+  },
+  "differential": {
+    "verdict": "PASS",
+    "checks_passed": 9,
+    "before_binary_sha256": "096359978a6b4d814605687828e70d09cf3197d62f941145c5792cd02c2cfa6f",
+    "after_binary_sha256": "07444fd68cca8d9f8d49e1e2d9297fb3df777bfc1fa894db8b1e3811f2a78e24",
+    "after_binary_provenance": "pre-commit worktree debug binary; not the clean-archive binary",
+    "clean_archive_binary_used_for_this_differential": false,
+    "independent_oracle": "execution_oracle=PASS plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a execution_hash=4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c jobs=7 receipts=2 dead_letters=5 self_tests=5"
+  },
+  "not_proven": [
+    "canonical external QF-OS execution compatibility or QIOS compatibility",
+    "general Skill sandbox, engine leases, arbitrary shell, network, dynamic-library, or external-process execution",
+    "distributed exactly-once execution, non-cooperating writer exclusion, CAS, WAL, or cross-host locking",
+    "publisher authentication, result signatures, trusted time, independent witnesses, or formal execution proofs",
+    "fsync-backed power-loss durability or whole-snapshot rollback resistance",
+    "DNS/connection-layer SSRF resistance and process-level memory, CPU, or file-descriptor isolation",
+    "remote Git synchronization, external CI, alliance active, cisvr ACK, KEY-SYNC-01, or old PAT revocation"
+  ],
+  "artifacts": {
+    "docs/evidence/execution-preregister-2026-11-16.json": {
+      "bytes": 2126,
+      "sha256": "9e4df5291d24e4f1e84d906ed27ed5794be89ebb4fc05f6b45cca67e78a1a50f"
+    },
+    "docs/evidence/execution-differential-2026-11-16.json": {
+      "bytes": 7135,
+      "sha256": "d720317ce7a0b721c94c3fb359786e6d8ce0ff0d1a55080a03b70df4f4c0222f"
+    },
+    "docs/evidence/execution-clean-rebuild-2026-11-17.log": {
+      "bytes": 18561,
+      "sha256": "45e591bbcd8882228f813fa4803ad5f6b4ae80976a6bb125ebdb42a538b79f08"
+    },
+    "docs/evidence/execution-smoke-2026-11-17.json": {
+      "bytes": 1200,
+      "sha256": "5fde1432f9ff7ef5885e17be87395368c16e6553a34f9aa7ca39644d051301b6"
+    },
+    "docs/evidence/execution-smoke-state-2026-11-17.json": {
+      "bytes": 414,
+      "sha256": "d6673fecb808ad39849ae0ca07414517bcfb8d6943623f7aa7e01d7cb70bd8f9"
+    },
+    "config/sessions.execution.json": {
+      "bytes": 317,
+      "sha256": "535307870f33572cd005700738f669944f0523b27eefd12b8e4eec77824aef96"
+    },
+    "fixtures/qfos-exec-outbox.json": {
+      "bytes": 24230,
+      "sha256": "d1f31f00cd34926de7c0a38045f3f04f5d17f370b5c5463846164ec771067352"
+    },
+    "fixtures/qfos-exec-pre-state.json": {
+      "bytes": 17773,
+      "sha256": "702ec095d0c529d654c9d5585efada2fd8885b40b2a67e03b8a23b014449bd7a"
+    },
+    "fixtures/qfos-exec-plan.json": {
+      "bytes": 15160,
+      "sha256": "cdc6cd33bcc3e155dfab134759dc0c603a3a9f740f490b63ab642f7462fdf718"
+    },
+    "fixtures/qfos-exec-state.json": {
+      "bytes": 4716,
+      "sha256": "ceafc719fd670a0b418afefb7230fa040494756b853e5d382eb4f7aebec202a5"
+    },
+    "fixtures/qfos-exec-report.json": {
+      "bytes": 5355,
+      "sha256": "5b394e59c96fcf6762bca8ac4f6322c86ec3cdf8b9f909fcb74acf5693df72de"
+    }
+  },
+  "verdict": "PASS"
+}

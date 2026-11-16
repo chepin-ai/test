@@ -55,9 +55,11 @@
 - `resource-budget-poll-2026-11-14.json`：干净二进制于 2026-11-14T15:17:42Z、显式 60 秒总预算下采集的七端点报告。asfa-ai 为 `verified`，cfts／cisvr／qgl／ucif2／usrm 为 404，vinf 为 `invalid_schema`；只描述采集时点，不证明远端实现提交、发布者身份或联盟状态。
 - PASS 只覆盖本轮预注册判据，不证明 DNS 完整受控、进程级内存／CPU／文件描述符隔离、分布式锁、QF-OS 执行或 QIOS 兼容。cisvr ACK、正典 active、KEY-SYNC-01、旧 PAT 撤销、远端同步和外部 CI 均无完成证据；最终推送结果另以实际推送与读回为准。
 
-## 2026-11-16
+## 2026-11-16—17
 
 - `execution-preregister-2026-11-16.json`：实现前登记的 EXE-01–06，覆盖真实内建输出、五类死信、恢复与重放、独立语义判读、v4 原子快照和旧新进程差分；不含结果声称。
 - `execution-differential-2026-11-16.json`：同一 Registry／Outbox 下的九项真实进程差分，旧端提交 `320b226ca7b605f41744f50e970b2371077bebdb` 无 `--execute-wave` 且 7 项保持 pending；新端产生 2 个成功回执＋5 个死信，重放为 2＋5 skipped 且账本字节不变，独立判读通过。旧二进制 SHA-256 为 `096359978a6b4d814605687828e70d09cf3197d62f941145c5792cd02c2cfa6f`，工作树 debug 新二进制 SHA-256 为 `07444fd68cca8d9f8d49e1e2d9297fb3df777bfc1fa894db8b1e3811f2a78e24`；后者不得当作提交后干净归档二进制哈希。
-- 工作树统一门禁实测 92／92 Rust 测试通过，固定计划哈希为 `f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a`，执行报告哈希为 `4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c`。实现提交、干净归档重建与综合证据身份在重建完成后单独登记。
+- `execution-consistency-2026-11-17.json`：实现提交 `098dab63c3d449bc21a43f79d138b156624b7b15` 的综合证据。无 `.git`、空 target 干净重建全门禁通过，92／92 测试分解为 bridge 单元 32、bridge 集成 46、kernel 11、userspace 3；归档 SHA-256 为 `c645bedeb4496703417e1d47de689884d6d2089cb8e545d279ea5a9fb871bd89`，干净 debug 二进制 SHA-256 为 `a16bc5e9ea360e078def92d87da9606468771f98af027caa2546f6dedf3ceb6e`。综合证据 SHA-256 为 `6703407ff64ee27226cc197c32baf3df8d3aee3107776db866368931090401b9`，11 项 artifact 已复算。
+- `execution-clean-rebuild-2026-11-17.log`：上述归档的完整重建输出；`execution-smoke-2026-11-17.json` 与 `execution-smoke-state-2026-11-17.json` 保存原始烟测报告和 v4 状态。固定计划哈希为 `f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a`，执行报告哈希为 `4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c`，重放报告哈希为 `9dce14b4b357f72851dff2d67af085bd8c10e560aca51c414fd07ffe416be36f`。
+- `execution-publication-2026-11-17.json`：记录真实发布结果。首次 push 以 TLS 非正确终止失败，随后读回超时；HTTP/1.1 重试因非交互认证不可用失败，最终读回成功且远端 `main` 仍为 `c573dc496dc3caeab1f0f143373c80859ccd93d4`。推送候选为 `7523979df84750c9f8077157ed24163c41f93719`，相对远端 `ahead_by=13, behind_by=0`；结论为 `NOT_PUSHED`、`remote≠local`，无新外部 CI，未恢复或输出历史 PAT／CMD。
 - PASS 只覆盖仓内 `qfos-exec-v1`，不证明外部 QF-OS 正典、QIOS、通用 Skill 沙箱、租约、分布式 exactly-once、发布者认证、结果签名或掉电持久性。

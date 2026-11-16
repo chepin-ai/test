@@ -219,6 +219,8 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 ## 7. 可复算证据入口
 
+- `evidence/execution-consistency-2026-11-17.json`：实现提交、92 项测试、无 `.git` 空 target 干净重建、真实执行与重放、九项旧新差分、五类独立判读和 11 项 artifact 的综合证据。
+- `evidence/execution-clean-rebuild-2026-11-17.log`：实现提交归档的完整干净重建输出；`execution-smoke-2026-11-17.json` 与 `execution-smoke-state-2026-11-17.json` 保存对应烟测原始结果。
 - `evidence/execution-preregister-2026-11-16.json`：真实执行、五类死信、恢复幂等、独立判读、v4 原子性与旧新差分的实现前判据。
 - `evidence/execution-differential-2026-11-16.json`：同一 Registry／Outbox 下旧端无执行能力、新端真实执行与重启跳过的九项进程差分；新端哈希属于工作树 debug 构建，不与后续干净归档哈希混用。
 - `evidence/resource-budget-preregister-2026-11-14.json`：全轮询与 JSON 深度／节点攻击的实现前判据。

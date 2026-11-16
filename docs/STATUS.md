@@ -1,8 +1,9 @@
-# 实现状态（本轮实测证据：2026-11-16）
+# 实现状态（本轮实测证据：2026-11-16—17）
 
 ## 最新续拍：`qfos-exec-v1` 受控执行与恢复
 
-- 当前工作树统一门禁实测通过 92 个 Rust 测试：bridge 单元 32、bridge 集成 46、kernel 11、userspace 3，失败为 0；rustfmt、Clippy、凭据扫描、五类独立判读、固定夹具重建／字节对拍、执行重放、认知示例和 CLI 烟测均通过。实现提交、无 `.git` 干净归档与干净二进制身份另由本轮综合证据登记，不以工作树结果替代。
+- 实现提交为 `098dab63c3d449bc21a43f79d138b156624b7b15`（`feat(bridge): add bounded wave execution and recovery`）。从该提交的 Git 归档在无 `.git`、空 target 环境完整重建，统一门禁通过 92 个 Rust 测试：bridge 单元 32、bridge 集成 46、kernel 11、userspace 3，失败为 0；rustfmt、Clippy、凭据扫描、五类独立判读、固定夹具重建／字节对拍、执行重放、认知示例和 CLI 烟测均通过。
+- 干净归档 SHA-256 为 `c645bedeb4496703417e1d47de689884d6d2089cb8e545d279ea5a9fb871bd89`，干净 debug 二进制 SHA-256 为 `a16bc5e9ea360e078def92d87da9606468771f98af027caa2546f6dedf3ceb6e`。综合证据为 `evidence/execution-consistency-2026-11-17.json`，SHA-256 为 `6703407ff64ee27226cc197c32baf3df8d3aee3107776db866368931090401b9`，其 11 项 artifact 的路径、字节数与摘要已复算。差分新端 `07444fd6…e24` 仍是提交前工作树 debug 二进制，不与上述干净二进制混用。
 - 执行面只开放 `engine.sum` 与 `engine.sha256`。前者最多 1024 个 `i64` 并逐项检查溢出，后者最多 1048576 个 UTF-8 字节；无 shell、无网络、无动态库、无外部进程。未知动作、非法载荷、输入超限、算术溢出和执行前过期形成五类显式死信。
 - 固定夹具含 7 项指令，初次执行为 2 个成功回执＋5 个死信、7 consumed、0 pending；`sum` 真实输出为 `{"count":3,"sum":42}`，Unicode SHA-256 输出可独立复算。计划哈希为 `f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a`，执行报告哈希为 `4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c`。
 - LedgerSnapshot v4 将 pending 删除、consumed tombstone、成功回执和死信保存在同一原子快照。库内执行先在克隆账本暂存，容量失败不留下成功前缀；执行模式先持久化原计划，再保存执行后状态，最后写报告。报告输出失败后，恢复原计划只得到 2＋5 skipped；再次重放的账本与报告字节不变。磁盘原子可见性仍只有临时文件＋rename，不声称 fsync 掉电持久性。
@@ -87,7 +88,7 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 
 最后已核验正典状态仍为历史记录 `asfa-ai = conditional`（2026-11-09）。本轮没有 cisvr ACK、正典升 active 或 KEY-SYNC-01 relay 完成回执；写入 Outbox 不等于真实投递或对方 ACK。
 
-本地 remote 为 `https://github.com/chepin-ai/test.git`，不含明文凭证。此前泄露的 PAT 仍应撤销／轮换，当前没有 GitHub 侧撤销证据。最后成功远端读回仍是 2026-11-11 的 `c573dc496dc3caeab1f0f143373c80859ccd93d4`；本轮两次 `ls-remote` 分别出现 TLS 非正确终止和超时，不能声称已刷新远端状态。按最后本地跟踪引用，QF-OS 实现提交当时为 `ahead_by=8, behind_by=0`；资源预算实现提交后该本地分叉为 `ahead_by=10, behind_by=0`，本证据提交及最终推送对拍另以实际命令结果为准。没有本轮外部 CI 回执。
+本地 remote 为 `https://github.com/chepin-ai/test.git`，不含明文凭证。此前泄露的 PAT 仍应撤销／轮换，当前没有 GitHub 侧撤销证据。2026-11-17 推送前 `ls-remote` 成功，远端 `main=c573dc496dc3caeab1f0f143373c80859ccd93d4`；首次 push 以 TLS 非正确终止失败，随后读回超时。单次 HTTP/1.1 重试到达非交互认证边界，因没有可用用户名／凭证失败；最终 `ls-remote` 成功且远端仍为同一哈希。因此本轮未推送，`remote≠local`，推送候选相对远端为 `ahead_by=13, behind_by=0`，没有新外部 CI 回执。原始记录见 `evidence/execution-publication-2026-11-17.json`。未恢复或输出任何历史 PAT／CMD 值。
 
 ## 明确未实现与后续债
 

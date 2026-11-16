@@ -1,0 +1,54 @@
+{
+  "schema_version": "asfa-bridge-report/v1",
+  "network_name": "asfa-smoke-test",
+  "generated_at_epoch": 1000,
+  "summary": {
+    "total": 3,
+    "verified": 1,
+    "failed": 2
+  },
+  "records": [
+    {
+      "session": "good",
+      "url": "file://fixtures/valid-outbox.json",
+      "fetched_at_epoch": 1000,
+      "status": {
+        "kind": "verified",
+        "verified_blocks": 0,
+        "verified_directives": 0,
+        "untrusted_directives": 0
+      }
+    },
+    {
+      "session": "malformed",
+      "url": "file://fixtures/malformed.json",
+      "fetched_at_epoch": 1000,
+      "status": {
+        "kind": "invalid_json",
+        "message": "expected ident at line 1 column 2"
+      }
+    },
+    {
+      "session": "missing",
+      "url": "file://fixtures/not-found.json",
+      "fetched_at_epoch": 1000,
+      "status": {
+        "kind": "transport",
+        "message": "No such file or directory (os error 2)"
+      }
+    }
+  ],
+  "ingestion": {
+    "inserted": 0,
+    "duplicate": 0,
+    "replayed_consumed": 0,
+    "conflict": 0,
+    "expired": 0,
+    "invalid": 0,
+    "chain_checkpoints": 1,
+    "pending": 0,
+    "tombstones": 0,
+    "state_saved": true,
+    "events": []
+  }
+}
