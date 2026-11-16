@@ -1,0 +1,25 @@
+{
+  "schema_version": "asfa-egress-publication/v1",
+  "recorded_at": "2026-11-17T04:04:16+08:00",
+  "remote": "https://github.com/chepin-ai/test.git",
+  "implementation_commit": "32b450b01da77dab77667d930888cb201a913699",
+  "candidate_head_at_attempt": "713a3608bee51b9ac44aa1728e06fdecc9b5a71c",
+  "remote_readback": {
+    "command": "GIT_TERMINAL_PROMPT=0 git ls-remote https://github.com/chepin-ai/test.git refs/heads/main",
+    "exit": 0,
+    "attempt": 1,
+    "main": "c573dc496dc3caeab1f0f143373c80859ccd93d4"
+  },
+  "attempts": [],
+  "divergence_at_attempt": {
+    "remote": "c573dc496dc3caeab1f0f143373c80859ccd93d4",
+    "ahead_by": 15,
+    "behind_by": 0
+  },
+  "remote_changed": false,
+  "remote_equals_candidate": false,
+  "result": "NOT_PUSHED; unauthenticated readback confirms remote main unchanged",
+  "credential_scope": "No historical PAT or CMD value was recovered or emitted. No authenticated push was attempted because no current non-interactive credential is available.",
+  "external_ci": "No new external CI receipt; no successful push triggering this candidate is evidenced.",
+  "record_note": "The unpublished evidence commit is amended only to add this publication record and corresponding documentation; the ahead/behind count is unchanged."
+}

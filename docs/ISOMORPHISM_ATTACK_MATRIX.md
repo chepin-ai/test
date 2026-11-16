@@ -1,4 +1,4 @@
-# 形式化结构、同构映射与攻击矩阵（2026-11-16）
+# 形式化结构、同构映射与攻击矩阵（2026-11-17）
 
 ## 1. 当前绑定的结构
 
@@ -25,7 +25,9 @@ c = session.canonical_url.unwrap_or(session.url)
 
 验证要求 `d = c`，采用精确字符串对拍。只有显式声明 `canonical_url` 后，只读镜像的 `u` 才允许与 `c` 不同。HTTP 自动重定向关闭，300–399 均为显式负结果，第二跳不请求；默认只接受 HTTPS，`http://` 与 `file://` 分别要求 `allow_insecure_http=true` 与 `allow_file=true`。fragment 和其他 scheme 在 I/O 前拒绝；HTTP(S) 还拒绝缺失 host 与 URL userinfo。
 
-这些检查不执行 URL 语义归一化，不认证镜像或发布者，也不等于完整 SSRF 防护。
+这些检查不执行 URL 语义归一化，不认证镜像或发布者。HTTP(S) 目的地址另受默认 public-only 策略约束：令一次策略解析的答案为 `A`，要求 `1≤|A|≤32`，且每个 `a∈A` 都通过地址分类；随后以原 URL 端口构造固定 `SocketAddr` 集 `P`，实际 agent 只能返回 `P`。任一非公开成员使整组失败，因此混合公网／私网答案不能只挑公网成员放行。请求保留原 URL authority 与 TLS server name，禁止环境代理与重定向，避免绕过固定连接目的。
+
+IP 字面量不经过 DNS。域名解析等待受剩余预算约束，超时 worker 不持有 HTTP agent；但底层系统解析的强制取消、阻塞线程回收、外层 egress 隔离和 hostile OS 仍不属于该应用层不变量。显式进程级 `AllowNonPublic` 只用于本地测试／受控遗留部署，不可由 Session JSON 开启。
 
 ### 1.3 网络与安全策略联合隔离
 
@@ -60,7 +62,7 @@ h' > h ∧ h > 0
 
 ### 1.5 资源边界
 
-Outbox 与 Registry 上限均为 2 MiB，LedgerSnapshot 上限为 16 MiB；文件读取同时检查 metadata 与实际读回字节，HTTP 读取也有响应上限。三类 JSON 入口统一限制 64 层与 16384 个值节点。Registry 会话数硬上限为 64；pending、tombstone 与单 Outbox 指令数分别硬限 4096、16384、1024，CLI 只能调低。入库在暂存账本执行，容量失败整批丢弃；快照恢复和写出也执行基数／字节门禁。单会话 15 秒超时继续保留，CLI 另有默认 60 秒全轮询 deadline；活动 HTTP 请求只获得剩余时间，会话间及保存前复核。进程级内存、CPU 和文件描述符硬隔离仍未关闭。
+Outbox 与 Registry 上限均为 2 MiB，LedgerSnapshot 上限为 16 MiB；文件读取同时检查 metadata 与实际读回字节，HTTP 读取也有响应上限。三类 JSON 入口统一限制 64 层与 16384 个值节点。Registry 会话数硬上限为 64；pending、tombstone 与单 Outbox 指令数分别硬限 4096、16384、1024，CLI 只能调低。入库在暂存账本执行，容量失败整批丢弃；快照恢复和写出也执行基数／字节门禁。单会话 15 秒超时继续保留，CLI 另有默认 60 秒全轮询 deadline；域名解析等待、活动 HTTP 连接／读／写只获得剩余预算，会话间及保存前复核。DNS 空答案与超 32 答案也失败关闭。进程级内存、CPU、文件描述符和阻塞 resolver 线程的硬隔离仍未关闭。
 
 ### 1.6 协作写者互斥与消费容量
 
@@ -177,6 +179,21 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 预登记见 `evidence/execution-preregister-2026-11-16.json`，旧新真实进程原始结果见 `evidence/execution-differential-2026-11-16.json`。PASS 仅覆盖本仓 `qfos-exec-v1`，不证明外部 QF-OS 正典、QIOS、通用 Skill 沙箱、分布式 exactly-once、发布者认证或掉电持久性。
 
+### 3.6 2026-11-17 public-only egress 与 DNS rebinding 门禁
+
+| 攻击／碰撞 | 预注册拒绝条件 | 自动化与实测对应 |
+|---|---|---|
+| URL 直接使用 loopback／私网／metadata | 默认策略在 TCP accept 前返回 `blocked_egress` | EGR-01／02；48 条 Rust＋Python 地址已知答案；旧端 `verified／1 hit`，干净新端 `blocked_egress／0 hit` |
+| 域名解析到非公开地址 | 实际 resolver 答案验证失败，不能拨号 | `hostname_resolving_to_loopback_is_blocked_before_any_dial` |
+| 混合公网＋非公开答案、空答案、33 个答案 | 整组 fail-closed；答案硬顶 32 | `mixed_answers_and_answer_capacity_fail_closed` |
+| 验证后第二次 DNS rebinding | 策略解析恰好一次；实际 agent 只拨已验证地址，原 Host 保留 | `validated_resolution_is_the_only_resolution_and_the_actual_dial_target`：A 收到请求、B 零命中、`Host: pinned.test:<port>` |
+| 代理环境变量绕过固定目的 | 显式本地放权仍不得使用环境代理 | EGR-04 进程差分：六类代理变量同时注入，target=1、proxy=0、verified |
+| 不可信 Session／Registry 私加放权字段 | `deny_unknown_fields` 拒绝；不能开启非公开 egress | EGR-06：`untrusted_session_json_cannot_enable_non_public_egress`；真实 CLI exit=2、零命中、无报告 |
+| 阻塞 resolver 拖死调用方 | 小预算内有界等待；worker 无 HTTP agent | EGR-05：20ms 预算对 250ms resolver；不声称底层 resolver 强制取消或线程资源隔离 |
+| 门禁误改 file／链／执行语义 | 既有全部固定夹具、deadline 与重放保持不漂移 | EGR-07：实现提交无 `.git`、空 target 完整重建，99／99 测试和全部独立判读通过 |
+
+预注册、原始旧新进程结果和综合证据分别为 `evidence/egress-preregister-2026-11-17.json`、`evidence/egress-differential-2026-11-17.json`、`evidence/egress-consistency-2026-11-17.json`。首轮 Rust／Python 分类顺序 FAIL 与差分测试器 bytes 编码 FAIL 均保留在综合证据的 `development_corrections`，未计作首轮通过。PASS 只覆盖该 HTTP client 的应用层目的地址门禁，不是 network namespace、外层 egress proxy、hostile OS 防护或通用 SSRF 证明。
+
 ## 4. JCS 候选包评估与不采用结论
 
 检索到 `serde_jcs 0.2.0`、`jcs-canonicalize 0.2.1`、`serde_json_canonicalizer 0.4.1`。目前只评估，没有把任何候选加入本仓依赖。
@@ -192,9 +209,9 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 ## 5. 仍未关闭的攻击面与后续债
 
-1. **DNS 与连接层 SSRF**：DNS rebinding／pinning、解析器意见不一致、连接时 IP 绑定尚未实现；解析过程也不一定受单会话总 timeout 中断。
-2. **地址与出口策略**：私网、loopback、link-local、cloud metadata 等地址没有应用层分类拒绝，仍需外层 egress 隔离；禁重定向和默认 HTTPS 不等于完整 SSRF 防护。
-3. **进程级资源隔离**：64 会话、全轮询 deadline、逐请求剩余时间、JSON 深度／节点与账本基数已限；进程级内存、CPU、文件描述符硬隔离和动态费率策略未实现，DNS 解析也不因本轮门禁而被证明完整受控。
+1. **出口策略的进程外边界**：本 HTTP client 已有 public-only 分类、完整答案验证、单次策略解析和连接固定；其他进程、其他协议与非协作代码仍可自行拨号。network namespace、外层 egress proxy、hostile OS 与通用 SSRF 防护仍需独立机制。
+2. **DNS 取消与线程生命周期**：解析等待超时只释放调用方，worker 不持有 HTTP agent；底层系统 resolver 是否取消、阻塞线程何时退出及其资源消耗没有被强制隔离。地址表也是显式保守策略，不声称替代完整 IANA 注册表或外部威胁情报。
+3. **进程级资源隔离**：64 会话、全轮询 deadline、逐请求剩余时间、JSON 深度／节点与账本基数已限；进程级内存、CPU、文件描述符硬隔离和动态费率策略未实现，DNS 阻塞 worker 也未获得独立资源域。
 4. **多写者协调**：协作 CLI 的 sidecar 排他锁已实测；路径别名、非协作写者、跨主机语义、CAS、WAL 和原子 check-and-persist 未实现，不能称为分布式单写者。
 5. **整份快照回滚与分裂视图**：攻击者若能同时替换 state 和旧链，本地检查点与策略摘要也会回到旧值。需要外部单调计数器、签名 checkpoint、独立 witness／quorum 及并发原子更新。
 6. **发布者与指令授权**：无签名链不认证发布者；后续可映射 A2A/JWS 或 SCITT Signed Statement，但签名对象必须覆盖指令及授权范围，而非只签 Agent Card。
@@ -211,6 +228,8 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 `scripts/verify-policy-python.py` 独立重建 Registry 安全投影和策略摘要，并自证：说明字段变化不改变摘要、显式默认 canonical 不改变摘要、URL 变化必须改变摘要。它可检查 v4 snapshot 的 `network_name` 与 `policy_hash`，但不验证签名、外部信任或状态文件未被整体替换。
 
+`scripts/verify-egress-python.py` 使用 Python `ipaddress` 与独立 CIDR 表重算 48 条预注册 IPv4／IPv6 分类，不读取 Rust 分类输出。它还独立检查 blocked 报告的汇总、单记录、`blocked_egress` 状态、loopback 原因与 TCP hits=0，并以错误状态、伪造 verified 汇总、实际发生连接和额外记录四类已知答案假报告自证。该判读不证明 network namespace、底层 DNS 取消或通用 SSRF 防护。
+
 `scripts/verify-json-budget-python.py` 使用独立严格重复键解析与显式栈迭代遍历，复算根深度、最大深度和全文档值节点；对象键不另计。它对 64 层接受、65 层拒绝、16384 节点接受、16385 节点拒绝、跨分支计数和转义重复键进行已知答案自证，不读取 Rust 中间结果，也不证明进程内存上限。
 
 `scripts/verify-wave-python.py` 从 Registry 和原始 snapshot 独立重建分组、过期过滤、来源轮转、双配额、deferred 计数、ledger hash 与 plan hash，并拒绝 Job 篡改和账本绑定篡改。其范围为 qfos-wave-v1 无浮点子集，不是 JCS、发布者认证、执行证明或 QIOS 判读器。
@@ -219,6 +238,10 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 ## 7. 可复算证据入口
 
+- `evidence/egress-consistency-2026-11-17.json`：实现提交、EGR-01–07、99 项测试、无 `.git` 空 target 干净重建、48 条独立地址判据、四项假报告反证、真实旧新差分与开发纠偏的综合证据。
+- `evidence/egress-differential-2026-11-17.json`：旧端 loopback 实际 verified、新默认端零命中阻断、显式本地放权代理零命中与 Registry 放权注入拒绝的原始进程证据；新端就是干净归档二进制。
+- `evidence/egress-preregister-2026-11-17.json`：实现前登记的七项 egress 判据及未覆盖边界。
+- `evidence/egress-clean-rebuild-2026-11-17.log`：实现提交归档的完整干净重建输出；`egress-smoke-2026-11-17.json` 与 `egress-smoke-state-2026-11-17.json` 保存对应烟测原始结果。
 - `evidence/execution-consistency-2026-11-17.json`：实现提交、92 项测试、无 `.git` 空 target 干净重建、真实执行与重放、九项旧新差分、五类独立判读和 11 项 artifact 的综合证据。
 - `evidence/execution-clean-rebuild-2026-11-17.log`：实现提交归档的完整干净重建输出；`execution-smoke-2026-11-17.json` 与 `execution-smoke-state-2026-11-17.json` 保存对应烟测原始结果。
 - `evidence/execution-preregister-2026-11-16.json`：真实执行、五类死信、恢复幂等、独立判读、v4 原子性与旧新差分的实现前判据。
@@ -240,9 +263,11 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 - `evidence/attack-consistency-2026-11-10.json`：上一轮历史证据，保留当时的公网 URL 差异，不回写为本轮结果。
 - `../scripts/verify-outbox-python.py`：独立 Python 链判读与已知答案／篡改负例自证入口。
 - `../scripts/verify-policy-python.py`：独立 Python 策略投影、fixture 与 live snapshot 对拍入口。
+- `../scripts/verify-egress-python.py`：独立 IPv4／IPv6 分类、48 条已知答案与四类假报告反证入口。
+- `../scripts/egress-differential.py`：真实 loopback target／proxy、旧新 CLI、socket hits 和独立 blocked 报告判读的差分入口。
 - `../scripts/verify-json-budget-python.py`：独立迭代 JSON 深度／节点判读与已知答案入口。
 - `../scripts/verify-wave-python.py`：独立 Python 波次重建、静态已知答案与篡改负例入口。
 - `../scripts/verify-execution-python.py`：独立执行语义、状态／报告勾稽、固定夹具与 rehashed 假语义负例入口。
-- `../scripts/build-all.sh`：格式、Clippy、全部测试、凭据扫描、五类 Python 判读、认知示例、波次与执行固定夹具字节对拍、执行重放和 CLI 烟测的统一重建门禁。
+- `../scripts/build-all.sh`：格式、Clippy、全部测试、凭据扫描、六类 Python 判读、认知示例、波次与执行固定夹具字节对拍、执行重放和 CLI 烟测的统一重建门禁。
 
 本轮公网正典已明确迁移到实际发布的 `.../main/...` 形式；当前字节一致只适用于本轮采集时点，不能回改 2026-11-10 的历史差异。镜像 `verified` 也不等于发布者认证。所有外部状态（推送、CI、ACK、正典 active、KEY-SYNC-01）均需要独立回执。

@@ -1,6 +1,16 @@
 # 实现状态（本轮实测证据：2026-11-16—17）
 
-## 最新续拍：`qfos-exec-v1` 受控执行与恢复
+## 最新续拍：public-only egress 与 DNS rebinding 闭环
+
+- 实现提交为 `32b450b01da77dab77667d930888cb201a913699`（`feat(bridge): pin validated public egress destinations`），基线为 `03cf7d8b7ee71e97fa35f25c6ab9af3ec7a3af26`。从实现提交的 Git 归档在无 `.git`、空 target 环境完整重建，99 个 Rust 测试通过：bridge 单元 37、bridge 集成 48、kernel 11、userspace 3，失败为 0；rustfmt、Clippy、凭据扫描、六类独立判读、固定夹具、执行重放、认知示例和 CLI 烟测全部通过。
+- 干净 tar 归档 SHA-256 为 `84213d0f89ecba27c3f120c2afe82f2132dfaff1e4b79760bcbcaa2059597515`，干净 debug 新二进制 SHA-256 为 `4ce77eb6ce94937c39a6fa2f5b99e4297a5a0092ed777b09e0c00453bd3898af`。综合证据为 `evidence/egress-consistency-2026-11-17.json`，SHA-256 为 `39f0ed02005e8416e74e48c2d2b2e28343a57f942f7b394890ef04ebb3186f66`，11 项 artifact 的路径、字节数与摘要已复算。
+- HTTP(S) 默认 public-only。IP 字面量直接分类；域名只进行一次策略解析，空答案、超过 32 个答案或任一非公开成员使整组失败。实际 agent 只拨验证后的固定 `SocketAddr`，保留原 Host／TLS server name，环境代理与重定向关闭；解析、连接、读、写共享剩余预算。
+- loopback、私网、link-local、shared／CGNAT、文档、benchmarking、reserved、multicast、IPv4-mapped、NAT64、Teredo／IETF、6to4、ULA 与非全局 IPv6 等 48 条预注册已知答案由 Rust 和独立 Python 一致复核。独立判读还拒绝错误状态、伪造 verified 汇总、实际发生连接和额外记录四类假报告。
+- 旧新真实进程差分使用上述干净新二进制重跑：旧端访问 loopback 后为 `verified／exit 0／target 1 hit`；新默认端为 `blocked_egress／exit 2／target 0 hit`。显式本地放权时目标 1 hit、恶意代理 0 hit、结果 verified；Registry 注入 `allow_non_public_egress` 则 exit 2、零命中且无报告。原始结果见 `evidence/egress-differential-2026-11-17.json`，SHA-256 为 `9c03a0a48a56ef9607a21ea82a8f95cca030998393a034e37d8fc7528c740490`。
+- 首轮 `2001:2::1` 分类顺序 FAIL、Python 对 `::ffff:127.0.0.1` 的判定顺序 FAIL、差分测试器 bytes 编码 FAIL，以及一次外层 shell 状态采集错误均公开保留；修正后从整组重跑，没有把失败当通过。
+- 当前结论只覆盖该 HTTP client 的应用层目的地址门禁。它不是 network namespace、外层 egress proxy、hostile OS 防护或通用 SSRF 证明；DNS 调用方等待有界不等于底层系统解析被强制取消，阻塞 worker 线程也未获得资源隔离。外部 QF-OS／QIOS、通用 Skill 沙箱、分布式 exactly-once、签名、独立 witness、WAL／fsync 与整份快照回滚等旧债继续保留。
+
+## 2026-11-16—17 `qfos-exec-v1` 受控执行与恢复（历史证据）
 
 - 实现提交为 `098dab63c3d449bc21a43f79d138b156624b7b15`（`feat(bridge): add bounded wave execution and recovery`）。从该提交的 Git 归档在无 `.git`、空 target 环境完整重建，统一门禁通过 92 个 Rust 测试：bridge 单元 32、bridge 集成 46、kernel 11、userspace 3，失败为 0；rustfmt、Clippy、凭据扫描、五类独立判读、固定夹具重建／字节对拍、执行重放、认知示例和 CLI 烟测均通过。
 - 干净归档 SHA-256 为 `c645bedeb4496703417e1d47de689884d6d2089cb8e545d279ea5a9fb871bd89`，干净 debug 二进制 SHA-256 为 `a16bc5e9ea360e078def92d87da9606468771f98af027caa2546f6dedf3ceb6e`。综合证据为 `evidence/execution-consistency-2026-11-17.json`，SHA-256 为 `6703407ff64ee27226cc197c32baf3df8d3aee3107776db866368931090401b9`，其 11 项 artifact 的路径、字节数与摘要已复算。差分新端 `07444fd6…e24` 仍是提交前工作树 debug 二进制，不与上述干净二进制混用。
@@ -75,6 +85,7 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 
 - `verify-outbox-python.py`：无浮点 V1 链重算、指令来源检查、已知答案和篡改自证；不是 RFC 8785 JCS。
 - `verify-policy-python.py`：Registry 安全投影、策略摘要、三项自证和 live snapshot 对拍；fixture 摘要仍为 `d5805bd450f0778f996fd6094d3a1723114da35be1adee5ca8bd0f361a3c7a21`。
+- `verify-egress-python.py`：独立 `ipaddress`／CIDR 地址分类、48 条已知答案与 blocked 报告复核；四类假报告自证通过，不证明外层网络隔离。
 - `verify-wave-python.py`：从原始 snapshot 重建完整波次计划；两个篡改自证通过，范围为无浮点 qfos-wave-v1 子集，不是签名、执行或 QIOS 证明。当前 v4 静态计划哈希为 `5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34`。
 - `verify-execution-python.py`：独立推导执行输出与五类失败、重算全部摘要并勾稽计划／报告／最终状态；五项自证含 rehashed 假语义，固定执行夹具为 2 回执＋5 死信。
 
@@ -88,13 +99,15 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 
 最后已核验正典状态仍为历史记录 `asfa-ai = conditional`（2026-11-09）。本轮没有 cisvr ACK、正典升 active 或 KEY-SYNC-01 relay 完成回执；写入 Outbox 不等于真实投递或对方 ACK。
 
-本地 remote 为 `https://github.com/chepin-ai/test.git`，不含明文凭证。此前泄露的 PAT 仍应撤销／轮换，当前没有 GitHub 侧撤销证据。2026-11-17 推送前 `ls-remote` 成功，远端 `main=c573dc496dc3caeab1f0f143373c80859ccd93d4`；首次 push 以 TLS 非正确终止失败，随后读回超时。单次 HTTP/1.1 重试到达非交互认证边界，因没有可用用户名／凭证失败；最终 `ls-remote` 成功且远端仍为同一哈希。因此本轮未推送，`remote≠local`，推送候选相对远端为 `ahead_by=13, behind_by=0`，没有新外部 CI 回执。原始记录见 `evidence/execution-publication-2026-11-17.json`。未恢复或输出任何历史 PAT／CMD 值。
+本地 remote 为 `https://github.com/chepin-ai/test.git`，不含明文凭证。此前泄露的 PAT 仍应撤销／轮换，当前没有 GitHub 侧撤销证据。上一轮推送以 TLS 错误和非交互认证缺失失败，最终远端 `main` 仍为 `c573dc496dc3caeab1f0f143373c80859ccd93d4`，当时候选为 `ahead_by=13, behind_by=0`；原始记录见 `evidence/execution-publication-2026-11-17.json`。
+
+本轮 egress 证据候选为 `713a3608bee51b9ac44aa1728e06fdecc9b5a71c`。2026-11-17 无凭证 `ls-remote` 第一次即成功，远端仍为同一 `c573dc4…`；候选相对远端为 `ahead_by=15, behind_by=0`。当前无可用 PAT／CMD，未发起认证推送，结论为 `NOT_PUSHED`、`remote≠local`，没有新外部 CI；未恢复或输出任何历史凭证。证据提交仅 amend 发布记录与对应文档，分叉计数不变。原始记录见 `evidence/egress-publication-2026-11-17.json`。
 
 ## 明确未实现与后续债
 
-1. DNS rebinding／pinning、解析器意见不一致、连接时 IP 绑定与 DNS 超时覆盖；
-2. 私网、loopback、link-local、cloud metadata 地址策略与外层 egress 隔离；
-3. 进程级内存、CPU、文件描述符硬隔离、CLI 轮询阶段外的整体执行预算，以及 DNS 解析完整受控证明；全轮询 deadline、逐请求剩余时间和 JSON 深度／节点预算已实现；
+1. 本 HTTP client 之外的出口流量、network namespace、外层 egress proxy、hostile OS 与通用 SSRF 防护；
+2. 底层 DNS 强制取消、阻塞 resolver 线程回收与资源隔离；应用层单次解析、全答案验证和连接固定已实现；
+3. 进程级内存、CPU、文件描述符硬隔离与 CLI 轮询阶段外的整体执行预算；全轮询 deadline、解析等待与逐请求剩余时间、JSON 深度／节点预算已实现；
 4. 路径别名、非协作写者、跨主机锁语义、CAS、WAL 和原子 check-and-persist；
 5. 整份快照回滚、分裂视图、签名 checkpoint、独立 witness／quorum；
 6. 发布者与指令授权、可信时间；

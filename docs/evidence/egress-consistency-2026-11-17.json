@@ -1,0 +1,212 @@
+{
+  "schema_version": "asfa-egress-consistency/v1",
+  "recorded_at": "2026-11-17T03:50:33+08:00",
+  "baseline_commit": "03cf7d8b7ee71e97fa35f25c6ab9af3ec7a3af26",
+  "implementation_commit": "32b450b01da77dab77667d930888cb201a913699",
+  "implementation_subject": "feat(bridge): pin validated public egress destinations",
+  "clean_rebuild": {
+    "source": "git archive of implementation_commit; no .git; empty CARGO_TARGET_DIR; locked dependencies",
+    "archive_format": "tar",
+    "archive_bytes": 798720,
+    "archive_sha256": "84213d0f89ecba27c3f120c2afe82f2132dfaff1e4b79760bcbcaa2059597515",
+    "no_git_in_extracted_source": true,
+    "empty_target_before_build": true,
+    "binary_profile": "debug",
+    "binary_sha256": "4ce77eb6ce94937c39a6fa2f5b99e4297a5a0092ed777b09e0c00453bd3898af",
+    "rustc": "rustc 1.100.0 (0ef1bc386 2026-11-09)",
+    "cargo": "cargo 1.100.0 (3acc79c0c 2026-11-05)",
+    "command": "bash scripts/build-all.sh",
+    "exit_code": 0,
+    "verdict": "PASS",
+    "tests": {
+      "bridge_unit": 37,
+      "bridge_integration": 48,
+      "kernel": 11,
+      "userspace": 3,
+      "total": 99,
+      "failed": 0
+    },
+    "rustfmt": "PASS",
+    "clippy": "zero warnings under -D warnings",
+    "credential_scan": "PASS",
+    "independent_oracles": {
+      "outbox": "PASS; three documents; escaped duplicate and tampered chain rejected for each",
+      "policy": "PASS; three self-tests and live snapshot match",
+      "egress": "PASS; 48 preregistered addresses; four false blocked-report variants rejected",
+      "json_budget": "PASS; five self-tests; depth=64 nodes=16384",
+      "wave": "PASS; two self-tests; current v4 plan hash matched",
+      "execution": "PASS; five self-tests including rehashed false semantics"
+    },
+    "smoke": {
+      "total": 3,
+      "verified": 1,
+      "failed": 2
+    }
+  },
+  "criteria": [
+    {
+      "id": "EGR-01",
+      "verdict": "PASS",
+      "evidence": "Rust known-answer test plus independent Python ipaddress/CIDR recomputation: 48/48; four false-report oracle self-tests rejected."
+    },
+    {
+      "id": "EGR-02",
+      "verdict": "PASS",
+      "evidence": "Old exit=0, verified, target_hits=1; clean new default exit=2, blocked_egress, target_hits=0."
+    },
+    {
+      "id": "EGR-03",
+      "verdict": "PASS",
+      "evidence": "hostname_resolving_to_loopback_is_blocked_before_any_dial; mixed_answers_and_answer_capacity_fail_closed covers mixed, empty and 33-answer inputs."
+    },
+    {
+      "id": "EGR-04",
+      "verdict": "PASS",
+      "evidence": "Exactly one policy resolution; only listener A accepts; listener B=0; Host pinned.test preserved. Explicit-local process differential ignores six hostile proxy variables: target_hits=1, proxy_hits=0."
+    },
+    {
+      "id": "EGR-05",
+      "verdict": "PASS",
+      "evidence": "resolution_wait_is_bounded_even_when_the_worker_is_slow: 20ms bound against 250ms resolver; worker owns no HTTP agent. Underlying resolver cancellation and thread-resource isolation are not claimed."
+    },
+    {
+      "id": "EGR-06",
+      "verdict": "PASS",
+      "evidence": "untrusted_session_json_cannot_enable_non_public_egress and process differential: injected Registry field exits=2, target_hits=0, no report, unknown-field error."
+    },
+    {
+      "id": "EGR-07",
+      "verdict": "PASS",
+      "evidence": "No-.git empty-target archive build ran the complete gate; 99/99 tests, file transport, chain, deadline, fixed wave/execution/replay fixtures and smoke all passed."
+    }
+  ],
+  "differential": {
+    "artifact": "docs/evidence/egress-differential-2026-11-17.json",
+    "verdict": "PASS",
+    "old_binary_sha256": "a8e27ec2c29cfd51de6311dc18108401a4701235b55199190945f7f6d9c36f83",
+    "new_binary_sha256": "4ce77eb6ce94937c39a6fa2f5b99e4297a5a0092ed777b09e0c00453bd3898af",
+    "new_binary_provenance": "debug binary built from the implementation-commit archive with no .git and an initially empty target",
+    "clean_archive_binary_used_for_this_differential": true,
+    "cases": {
+      "EGR-02-old-loopback": {
+        "exit": 0,
+        "target_hits": 1,
+        "proxy_hits": 0,
+        "status": [
+          "verified"
+        ]
+      },
+      "EGR-02-new-loopback": {
+        "exit": 2,
+        "target_hits": 0,
+        "proxy_hits": 0,
+        "status": [
+          "blocked_egress"
+        ]
+      },
+      "EGR-04-explicit-local-proxy-bypass": {
+        "exit": 0,
+        "target_hits": 1,
+        "proxy_hits": 0,
+        "status": [
+          "verified"
+        ]
+      },
+      "EGR-06-registry-escape": {
+        "exit": 2,
+        "target_hits": 0,
+        "proxy_hits": 0,
+        "status": null
+      }
+    }
+  },
+  "regression_anchors": {
+    "wave_plan_hash": "5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34",
+    "execution_plan_hash": "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a",
+    "execution_report_hash": "4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c",
+    "replay_execution_hash": "9dce14b4b357f72851dff2d67af085bd8c10e560aca51c414fd07ffe416be36f",
+    "execution_consistency_sha256": "6703407ff64ee27226cc197c32baf3df8d3aee3107776db866368931090401b9",
+    "execution_publication_sha256": "2f7dc6dfd67f9ccadd1f12084ff144116f9019d6d0b5918f36129824552e1314"
+  },
+  "development_corrections": [
+    {
+      "stage": "initial Rust address test",
+      "verdict_before_fix": "FAIL",
+      "observed": "2001:2::1 classified as transition_or_ietf instead of preregistered benchmarking",
+      "correction": "Check 2001:2::/48 before broader 2001::/23; rerun passed."
+    },
+    {
+      "stage": "initial independent Python oracle",
+      "verdict_before_fix": "FAIL",
+      "observed": "::ffff:127.0.0.1 classified as loopback before ipv4_mapped",
+      "correction": "Check ipv4_mapped before Python is_loopback, preserving preregistered semantics; rerun passed."
+    },
+    {
+      "stage": "initial process differential harness",
+      "verdict_before_fix": "FAIL",
+      "observed": "AttributeError: 'bytes' object has no attribute 'encode' before explicit-local case execution",
+      "correction": "Accept both str and bytes in OneShotServer; reran the complete differential from the old case."
+    },
+    {
+      "stage": "first worktree full-gate invocation",
+      "verdict_before_fix": "STATUS_COLLECTION_ERROR",
+      "observed": "All gate steps completed, but outer /bin/sh PIPESTATUS collection raised Bad substitution",
+      "correction": "Reran without the wrapper pipeline and used build-all.sh exit code 0; clean archive later reran the same gate independently."
+    }
+  ],
+  "not_proven": [
+    "kernel/network-namespace egress enforcement, an external egress proxy, or protection against a hostile OS or non-cooperating process",
+    "complete cancellation of a timed-out system resolver, bounded resolver-thread lifetime, or process-level memory/CPU/file-descriptor isolation",
+    "universal SSRF protection outside this HTTP client or safety of arbitrary schemes, redirects, or downstream components",
+    "publisher authentication, result signatures, trusted time, independent witnesses, zero-knowledge proofs, or formal execution proofs",
+    "canonical external QF-OS execution compatibility, QIOS compatibility, general Skill sandboxing, distributed exactly-once, or fsync-backed power-loss durability",
+    "remote Git synchronization, external CI, alliance active, cisvr ACK, KEY-SYNC-01, or old PAT revocation"
+  ],
+  "artifacts": {
+    "docs/evidence/egress-preregister-2026-11-17.json": {
+      "bytes": 2531,
+      "sha256": "27e43adb5d8e2bb67a9db97fc8c6662875a184cef3900d3576d876a89b339904"
+    },
+    "docs/evidence/egress-differential-2026-11-17.json": {
+      "bytes": 5409,
+      "sha256": "9c03a0a48a56ef9607a21ea82a8f95cca030998393a034e37d8fc7528c740490"
+    },
+    "docs/evidence/egress-clean-rebuild-2026-11-17.log": {
+      "bytes": 19302,
+      "sha256": "81093d87608f0986ddb0d22457855d1816aa7b153be150ae3095f6b99eaf30c8"
+    },
+    "docs/evidence/egress-smoke-2026-11-17.json": {
+      "bytes": 1200,
+      "sha256": "5fde1432f9ff7ef5885e17be87395368c16e6553a34f9aa7ca39644d051301b6"
+    },
+    "docs/evidence/egress-smoke-state-2026-11-17.json": {
+      "bytes": 414,
+      "sha256": "d6673fecb808ad39849ae0ca07414517bcfb8d6943623f7aa7e01d7cb70bd8f9"
+    },
+    "fixtures/egress-address-cases.json": {
+      "bytes": 3036,
+      "sha256": "844ca3b7849c5e01d5ff8825a3b4f4135844d63c7bcf07f48ce970fa35031bf5"
+    },
+    "bridge-poller/src/egress.rs": {
+      "bytes": 9372,
+      "sha256": "ffbe49773b419df12487ee7662c17bae8706b2397ec11f760f0298adb10f4bef"
+    },
+    "bridge-poller/src/poller.rs": {
+      "bytes": 19004,
+      "sha256": "560d4189ad7ea0d2673bee687f11894ed2e32ff18ea3891b6c02b814e407292d"
+    },
+    "bridge-poller/tests/bridge.rs": {
+      "bytes": 70004,
+      "sha256": "bfc8d1d462bea806ae64497c01f8db06a152fa69be5783577441c413783d3046"
+    },
+    "scripts/verify-egress-python.py": {
+      "bytes": 5549,
+      "sha256": "2de5a31d953da613ff6dd9ad72fde72c9297581c61d147b4c3b98755486dd99a"
+    },
+    "scripts/egress-differential.py": {
+      "bytes": 8109,
+      "sha256": "749780a379aecbe0b4e641a7641759faddc95517a5cc8bc18ff4f5330eb22486"
+    }
+  },
+  "verdict": "PASS"
+}

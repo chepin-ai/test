@@ -63,3 +63,14 @@
 - `execution-clean-rebuild-2026-11-17.log`：上述归档的完整重建输出；`execution-smoke-2026-11-17.json` 与 `execution-smoke-state-2026-11-17.json` 保存原始烟测报告和 v4 状态。固定计划哈希为 `f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a`，执行报告哈希为 `4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c`，重放报告哈希为 `9dce14b4b357f72851dff2d67af085bd8c10e560aca51c414fd07ffe416be36f`。
 - `execution-publication-2026-11-17.json`：记录真实发布结果。首次 push 以 TLS 非正确终止失败，随后读回超时；HTTP/1.1 重试因非交互认证不可用失败，最终读回成功且远端 `main` 仍为 `c573dc496dc3caeab1f0f143373c80859ccd93d4`。推送候选为 `7523979df84750c9f8077157ed24163c41f93719`，相对远端 `ahead_by=13, behind_by=0`；结论为 `NOT_PUSHED`、`remote≠local`，无新外部 CI，未恢复或输出历史 PAT／CMD。
 - PASS 只覆盖仓内 `qfos-exec-v1`，不证明外部 QF-OS 正典、QIOS、通用 Skill 沙箱、租约、分布式 exactly-once、发布者认证、结果签名或掉电持久性。
+
+## 2026-11-17 public-only egress 与 DNS rebinding
+
+- `egress-preregister-2026-11-17.json`：实现前登记的 EGR-01–07，覆盖 48 条地址已知答案、旧新 loopback 差分、混合／空／超量答案、单次解析与固定拨号、有界 DNS 等待、Registry 放权注入和完整回归；不含结果声称。
+- `egress-differential-2026-11-17.json`：旧端基线提交 `03cf7d8b7ee71e97fa35f25c6ab9af3ec7a3af26` 与实现提交干净归档二进制的真实进程差分。旧端 `verified／1 hit`；新默认端 `blocked_egress／0 hit`；显式本地放权目标 1 hit、恶意代理 0 hit；Registry 私加放权字段被拒绝。SHA-256 为 `9c03a0a48a56ef9607a21ea82a8f95cca030998393a034e37d8fc7528c740490`。
+- `egress-consistency-2026-11-17.json`：实现提交 `32b450b01da77dab77667d930888cb201a913699` 的综合证据。无 `.git`、空 target 干净重建全门禁通过，99／99 测试分解为 bridge 单元 37、bridge 集成 48、kernel 11、userspace 3；归档 SHA-256 为 `84213d0f89ecba27c3f120c2afe82f2132dfaff1e4b79760bcbcaa2059597515`，干净 debug 二进制 SHA-256 为 `4ce77eb6ce94937c39a6fa2f5b99e4297a5a0092ed777b09e0c00453bd3898af`。综合证据 SHA-256 为 `39f0ed02005e8416e74e48c2d2b2e28343a57f942f7b394890ef04ebb3186f66`，11 项 artifact 已复算，首轮 FAIL 均保留在 `development_corrections`。
+- `egress-clean-rebuild-2026-11-17.log`：上述归档的完整干净重建输出；`egress-smoke-2026-11-17.json` 与 `egress-smoke-state-2026-11-17.json` 保存对应原始烟测报告与 v4 状态。固定 wave／execution／replay 哈希与既有执行证据摘要均未漂移。
+- `egress-publication-2026-11-17.json`：证据候选 `713a3608bee51b9ac44aa1728e06fdecc9b5a71c` 的真实发布边界。无凭证读回第一次成功，远端 `main` 仍为 `c573dc496dc3caeab1f0f143373c80859ccd93d4`，候选 `ahead_by=15, behind_by=0`；无当前凭证，未发起认证推送，`NOT_PUSHED`，无新外部 CI。证据提交仅 amend 本记录与对应文档，分叉计数不变。
+- `../scripts/verify-egress-python.py`：独立使用 Python `ipaddress` 与 CIDR 表重算 48 条地址答案，并拒绝错误状态、伪造 verified 汇总、实际发生连接和额外记录四类假报告；不是网络命名空间或形式化网络安全证明。
+- `../scripts/egress-differential.py`：建立真实 loopback HTTP target／proxy、Registry 和 genesis Outbox，执行旧新进程、采集 socket hits 与报告，再交给独立判读器复核。
+- PASS 只覆盖本 HTTP client 的应用层 public-only 与 rebinding 门禁；不证明底层 DNS 强制取消、线程资源隔离、外层 egress proxy、hostile OS 防护、通用 SSRF、发布者认证、外部 QF-OS／QIOS 或远端 Git 同步。

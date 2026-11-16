@@ -13,6 +13,8 @@
   - 可执行 JSON Skill 注册表。
 - `asfa-bridge-poller`
   - 默认 HTTPS 轮询；`file://` 与 HTTP 必须显式授权，自动重定向关闭且 3xx 显式失败；
+  - HTTP(S) 默认 public-only egress：IP 字面量直接分类，域名只解析一次并检查组内全部地址；实际连接固定到已验证地址，保留原 Host／TLS server name，环境代理关闭；
+  - loopback、私网、link-local、shared、文档、保留、组播及 IPv4-mapped／NAT64／transition 等目的地址在拨号前以 `blocked_egress` 失败；只有进程级 `--allow-non-public-egress` 可为本地测试／受控遗留部署放权，Registry 无法开启；
   - `Outbox.url` 绑定显式正典 URL，只读镜像可在声明后与读取 URL 不同；
   - 无签名哈希链逐块重算；
   - Outbox、Registry、Snapshot 统一严格 JSON 入口，递归拒绝重复、转义后同名键及未知协议字段；
@@ -43,6 +45,7 @@ cargo run --example cognitive_demo -p asfa-userspace
 python3 scripts/verify-outbox-python.py --self-test \
   fixtures/python-oracle-outbox.json outbox/asfa-ai-outbox.json
 python3 scripts/verify-policy-python.py --fixture fixtures/policy-oracle.json
+python3 scripts/verify-egress-python.py --self-test
 python3 scripts/verify-json-budget-python.py
 python3 scripts/verify-wave-python.py \
   --expect-plan-hash 5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34
@@ -91,7 +94,7 @@ cargo run -p asfa-bridge-poller -- \
   --execute-wave --execution-out /tmp/asfa-exec-report.json --now 100
 ```
 
-`--fail-on-error` 会把轮询失败、入库冲突／非法指令、消费目标不存在以及新产生或恢复的执行死信变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v4 状态同时绑定 `network_name` 与 Registry 安全策略摘要 `policy_hash`；旧 v1／v2／v3、跨网络及同网络策略变化均不做隐式迁移，说明性 `role`／`note` 变化不影响兼容性。执行模式先保存原计划，再暂存执行并原子保存 v4 状态，最后写执行报告；报告写坏后可从计划与持久回执恢复。CLI 容量参数只能把硬上限调低，不能调高；sidecar 锁只约束使用相同词法状态路径的协作进程，不是分布式锁。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、非协作写者、DNS 完整超时覆盖与进程级内存／CPU 隔离仍不在保障范围内。
+`--fail-on-error` 会把轮询失败、入库冲突／非法指令、消费目标不存在以及新产生或恢复的执行死信变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v4 状态同时绑定 `network_name` 与 Registry 安全策略摘要 `policy_hash`；旧 v1／v2／v3、跨网络及同网络策略变化均不做隐式迁移，说明性 `role`／`note` 变化不影响兼容性。执行模式先保存原计划，再暂存执行并原子保存 v4 状态，最后写执行报告；报告写坏后可从计划与持久回执恢复。CLI 容量参数只能把硬上限调低，不能调高；sidecar 锁只约束使用相同词法状态路径的协作进程，不是分布式锁。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、非协作写者、底层 DNS 强制取消／线程回收与进程级内存／CPU／文件描述符隔离仍不在保障范围内。
 
 一键全部门禁（`/mnt` 等禁止执行位挂载下也能构建）：
 
@@ -99,7 +102,7 @@ cargo run -p asfa-bridge-poller -- \
 bash scripts/build-all.sh
 ```
 
-预期：92 项 Rust 测试通过；烟测汇总为 `total=3, verified=1, failed=2`，两个失败分别是故意设置的非法 JSON 和缺失文件。QF-OS 静态向量准入 `a1 → b1 → a2`，两个延后项分别由来源配额和全局配额解释。执行夹具包含 7 项作业，实测 2 个真实成功回执与 5 个显式死信，重放为 7 项 skipped 且账本字节不变；Python 独立重建输出与失败类别，并以 5 个篡改样本自证，其中包含篡改后重算哈希的假输出与假失败类别。独立 JSON 判读以迭代遍历复核深度、全文档节点数、转义重复键及五个已知答案负例。
+预期：99 项 Rust 测试通过；烟测汇总为 `total=3, verified=1, failed=2`，两个失败分别是故意设置的非法 JSON 和缺失文件。egress 预注册 48 个 IPv4／IPv6 已知答案由 Rust 与独立 Python 同时复核；旧新真实进程差分证明旧端访问 loopback 并 verified，新默认端在零 TCP accept 下返回 `blocked_egress`，显式本地放权仍可达目标且六类恶意代理环境变量零命中。QF-OS 静态向量准入 `a1 → b1 → a2`，两个延后项分别由来源配额和全局配额解释。执行夹具包含 7 项作业，实测 2 个真实成功回执与 5 个显式死信，重放为 7 项 skipped 且账本字节不变；Python 独立重建输出与失败类别，并以 5 个篡改样本自证，其中包含篡改后重算哈希的假输出与假失败类别。独立 JSON 判读以迭代遍历复核深度、全文档节点数、转义重复键及五个已知答案负例。
 
 ## 证据与协议
 

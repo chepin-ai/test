@@ -1,0 +1,167 @@
+{
+  "schema_version": "asfa-egress-differential/v1",
+  "recorded_at": "2026-11-17",
+  "old_binary": {
+    "path": "/tmp/asfa-egress-old-target/debug/asfa-bridge-poller",
+    "sha256": "a8e27ec2c29cfd51de6311dc18108401a4701235b55199190945f7f6d9c36f83"
+  },
+  "new_binary": {
+    "path": "/tmp/asfa-egress-clean-target/debug/asfa-bridge-poller",
+    "sha256": "4ce77eb6ce94937c39a6fa2f5b99e4297a5a0092ed777b09e0c00453bd3898af"
+  },
+  "independent_oracle": {
+    "address_cases": 48,
+    "self_test": "PASS",
+    "rejected_false_reports": [
+      "wrong_status",
+      "false_verified_summary",
+      "actual_connection",
+      "extra_record"
+    ]
+  },
+  "cases": {
+    "EGR-02-old-loopback": {
+      "command": [
+        "/tmp/asfa-egress-old-target/debug/asfa-bridge-poller",
+        "--config",
+        "/tmp/asfa-egress-differential-yejykjrb/EGR-02-old-loopback/registry.json",
+        "--out",
+        "/tmp/asfa-egress-differential-yejykjrb/EGR-02-old-loopback/report.json",
+        "--now",
+        "100",
+        "--fail-on-error"
+      ],
+      "exit": 0,
+      "elapsed_ms": 65.18,
+      "target_hits": 1,
+      "proxy_hits": 0,
+      "report": {
+        "schema_version": "asfa-bridge-report/v1",
+        "network_name": "EGR-02-old-loopback",
+        "generated_at_epoch": 100,
+        "summary": {
+          "total": 1,
+          "verified": 1,
+          "failed": 0
+        },
+        "records": [
+          {
+            "session": "node",
+            "url": "http://127.0.0.1:45653/outbox",
+            "fetched_at_epoch": 100,
+            "status": {
+              "kind": "verified",
+              "verified_blocks": 0,
+              "verified_directives": 0,
+              "untrusted_directives": 0
+            }
+          }
+        ]
+      },
+      "report_sha256": "7de67da4f438b3a6599ebacf7fc4a767688291e02125c1a0b337abf9122b9d5e",
+      "stderr": "polled=1 verified=1 failed=0\n"
+    },
+    "EGR-02-new-loopback": {
+      "command": [
+        "/tmp/asfa-egress-clean-target/debug/asfa-bridge-poller",
+        "--config",
+        "/tmp/asfa-egress-differential-yejykjrb/EGR-02-new-loopback/registry.json",
+        "--out",
+        "/tmp/asfa-egress-differential-yejykjrb/EGR-02-new-loopback/report.json",
+        "--now",
+        "100",
+        "--fail-on-error"
+      ],
+      "exit": 2,
+      "elapsed_ms": 51.774,
+      "target_hits": 0,
+      "proxy_hits": 0,
+      "report": {
+        "schema_version": "asfa-bridge-report/v1",
+        "network_name": "EGR-02-new-loopback",
+        "generated_at_epoch": 100,
+        "summary": {
+          "total": 1,
+          "verified": 0,
+          "failed": 1
+        },
+        "records": [
+          {
+            "session": "node",
+            "url": "http://127.0.0.1:45663/outbox",
+            "fetched_at_epoch": 100,
+            "status": {
+              "kind": "blocked_egress",
+              "message": "non-public egress blocked: 127.0.0.1 (loopback)"
+            }
+          }
+        ]
+      },
+      "report_sha256": "6b14e90c11bc81e9bacd199c797bae87e8d501054ebdbe1d98ff636ced358cde",
+      "stderr": "polled=1 verified=0 failed=1\nbridge-poller: poll, ingestion, or execution verification failed\n"
+    },
+    "EGR-04-explicit-local-proxy-bypass": {
+      "command": [
+        "/tmp/asfa-egress-clean-target/debug/asfa-bridge-poller",
+        "--config",
+        "/tmp/asfa-egress-differential-yejykjrb/EGR-04-explicit-local-proxy-bypass/registry.json",
+        "--out",
+        "/tmp/asfa-egress-differential-yejykjrb/EGR-04-explicit-local-proxy-bypass/report.json",
+        "--now",
+        "100",
+        "--fail-on-error",
+        "--allow-non-public-egress"
+      ],
+      "exit": 0,
+      "elapsed_ms": 52.419,
+      "target_hits": 1,
+      "proxy_hits": 0,
+      "report": {
+        "schema_version": "asfa-bridge-report/v1",
+        "network_name": "EGR-04-explicit-local-proxy-bypass",
+        "generated_at_epoch": 100,
+        "summary": {
+          "total": 1,
+          "verified": 1,
+          "failed": 0
+        },
+        "records": [
+          {
+            "session": "node",
+            "url": "http://127.0.0.1:33795/outbox",
+            "fetched_at_epoch": 100,
+            "status": {
+              "kind": "verified",
+              "verified_blocks": 0,
+              "verified_directives": 0,
+              "untrusted_directives": 0
+            }
+          }
+        ]
+      },
+      "report_sha256": "9b85771c4b6fda96031578d14ecd05ffc55363f77e93d59a1b11544bc78d30e5",
+      "stderr": "polled=1 verified=1 failed=0\n"
+    },
+    "EGR-06-registry-escape": {
+      "command": [
+        "/tmp/asfa-egress-clean-target/debug/asfa-bridge-poller",
+        "--config",
+        "/tmp/asfa-egress-differential-yejykjrb/EGR-06-registry-escape/registry.json",
+        "--out",
+        "/tmp/asfa-egress-differential-yejykjrb/EGR-06-registry-escape/report.json",
+        "--now",
+        "100",
+        "--fail-on-error"
+      ],
+      "exit": 2,
+      "elapsed_ms": 51.594,
+      "target_hits": 0,
+      "proxy_hits": 0,
+      "report": null,
+      "report_sha256": null,
+      "stderr": "bridge-poller: unknown field `allow_non_public_egress`, expected one of `url`, `canonical_url`, `role`, `trust`, `note`, `allow_insecure_http`, `allow_file`\n"
+    }
+  },
+  "differential_verdict": "PASS",
+  "scope": "Application-layer bridge HTTP client only; not a network namespace, egress proxy, or hostile-OS boundary."
+}

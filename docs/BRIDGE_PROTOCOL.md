@@ -37,7 +37,13 @@ ASFA-OS-XI/UNSIGNED-HASH-CHAIN/V1\n
 
 注册表顶层 `trust_model`、会话 `trust` 和文档 `trust` 必须一致且均为 `unsigned-hash-chain`。不支持的会话模式在发起网络读取前即拒绝。HTTP 200、JSON 可解析或字段自报 `active` 均不等于验证通过。
 
-传输默认只接受 HTTPS。`http://` 必须显式设置 `allow_insecure_http=true`，`file://` 必须显式设置 `allow_file=true`；其他 scheme 和 URL fragment 在任何 I/O 前拒绝，HTTP(S) 还拒绝缺失主机与 URL userinfo。HTTP client 禁用自动重定向，300–399 均作为 `http_status` 负结果，第二跳不会被请求。单请求 15 秒超时和 2 MiB 响应上限继续保留。CLI 另在读取 Registry 前建立默认 60000ms 的全轮询 deadline，`--poll-timeout-ms` 只能调低到 1..=60000；每个 HTTP 请求的超时取单请求上限与当前剩余时间的较小值，会话之间及入库／波次保存前再次检查 deadline，超时整次运行非零失败。库 API 的旧 `poll_registry_detailed` 兼容入口只提供逐请求超时，处理不可信 Registry 必须调用 `poll_registry_detailed_with_deadline`。这些门禁不等于完整 SSRF 防护：DNS rebinding／pinning、私网与 metadata 地址、连接时 IP 绑定、出口防火墙和 DNS 超时仍需外层或后续实现。
+传输默认只接受 HTTPS。`http://` 必须显式设置 `allow_insecure_http=true`，`file://` 必须显式设置 `allow_file=true`；其他 scheme 和 URL fragment 在任何 I/O 前拒绝，HTTP(S) 还拒绝缺失主机与 URL userinfo。HTTP client 禁用自动重定向，300–399 均作为 `http_status` 负结果，第二跳不会被请求。单请求 15 秒超时和 2 MiB 响应上限继续保留。CLI 另在读取 Registry 前建立默认 60000ms 的全轮询 deadline，`--poll-timeout-ms` 只能调低到 1..=60000；每个 HTTP 请求的超时取单请求上限与当前剩余时间的较小值，会话之间及入库／波次保存前再次检查 deadline，超时整次运行非零失败。库 API 的旧 `poll_registry_detailed` 兼容入口只提供逐请求超时，处理不可信 Registry 必须调用 `poll_registry_detailed_with_deadline`。
+
+HTTP(S) 默认使用 `EgressPolicy::PublicOnly`。IP 字面量不经过 DNS，直接进行分类；域名在有界 worker 中解析一次，空答案、超过 32 个答案或组内任一非公开地址均使整组失败。验证后的 IP 与原 URL 端口重新构造并去重，实际 one-shot HTTP agent 的 resolver 只返回这组固定地址；请求仍使用原 URL，因此保留原 Host 与 TLS server name，而不是把 URL 改写成 IP。连接、读、写只获得扣除解析耗时后的剩余预算；重定向为零、环境代理关闭、连接池禁用。
+
+默认拒绝未指定／当前网络、私网、shared／CGNAT、loopback、link-local、IETF protocol、documentation、transition、benchmarking、multicast、reserved，以及 IPv6 未指定、loopback、IPv4-mapped、NAT64、discard、IETF／transition、documentation、6to4、ULA、link-local、multicast 和非 `2000::/3` 地址。翻译／过渡形式整体 fail-closed，不因内嵌公网 IPv4 而自动信任。命中的非公开目的地址产生 `blocked_egress`；解析为空、过多、失败或调用方等待超时仍为 `transport` 并附具体原因。
+
+`--allow-non-public-egress` 是仅供本地测试与受控遗留部署的显式进程级开关；它不是 `Session` 字段，不能由不可信 Registry／Outbox 开启，也不会关闭空答案、数量上限、原端口重构或禁代理检查。该门禁只覆盖本 HTTP client：不等同于 network namespace、外层 egress proxy、hostile OS 防护或通用 SSRF 防护。DNS 等待超时会释放调用方且 worker 不持有 HTTP agent，但不声称底层系统解析被强制取消或阻塞线程已被资源隔离。
 
 ## 4. 指令
 
@@ -144,6 +150,6 @@ ASFA-OS-XI/QFOS-EXECUTION-REPORT/V1\n
 
 ## 6. 负结果
 
-`http_status`、`transport`、`invalid_json`、`invalid_schema`、`invalid_trust`、`unsupported_trust` 都保留在报告中。重定向、正典 URL 错配、未知字段、未授权 scheme、超限输入、解析失败均不得静默跳过。策略／版本恢复失败发生在轮询之前，因此不生成新报告、不覆盖原状态。全轮询 deadline 是整次 CLI 错误而非降级为普通成功报告；超时发生在状态保存前时不生成报告或新状态。开放 Outbox 字段的深度／节点超限分类为 `invalid_json`，配合 `--fail-on-error` 返回非零。
+`http_status`、`blocked_egress`、`transport`、`invalid_json`、`invalid_schema`、`invalid_trust`、`unsupported_trust` 都保留在报告中。非公开目的地址在任何 TCP 连接前形成 `blocked_egress`；重定向、正典 URL 错配、未知字段、未授权 scheme、超限输入、解析失败均不得静默跳过。策略／版本恢复失败发生在轮询之前，因此不生成新报告、不覆盖原状态。全轮询 deadline 是整次 CLI 错误而非降级为普通成功报告；超时发生在状态保存前时不生成报告或新状态。开放 Outbox 字段的深度／节点超限分类为 `invalid_json`，配合 `--fail-on-error` 返回非零。
 
-64 层与 16384 节点是应用自身预算，不再依赖 serde_json 默认递归限制充当安全边界。session 数、pending／tombstone／单 Outbox 基数和协作 CLI 写者锁也已具备门禁；这些仍不能替代非协作写者防护、路径规范化、CAS、WAL、分布式协调、完整 DNS 超时覆盖或进程级内存／CPU 隔离。
+64 层与 16384 节点是应用自身预算，不再依赖 serde_json 默认递归限制充当安全边界。session 数、pending／tombstone／单 Outbox 基数和协作 CLI 写者锁也已具备门禁；这些仍不能替代非协作写者防护、路径规范化、CAS、WAL、分布式协调、底层 DNS 强制取消或进程级内存／CPU／文件描述符隔离。
