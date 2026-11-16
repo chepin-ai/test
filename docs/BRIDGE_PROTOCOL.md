@@ -63,7 +63,7 @@ ASFA-OS-XI/UNSIGNED-HASH-CHAIN/V1\n
 
 账本使用 `(session, id)` 结构化键，避免字符串拼接碰撞。完全相同的重复指令返回 `Duplicate`；同键不同内容返回 `Conflict`；过期、空字段和来源不符分别返回负结果。`consume` 删除待办指令并保留 tombstone，再次收到同键指令返回 `Consumed`，不能重新入库。`pending_for_at` 与 `prune_expired` 会按当前时间重新检查过期状态。默认硬上限为 4096 个 pending、16384 个 tombstone、单 Outbox 1024 条已验证指令；CLI 可用 `--max-pending`、`--max-tombstones`、`--max-outbox-directives` 调低但不能调高。容量超限在写入前失败；tombstone 满时消费失败且待办指令不丢失。
 
-`LedgerSnapshot` 使用 `asfa-directive-ledger/v3`，将网络身份、安全策略摘要、待办、tombstone 与每会话 `(height,latest)` 检查点以确定性数组表示。CLI 通过 `load_for_registry` 强制快照 `network_name` 与 `policy_hash` 同时等于当前 Registry；旧 v1／v2、无网络或无策略身份、跨网络及同网络安全策略变化均不做隐式迁移，加载失败不覆盖原文件。只修改说明性 `role`／`note` 不改变策略摘要，可以继续加载。
+`LedgerSnapshot` 使用 `asfa-directive-ledger/v4`，将网络身份、安全策略摘要、待办、tombstone、每会话 `(height,latest)` 检查点、执行回执 `receipts` 与死信 `dead_letters` 以确定性数组表示。CLI 通过 `load_for_registry` 强制快照 `network_name` 与 `policy_hash` 同时等于当前 Registry；旧 v1／v2／v3、无网络或无策略身份、跨网络及同网络安全策略变化均不做隐式迁移，加载失败不覆盖原文件。只修改说明性 `role`／`note` 不改变策略摘要，可以继续加载。
 
 策略摘要的域分离定义为：
 
@@ -75,7 +75,7 @@ policy_hash = SHA256(
 
 `policy_projection` 包含 Registry `schema_version`、`network_name`、`trust_model`，以及每个 session 的读取 URL、解析后的正典 URL、trust、`allow_insecure_http` 和 `allow_file`。`role`／`note` 被明确排除。省略 `canonical_url` 与显式填写相同读取 URL 具有相同投影。该摘要是版本化、确定性的 SHA-256 投影，不是完整 JCS，也不是签名；能同时篡改 Registry 与 state 的本机攻击者仍可重算它。
 
-`save_atomic` 使用同目录临时文件原子替换，并拒绝生成超过 16 MiB 的快照；恢复时校验 schema、重复／未知 JSON 成员、重复结构化键、非法指令、非法／重复检查点、“已消费但仍待办”矛盾及本地基数上限。恢复后重放仍返回 `Consumed`，历史分叉仍被拒绝。
+`save_atomic` 使用同目录临时文件原子替换，并拒绝生成超过 16 MiB 的快照；恢复时校验 schema、重复／未知 JSON 成员、重复结构化键、非法指令、非法／重复检查点、“已消费但仍待办”矛盾、回执／死信自身摘要、输出摘要、结果对应 consumed 及同键成功／失败冲突，并执行本地基数上限。恢复后重放仍返回 `Consumed`，历史分叉仍被拒绝。该原子替换尚未增加 fsync，不声称覆盖掉电持久性。
 
 检查点规则：新高度低于旧高度为 `Rollback`；同高不同 latest 为 `Fork`；更高高度在旧高度处的块哈希必须等于旧 latest，否则为 `Fork`。合法重读和保留旧前缀的延长放行。该检查是 O(n) 全链前缀对拍，不是 Merkle consistency proof；整份状态文件被替换仍需外部单调锚或独立 witness。持久化不是隐式副作用：调用方必须在状态变更后保存，否则重启只恢复到最后一次快照。CLI 在加载前取得 `<state>.lock` sidecar 的 OS 排他锁并持有到输出结束，锁竞争返回非零；sidecar 不随原子 rename 换 inode。它只约束使用相同词法路径的协作 CLI，不约束路径别名、非协作写者或跨主机锁。
 
@@ -90,14 +90,15 @@ StateLock.acquire(<state>.lock)
   → ingest_outbox（完整复验＋链头对拍＋暂存账本容量门禁）
   → 可选 consume(session, id)
   → 可选 plan_wave（只读）
+  → 执行模式：先保存已复核的原计划，再于克隆账本暂存 execute_wave
   → deadline 复核
-  → save_atomic(--state)
-  → 输出 BridgeReport.ingestion / qfos-wave-plan/v1
+  → save_atomic(--state, v4：pending 删除＋consumed＋receipt／dead letter)
+  → 输出 BridgeReport.ingestion / qfos-wave-plan/v1 / qfos-wave-execution/v1
 ```
 
 `--consume-session` 与 `--consume-id` 必须成对提供，且消费必须同时指定 `--state`；`--state` 与 `--out` 不得相同。状态文件不存在时从空账本开始，存在但无法解析或恢复矛盾时直接失败，不覆盖原文件。`state_saved=true` 只表示本次原子保存已返回成功，不表示收到外部 ACK。
 
-`ingestion` 汇总 `inserted`、`duplicate`、`replayed_consumed`、`conflict`、`expired`、`invalid`、`chain_checkpoints`、`pending`、`tombstones` 和逐指令事件；`chain_checkpoints` 统计完成本地一致性对拍并提交的会话检查点次数。`--fail-on-error` 将轮询失败、`conflict`、`invalid` 或消费 `not_found` 转为非零退出；`duplicate`、`replayed_consumed` 与 `expired` 是已显式分类的协议结果，不单独触发该门禁。
+`ingestion` 汇总 `inserted`、`duplicate`、`replayed_consumed`、`conflict`、`expired`、`invalid`、`chain_checkpoints`、`pending`、`tombstones` 和逐指令事件；`chain_checkpoints` 统计完成本地一致性对拍并提交的会话检查点次数。`--fail-on-error` 将轮询失败、`conflict`、`invalid`、消费 `not_found` 以及新产生或恢复的执行死信转为非零退出；`duplicate`、`replayed_consumed` 与入库阶段的 `expired` 是已显式分类的协议结果，不单独触发该门禁。
 
 ### 5.1 QF-OS 波次计划
 
@@ -113,6 +114,33 @@ plan_hash = SHA256(
 ```
 
 计划绑定 `network_name`、`policy_hash`、完整 `ledger_hash`、目标、本地时间输入、双配额、逐 Job 内容及逐来源计数。`mode` 固定为 `plan-only-no-execution`：生成计划不消费指令、不执行 action、不调用 Skill，也不证明引擎执行结果。独立 Python 判读器从 Registry 与原始 snapshot 重建整个计划，支持无浮点的 V1 子集，不是 JCS 或签名验证器。QIOS 标识在当前仓内与已核验定义中均未解析，本协议不作 QIOS 适配或兼容声称。
+
+### 5.2 仓内受控执行契约 `qfos-exec-v1`
+
+`--execute-wave` 必须同时提供 `--state`、`--wave-out` 与 `--execution-out`，四者路径不得冲突。若计划文件已存在，CLI 严格读取并复核 schema、mode、逐 Job 与来源计数和 `plan_hash`，随后恢复原计划；不存在时才生成新计划。执行模式在任何结果可能消费 pending 之前先保存原计划，避免“账本已提交而恢复锚点未落盘”的空档。
+
+本契约只允许两个纯内置动作：
+
+| action | 封闭输入与硬上限 | 成功输出 |
+|---|---|---|
+| `engine.sum` | 仅 `{"values":[i64,...]}`，最多 1024 项，逐项 `checked_add` | `{"count":N,"sum":S}` |
+| `engine.sha256` | 仅 `{"text":"UTF-8"}`，最多 1048576 字节 | `{"bytes":N,"sha256":"..."}` |
+
+未知 action、payload schema 错误、输入超限、i64 算术溢出分别形成 `unknown_action`、`invalid_payload`、`input_limit`、`arithmetic_overflow` 死信。计划生成时已过期指令不会入选；已入选计划在执行时发现 `expires_epoch <= now`，形成 `expired` 死信。没有 shell、网络、动态库或外部进程执行路径。
+
+成功回执包含真实 `output`、引擎标识、计划／输入／输出摘要和执行时间；死信包含失败类别、非空消息、计划／输入摘要和失败时间。摘要域分别为：
+
+```text
+ASFA-OS-XI/QFOS-EXECUTION-INPUT/V1\n
+ASFA-OS-XI/QFOS-EXECUTION-OUTPUT/V1\n
+ASFA-OS-XI/QFOS-EXECUTION-RECEIPT/V1\n
+ASFA-OS-XI/QFOS-DEAD-LETTER/V1\n
+ASFA-OS-XI/QFOS-EXECUTION-REPORT/V1\n
+```
+
+每个域后接对应无自哈希字段投影的 `serde_json::to_vec` 字节；输入投影始终包含 `expires_epoch`（无值时为 `null`）。执行报告 `qfos-wave-execution/v1` 另绑定 network、policy、plan、执行时间、逐项结果与汇总计数。所有 SHA-256 都是确定性完整性摘要，不是发布者签名或外部 witness。
+
+`execute_wave` 先在克隆账本完成全部校验、执行和结果提交，任何绑定或容量错误都丢弃暂存账本。成功时，调用者内存账本一次性替换；CLI 再以一次 v4 原子快照保存 pending 删除、consumed tombstone、回执和死信。已有匹配回执／死信只生成 `skipped_succeeded`／`skipped_dead_lettered`，不重跑内置动作、不复制结果；已经 consumed 却没有执行结果的键 fail-closed。状态保存后才写执行报告，因此报告输出失败可用原计划与 v4 结果恢复。该性质是本地、单协作写者边界内的恢复幂等，不是分布式 exactly-once，也不是外部 QF-OS 正典或 QIOS 兼容声称。
 
 ## 6. 负结果
 

@@ -4,8 +4,9 @@ use asfa_bridge_poller::ledger::{
 };
 use asfa_bridge_poller::wave::{DEFAULT_WAVE_MAX_JOBS, DEFAULT_WAVE_MAX_PER_SOURCE};
 use asfa_bridge_poller::{
-    ingest_outbox, plan_wave, strict_json, BridgeReport, DirectiveLedger, IngestionReport, Poller,
-    Registry, ResourceLimits, SessionPoll, StateLock, WavePlan,
+    execute_wave, ingest_outbox, ledger_digest, plan_wave, strict_json, verify_wave_plan,
+    BridgeReport, DirectiveLedger, IngestionReport, Poller, Registry, ResourceLimits, SessionPoll,
+    StateLock, WaveExecutionReport, WavePlan,
 };
 use std::error::Error;
 use std::fs;
@@ -26,7 +27,8 @@ fn usage() {
         "asfa-bridge-poller --config <sessions.json> [--out report.json] [--now EPOCH] \
          [--state ledger.json] [--consume-session NAME --consume-id ID] [--fail-on-error] \
          [--max-pending N] [--max-tombstones N] [--max-outbox-directives N] [--poll-timeout-ms N] \
-         [--wave-out plan.json --wave-target NAME] [--wave-max-jobs N] [--wave-max-per-source N]"
+         [--wave-out plan.json --wave-target NAME] [--wave-max-jobs N] [--wave-max-per-source N] \
+         [--execute-wave --execution-out execution.json]"
     );
 }
 
@@ -64,6 +66,8 @@ fn run() -> Result<(), Box<dyn Error>> {
     let mut wave_target = "qfos".to_owned();
     let mut wave_max_jobs = None;
     let mut wave_max_per_source = None;
+    let mut execute_wave_mode = false;
+    let mut execution_out: Option<PathBuf> = None;
     let mut args = std::env::args().skip(1);
     while let Some(arg) = args.next() {
         match arg.as_str() {
@@ -97,6 +101,10 @@ fn run() -> Result<(), Box<dyn Error>> {
             "--wave-max-per-source" => {
                 wave_max_per_source = Some(args.next().ok_or("--wave-max-per-source requires N")?)
             }
+            "--execute-wave" => execute_wave_mode = true,
+            "--execution-out" => {
+                execution_out = Some(args.next().ok_or("--execution-out requires a path")?.into())
+            }
             "--help" | "-h" => {
                 usage();
                 return Ok(());
@@ -113,6 +121,12 @@ fn run() -> Result<(), Box<dyn Error>> {
     if wave_out.is_some() && state.is_none() {
         return Err("--wave-out requires --state so plans bind to a verified ledger".into());
     }
+    if execute_wave_mode && (wave_out.is_none() || execution_out.is_none()) {
+        return Err("--execute-wave requires --wave-out and --execution-out".into());
+    }
+    if execution_out.is_some() && !execute_wave_mode {
+        return Err("--execution-out requires --execute-wave".into());
+    }
     if let (Some(state_path), Some(out_path)) = (&state, &out) {
         if state_path == out_path {
             return Err("--state and --out must be different files".into());
@@ -121,6 +135,14 @@ fn run() -> Result<(), Box<dyn Error>> {
     if let Some(wave_path) = &wave_out {
         if state.as_ref() == Some(wave_path) || out.as_ref() == Some(wave_path) {
             return Err("--wave-out must differ from --state and --out".into());
+        }
+    }
+    if let Some(execution_path) = &execution_out {
+        if state.as_ref() == Some(execution_path)
+            || out.as_ref() == Some(execution_path)
+            || wave_out.as_ref() == Some(execution_path)
+        {
+            return Err("--execution-out must differ from --state, --out and --wave-out".into());
         }
     }
     let limits = ResourceLimits {
@@ -176,7 +198,11 @@ fn run() -> Result<(), Box<dyn Error>> {
         .map(|path| StateLock::acquire(path))
         .transpose()?;
     let poller = Poller::new();
-    let (report, wave_plan): (BridgeReport, Option<WavePlan>) = if let Some(state_path) = state {
+    let (report, wave_plan, execution_report): (
+        BridgeReport,
+        Option<WavePlan>,
+        Option<WaveExecutionReport>,
+    ) = if let Some(state_path) = state {
         let mut ledger =
             match DirectiveLedger::load_for_registry_with_limits(&state_path, &registry, limits) {
                 Ok(ledger) => ledger,
@@ -198,31 +224,64 @@ fn run() -> Result<(), Box<dyn Error>> {
             let consumed = ledger.consume(&session, &id)?.is_some();
             ingestion.consume_result = Some(if consumed { "consumed" } else { "not_found" }.into());
         }
-        ingestion.pending = ledger.len();
-        ingestion.tombstones = ledger.consumed_len();
-        let wave_plan = wave_out
-            .as_ref()
-            .map(|_| {
-                plan_wave(
+        let wave_plan = if let Some(path) = wave_out.as_ref() {
+            if execute_wave_mode && path.exists() {
+                let plan: WavePlan = strict_json::from_path(path, MAX_REGISTRY_BYTES)?;
+                verify_wave_plan(&plan)?;
+                Some(plan)
+            } else {
+                let plan = plan_wave(
                     &ledger,
                     &wave_target,
                     now,
                     wave_max_jobs,
                     wave_max_per_source,
-                )
-            })
-            .transpose()?;
-        Poller::ensure_deadline(poll_deadline, "after ingestion and wave planning")?;
+                )?;
+                if execute_wave_mode && plan.ledger_hash != ledger_digest(&ledger) {
+                    return Err("fresh plan does not bind the current ledger".into());
+                }
+                Some(plan)
+            }
+        } else {
+            None
+        };
+        // In execution mode the immutable plan is the recovery anchor. Persist it
+        // before outcomes can consume pending jobs; otherwise a plan-write failure
+        // after state commit would make the original wave unrecoverable.
+        if execute_wave_mode {
+            if let (Some(path), Some(plan)) = (wave_out.as_ref(), wave_plan.as_ref()) {
+                if let Some(parent) = path.parent() {
+                    fs::create_dir_all(parent)?;
+                }
+                fs::write(path, serde_json::to_string_pretty(plan)? + "\n")?;
+            }
+        }
+        let execution_report = if execute_wave_mode {
+            Some(execute_wave(
+                &mut ledger,
+                wave_plan.as_ref().expect("execution requires a plan"),
+                now,
+            )?)
+        } else {
+            None
+        };
+        ingestion.pending = ledger.len();
+        ingestion.tombstones = ledger.consumed_len();
+        Poller::ensure_deadline(
+            poll_deadline,
+            "after ingestion, wave planning and execution",
+        )?;
         ledger.save_atomic(&state_path)?;
         ingestion.state_saved = true;
         let mut report = BridgeReport::new(registry.network_name.clone(), now, records);
         report.ingestion = Some(ingestion);
-        (report, wave_plan)
+        (report, wave_plan, execution_report)
     } else {
         let polls = poller.poll_registry_detailed_with_deadline(&registry, now, poll_deadline)?;
         let records = polls.into_iter().map(|result| result.record).collect();
         (
             BridgeReport::new(registry.network_name.clone(), now, records),
+            None,
             None,
         )
     };
@@ -237,15 +296,30 @@ fn run() -> Result<(), Box<dyn Error>> {
         print!("{rendered}");
     }
     if let (Some(path), Some(plan)) = (wave_out, wave_plan) {
-        if let Some(parent) = path.parent() {
-            fs::create_dir_all(parent)?;
+        if !execute_wave_mode {
+            if let Some(parent) = path.parent() {
+                fs::create_dir_all(parent)?;
+            }
+            fs::write(path, serde_json::to_string_pretty(&plan)? + "\n")?;
         }
-        fs::write(path, serde_json::to_string_pretty(&plan)? + "\n")?;
         eprintln!(
             "wave_jobs={} wave_deferred={} plan_hash={}",
             plan.jobs.len(),
             plan.deferred,
             plan.plan_hash
+        );
+    }
+    if let (Some(path), Some(execution)) = (execution_out, &execution_report) {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(path, serde_json::to_string_pretty(execution)? + "\n")?;
+        eprintln!(
+            "execution_succeeded={} execution_dead_lettered={} execution_skipped={} execution_hash={}",
+            execution.summary.succeeded,
+            execution.summary.dead_lettered,
+            execution.summary.skipped_succeeded + execution.summary.skipped_dead_lettered,
+            execution.execution_hash
         );
     }
     eprintln!(
@@ -257,8 +331,16 @@ fn run() -> Result<(), Box<dyn Error>> {
             || ingestion.invalid > 0
             || ingestion.consume_result.as_deref() == Some("not_found")
     });
-    if fail_on_error && (report.summary.failed > 0 || ingestion_failed) {
-        return Err("poll or ingestion verification failed".into());
+    let execution_failed = execution_report.as_ref().is_some_and(|execution| {
+        execution.results.iter().any(|result| {
+            matches!(
+                result.status.as_str(),
+                "dead_lettered" | "skipped_dead_lettered"
+            )
+        })
+    });
+    if fail_on_error && (report.summary.failed > 0 || ingestion_failed || execution_failed) {
+        return Err("poll, ingestion, or execution verification failed".into());
     }
     Ok(())
 }

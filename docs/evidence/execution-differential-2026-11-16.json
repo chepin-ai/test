@@ -1,0 +1,196 @@
+{
+  "schema_version": "asfa-execution-differential/v1",
+  "recorded_at": "2026-11-16T16:16:06Z",
+  "before_commit": "320b226ca7b605f41744f50e970b2371077bebdb",
+  "before_binary_sha256": "096359978a6b4d814605687828e70d09cf3197d62f941145c5792cd02c2cfa6f",
+  "after_binary_sha256": "07444fd68cca8d9f8d49e1e2d9297fb3df777bfc1fa894db8b1e3811f2a78e24",
+  "source": {
+    "registry": "config/sessions.execution.json",
+    "outbox": "fixtures/qfos-exec-outbox.json",
+    "outbox_sha256": "d1f31f00cd34926de7c0a38045f3f04f5d17f370b5c5463846164ec771067352",
+    "same_verified_source_for_both_binaries": true
+  },
+  "runs": [
+    {
+      "label": "before_help",
+      "command": [
+        "/tmp/asfa-bridge-before-exec",
+        "--help"
+      ],
+      "exit": 0,
+      "stdout": "asfa-bridge-poller --config <sessions.json> [--out report.json] [--now EPOCH] [--state ledger.json] [--consume-session NAME --consume-id ID] [--fail-on-error] [--max-pending N] [--max-tombstones N] [--max-outbox-directives N] [--poll-timeout-ms N] [--wave-out plan.json --wave-target NAME] [--wave-max-jobs N] [--wave-max-per-source N]\n",
+      "stderr": ""
+    },
+    {
+      "label": "before_plan_only",
+      "command": [
+        "/tmp/asfa-bridge-before-exec",
+        "--config",
+        "config/sessions.execution.json",
+        "--state",
+        "/tmp/asfa-exec-differential/old-state.json",
+        "--out",
+        "/tmp/asfa-exec-differential/old-bridge.json",
+        "--wave-out",
+        "/tmp/asfa-exec-differential/old-plan.json",
+        "--now",
+        "50"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "wave_jobs=7 wave_deferred=0 plan_hash=651d9b15d8a5c13a0c28103d122c9782d3d2f45ab791c95d93407d150549134c\npolled=1 verified=1 failed=0\n"
+    },
+    {
+      "label": "before_execute_rejected",
+      "command": [
+        "/tmp/asfa-bridge-before-exec",
+        "--config",
+        "config/sessions.execution.json",
+        "--state",
+        "/tmp/asfa-exec-differential/old-state.json",
+        "--out",
+        "/tmp/asfa-exec-differential/old-bridge.json",
+        "--wave-out",
+        "/tmp/asfa-exec-differential/old-plan.json",
+        "--execute-wave",
+        "--execution-out",
+        "/tmp/asfa-exec-differential/old-execution.json",
+        "--now",
+        "100"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "bridge-poller: unknown argument: --execute-wave\n"
+    },
+    {
+      "label": "after_plan_only",
+      "command": [
+        "/tmp/asfa-os-xi-target/debug/asfa-bridge-poller",
+        "--config",
+        "config/sessions.execution.json",
+        "--state",
+        "/tmp/asfa-exec-differential/new-state.json",
+        "--out",
+        "/tmp/asfa-exec-differential/new-bridge.json",
+        "--wave-out",
+        "/tmp/asfa-exec-differential/new-plan.json",
+        "--now",
+        "50"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "wave_jobs=7 wave_deferred=0 plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a\npolled=1 verified=1 failed=0\n"
+    },
+    {
+      "label": "after_execute",
+      "command": [
+        "/tmp/asfa-os-xi-target/debug/asfa-bridge-poller",
+        "--config",
+        "config/sessions.execution.json",
+        "--state",
+        "/tmp/asfa-exec-differential/new-state.json",
+        "--out",
+        "/tmp/asfa-exec-differential/new-bridge.json",
+        "--wave-out",
+        "/tmp/asfa-exec-differential/new-plan.json",
+        "--execute-wave",
+        "--execution-out",
+        "/tmp/asfa-exec-differential/new-execution.json",
+        "--now",
+        "100"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "wave_jobs=7 wave_deferred=0 plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a\nexecution_succeeded=2 execution_dead_lettered=5 execution_skipped=0 execution_hash=4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c\npolled=1 verified=1 failed=0\n"
+    },
+    {
+      "label": "after_replay",
+      "command": [
+        "/tmp/asfa-os-xi-target/debug/asfa-bridge-poller",
+        "--config",
+        "config/sessions.execution.json",
+        "--state",
+        "/tmp/asfa-exec-differential/new-state.json",
+        "--out",
+        "/tmp/asfa-exec-differential/new-bridge.json",
+        "--wave-out",
+        "/tmp/asfa-exec-differential/new-plan.json",
+        "--execute-wave",
+        "--execution-out",
+        "/tmp/asfa-exec-differential/new-replay.json",
+        "--now",
+        "100"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "wave_jobs=7 wave_deferred=0 plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a\nexecution_succeeded=0 execution_dead_lettered=0 execution_skipped=7 execution_hash=9dce14b4b357f72851dff2d67af085bd8c10e560aca51c414fd07ffe416be36f\npolled=1 verified=1 failed=0\n"
+    }
+  ],
+  "before_observation": {
+    "schema_version": "asfa-directive-ledger/v3",
+    "pending": 7,
+    "consumed": 0,
+    "execution_mode_present": false,
+    "execute_flag_exit": 2,
+    "state_unchanged_after_rejected_flag": true
+  },
+  "after_observation": {
+    "schema_version": "asfa-directive-ledger/v4",
+    "pending": 0,
+    "consumed": 7,
+    "receipts": 2,
+    "dead_letters": 5,
+    "receipt_outputs": {
+      "sha": {
+        "bytes": 12,
+        "sha256": "ce088755bce61c36c1da693f5101eba681521b69281ee4d5e1856c28526feecc"
+      },
+      "sum": {
+        "count": 3,
+        "sum": 42
+      }
+    },
+    "dead_letter_codes": {
+      "expired": "expired",
+      "invalid": "invalid_payload",
+      "overflow": "arithmetic_overflow",
+      "too-many": "input_limit",
+      "unknown": "unknown_action"
+    },
+    "initial_summary": {
+      "offered": 7,
+      "succeeded": 2,
+      "dead_lettered": 5,
+      "skipped_succeeded": 0,
+      "skipped_dead_lettered": 0
+    },
+    "replay_summary": {
+      "offered": 7,
+      "succeeded": 0,
+      "dead_lettered": 0,
+      "skipped_succeeded": 2,
+      "skipped_dead_lettered": 5
+    },
+    "replay_execution_hash": "9dce14b4b357f72851dff2d67af085bd8c10e560aca51c414fd07ffe416be36f",
+    "ledger_sha256_before_replay": "ceafc719fd670a0b418afefb7230fa040494756b853e5d382eb4f7aebec202a5",
+    "ledger_sha256_after_replay": "ceafc719fd670a0b418afefb7230fa040494756b853e5d382eb4f7aebec202a5"
+  },
+  "independent_oracle": {
+    "exit": 0,
+    "stdout": "execution_oracle=PASS plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a execution_hash=4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c jobs=7 receipts=2 dead_letters=5 self_tests=5\n",
+    "stderr": ""
+  },
+  "checks": {
+    "before_has_no_execute_flag": true,
+    "before_rejects_execute_flag": true,
+    "before_rejection_preserves_state": true,
+    "before_all_jobs_pending": true,
+    "after_all_jobs_consumed_exactly_once": true,
+    "after_real_successes": true,
+    "after_explicit_dead_letters": true,
+    "restart_is_idempotent": true,
+    "independent_oracle_passes": true
+  },
+  "verdict": "PASS",
+  "scope": "Local qfos-exec-v1 only; no canonical QF-OS, QIOS, publisher-authentication, distributed exactly-once, or power-loss durability claim."
+}

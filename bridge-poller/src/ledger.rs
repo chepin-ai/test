@@ -1,5 +1,5 @@
 use crate::chain::ChainError;
-use crate::model::{Directive, Outbox, Registry, GENESIS_HASH};
+use crate::model::{DeadLetterRecord, Directive, ExecutionReceipt, Outbox, Registry, GENESIS_HASH};
 use crate::strict_json;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -9,7 +9,7 @@ use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
 use thiserror::Error;
 
-pub const LEDGER_SCHEMA_VERSION: &str = "asfa-directive-ledger/v3";
+pub const LEDGER_SCHEMA_VERSION: &str = "asfa-directive-ledger/v4";
 pub const MAX_LEDGER_BYTES: u64 = 16 * 1024 * 1024;
 pub const DEFAULT_MAX_PENDING_DIRECTIVES: usize = 4096;
 pub const DEFAULT_MAX_CONSUMED_TOMBSTONES: usize = 16384;
@@ -43,6 +43,16 @@ pub enum CapacityError {
     DirectivesPerOutbox { limit: usize, actual: usize },
     #[error("ledger snapshot exceeds {limit} bytes: actual={actual}")]
     SnapshotBytes { limit: u64, actual: usize },
+}
+
+#[derive(Debug, Error)]
+pub enum ExecutionCommitError {
+    #[error("execution outcome is not pending: {session}/{id}")]
+    NotPending { session: String, id: String },
+    #[error("execution outcome conflicts with the pending directive: {session}/{id}")]
+    Conflict { session: String, id: String },
+    #[error("execution outcome exceeds ledger capacity: {0}")]
+    Capacity(#[from] CapacityError),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -98,11 +108,15 @@ pub struct LedgerSnapshot {
     pub directives: Vec<DirectiveEntry>,
     pub consumed: Vec<ConsumedKey>,
     pub checkpoints: Vec<CheckpointEntry>,
+    #[serde(default)]
+    pub receipts: Vec<ExecutionReceipt>,
+    #[serde(default)]
+    pub dead_letters: Vec<DeadLetterRecord>,
 }
 
 #[derive(Debug, Error, PartialEq, Eq)]
 pub enum RestoreError {
-    #[error("unsupported ledger schema: {0}")]
+    #[error("unsupported ledger schema: {0}; refusing implicit migration")]
     UnsupportedSchema(String),
     #[error("invalid ledger entry: {0}")]
     InvalidEntry(String),
@@ -112,8 +126,14 @@ pub enum RestoreError {
     DuplicateConsumed { session: String, id: String },
     #[error("duplicate chain checkpoint in snapshot: {session}")]
     DuplicateCheckpoint { session: String },
+    #[error("duplicate execution receipt in snapshot: {session}/{id}")]
+    DuplicateReceipt { session: String, id: String },
+    #[error("duplicate dead letter in snapshot: {session}/{id}")]
+    DuplicateDeadLetter { session: String, id: String },
     #[error("consumed directive is also pending: {session}/{id}")]
     ConsumedPending { session: String, id: String },
+    #[error("execution outcome conflicts in snapshot: {session}/{id}")]
+    OutcomeConflict { session: String, id: String },
     #[error("ledger resource limit: {0}")]
     ResourceLimit(#[from] CapacityError),
 }
@@ -128,6 +148,8 @@ pub struct DirectiveLedger {
     directives: BTreeMap<DirectiveKey, Directive>,
     consumed: BTreeSet<DirectiveKey>,
     checkpoints: BTreeMap<String, ChainCheckpoint>,
+    receipts: BTreeMap<DirectiveKey, ExecutionReceipt>,
+    dead_letters: BTreeMap<DirectiveKey, DeadLetterRecord>,
     limits: ResourceLimits,
 }
 
@@ -180,6 +202,26 @@ impl DirectiveLedger {
 
     pub fn consumed_len(&self) -> usize {
         self.consumed.len()
+    }
+
+    pub fn receipt_len(&self) -> usize {
+        self.receipts.len()
+    }
+
+    pub fn dead_letter_len(&self) -> usize {
+        self.dead_letters.len()
+    }
+
+    pub fn receipt(&self, session: &str, id: &str) -> Option<&ExecutionReceipt> {
+        self.receipts.get(&(session.to_owned(), id.to_owned()))
+    }
+
+    pub fn dead_letter(&self, session: &str, id: &str) -> Option<&DeadLetterRecord> {
+        self.dead_letters.get(&(session.to_owned(), id.to_owned()))
+    }
+
+    pub fn pending_entry(&self, session: &str, id: &str) -> Option<&Directive> {
+        self.directives.get(&(session.to_owned(), id.to_owned()))
     }
 
     pub fn checkpoint(&self, session: &str) -> Option<&ChainCheckpoint> {
@@ -279,6 +321,80 @@ impl DirectiveLedger {
         Ok(Some(directive))
     }
 
+    /// Commit a successful execution and its replay tombstone as one in-memory
+    /// transaction. Capacity and binding checks happen before pending removal.
+    pub fn record_receipt(
+        &mut self,
+        receipt: ExecutionReceipt,
+    ) -> Result<bool, ExecutionCommitError> {
+        let key = (receipt.session.clone(), receipt.id.clone());
+        if self.receipts.get(&key) == Some(&receipt) {
+            return Ok(false);
+        }
+        let Some(pending) = self.directives.get(&key) else {
+            return Err(ExecutionCommitError::NotPending {
+                session: receipt.session,
+                id: receipt.id,
+            });
+        };
+        if pending.action != receipt.action
+            || !receipt.has_valid_hash()
+            || self.dead_letters.contains_key(&key)
+        {
+            return Err(ExecutionCommitError::Conflict {
+                session: receipt.session,
+                id: receipt.id,
+            });
+        }
+        if self.consumed.len() >= self.limits.max_consumed_tombstones {
+            return Err(CapacityError::ConsumedTombstones {
+                limit: self.limits.max_consumed_tombstones,
+            }
+            .into());
+        }
+        self.directives.remove(&key);
+        self.consumed.insert(key.clone());
+        self.receipts.insert(key, receipt);
+        Ok(true)
+    }
+
+    /// Commit a failed execution as a dead letter plus a replay tombstone. The
+    /// failed job cannot later be reinserted under the same structured key.
+    pub fn record_dead_letter(
+        &mut self,
+        dead_letter: DeadLetterRecord,
+    ) -> Result<bool, ExecutionCommitError> {
+        let key = (dead_letter.session.clone(), dead_letter.id.clone());
+        if self.dead_letters.get(&key) == Some(&dead_letter) {
+            return Ok(false);
+        }
+        let Some(pending) = self.directives.get(&key) else {
+            return Err(ExecutionCommitError::NotPending {
+                session: dead_letter.session,
+                id: dead_letter.id,
+            });
+        };
+        if pending.action != dead_letter.action
+            || !dead_letter.has_valid_hash()
+            || self.receipts.contains_key(&key)
+        {
+            return Err(ExecutionCommitError::Conflict {
+                session: dead_letter.session,
+                id: dead_letter.id,
+            });
+        }
+        if self.consumed.len() >= self.limits.max_consumed_tombstones {
+            return Err(CapacityError::ConsumedTombstones {
+                limit: self.limits.max_consumed_tombstones,
+            }
+            .into());
+        }
+        self.directives.remove(&key);
+        self.consumed.insert(key.clone());
+        self.dead_letters.insert(key, dead_letter);
+        Ok(true)
+    }
+
     pub fn is_consumed(&self, session: &str, id: &str) -> bool {
         self.consumed.contains(&(session.to_owned(), id.to_owned()))
     }
@@ -364,6 +480,8 @@ impl DirectiveLedger {
                     latest: checkpoint.latest.clone(),
                 })
                 .collect(),
+            receipts: self.receipts.values().cloned().collect(),
+            dead_letters: self.dead_letters.values().cloned().collect(),
         }
     }
 
@@ -442,12 +560,70 @@ impl DirectiveLedger {
                 });
             }
         }
-        for (session, id) in &ledger.consumed {
-            if ledger
-                .directives
-                .contains_key(&(session.clone(), id.clone()))
+        for receipt in snapshot.receipts {
+            let key = (receipt.session.clone(), receipt.id.clone());
+            if receipt.session.trim().is_empty()
+                || receipt.id.trim().is_empty()
+                || receipt.action.trim().is_empty()
+                || receipt.engine.trim().is_empty()
+                || !valid_hash(&receipt.plan_hash)
+                || !valid_hash(&receipt.input_hash)
+                || !valid_hash(&receipt.output_hash)
+                || !valid_hash(&receipt.receipt_hash)
+                || !receipt.has_valid_hash()
+                || !ledger.consumed.contains(&key)
             {
+                return Err(RestoreError::InvalidEntry(format!(
+                    "invalid or unconsumed execution receipt: {}/{}",
+                    receipt.session, receipt.id
+                )));
+            }
+            if ledger.receipts.insert(key.clone(), receipt).is_some() {
+                return Err(RestoreError::DuplicateReceipt {
+                    session: key.0,
+                    id: key.1,
+                });
+            }
+        }
+        for dead_letter in snapshot.dead_letters {
+            let key = (dead_letter.session.clone(), dead_letter.id.clone());
+            if dead_letter.session.trim().is_empty()
+                || dead_letter.id.trim().is_empty()
+                || dead_letter.action.trim().is_empty()
+                || dead_letter.engine.trim().is_empty()
+                || dead_letter.code.trim().is_empty()
+                || !valid_hash(&dead_letter.plan_hash)
+                || !valid_hash(&dead_letter.input_hash)
+                || !valid_hash(&dead_letter.dead_letter_hash)
+                || !dead_letter.has_valid_hash()
+                || !ledger.consumed.contains(&key)
+            {
+                return Err(RestoreError::InvalidEntry(format!(
+                    "invalid or unconsumed dead letter: {}/{}",
+                    dead_letter.session, dead_letter.id
+                )));
+            }
+            if ledger
+                .dead_letters
+                .insert(key.clone(), dead_letter)
+                .is_some()
+            {
+                return Err(RestoreError::DuplicateDeadLetter {
+                    session: key.0,
+                    id: key.1,
+                });
+            }
+        }
+        for (session, id) in &ledger.consumed {
+            let key = (session.clone(), id.clone());
+            if ledger.directives.contains_key(&key) {
                 return Err(RestoreError::ConsumedPending {
+                    session: session.clone(),
+                    id: id.clone(),
+                });
+            }
+            if ledger.receipts.contains_key(&key) && ledger.dead_letters.contains_key(&key) {
+                return Err(RestoreError::OutcomeConflict {
                     session: session.clone(),
                     id: id.clone(),
                 });
@@ -734,6 +910,8 @@ mod tests {
                 id: "same".into(),
             }],
             checkpoints: vec![],
+            receipts: vec![],
+            dead_letters: vec![],
         };
         assert!(matches!(
             DirectiveLedger::from_snapshot(snapshot),
@@ -761,6 +939,8 @@ mod tests {
                     latest: "11".repeat(32),
                 },
             ],
+            receipts: vec![],
+            dead_letters: vec![],
         };
         assert!(matches!(
             DirectiveLedger::from_snapshot(duplicate),
@@ -778,6 +958,8 @@ mod tests {
                 height: 0,
                 latest: "11".repeat(32),
             }],
+            receipts: vec![],
+            dead_letters: vec![],
         };
         assert!(matches!(
             DirectiveLedger::from_snapshot(malformed),
@@ -829,6 +1011,8 @@ mod tests {
             }],
             consumed: vec![],
             checkpoints: vec![],
+            receipts: vec![],
+            dead_letters: vec![],
         };
         let limits = ResourceLimits {
             max_pending_directives: 0,

@@ -1,5 +1,5 @@
 {
-  "schema_version": "asfa-directive-ledger/v3",
+  "schema_version": "asfa-directive-ledger/v4",
   "network_name": "qfos-wave-fixture",
   "policy_hash": "83ce6e4d52c99bcf6704a6e196b488b545ce0b57f362f008d644f0ff34747e12",
   "directives": [
@@ -86,5 +86,7 @@
       "height": 1,
       "latest": "d59c5b4be134713b24f3002df2b64cce02ac845f41b7cfdf6acf90c714be6a73"
     }
-  ]
+  ],
+  "receipts": [],
+  "dead_letters": []
 }

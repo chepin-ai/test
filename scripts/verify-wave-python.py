@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Independent QF-OS wave oracle over snapshot and registry source documents.
 
-Profile: qfos-wave-v1/no-floats/non-jcs. This verifies deterministic consistency,
-not publisher authentication, execution, or a formal proof of engine behavior.
+Profile: qfos-wave-v1/no-floats/non-jcs. This verifies deterministic plan-only
+consistency, not publisher authentication, execution, or a formal proof of engine
+behavior. Execution outcomes are checked by verify-execution-python.py.
 """
 
 import argparse
@@ -86,7 +87,7 @@ def job(session, directive):
 
 
 def rebuild(registry, snapshot, plan):
-    assert snapshot["schema_version"] == "asfa-directive-ledger/v3"
+    assert snapshot["schema_version"] == "asfa-directive-ledger/v4"
     assert snapshot["network_name"] == registry["network_name"]
     expected_policy = policy_digest(registry)
     assert snapshot["policy_hash"] == expected_policy, "snapshot policy mismatch"

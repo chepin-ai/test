@@ -96,7 +96,7 @@ def main():
     if args.registry:
         registry = load_json(args.registry)
         snapshot = load_json(args.snapshot)
-        assert snapshot["schema_version"] == "asfa-directive-ledger/v3"
+        assert snapshot["schema_version"] == "asfa-directive-ledger/v4"
         assert snapshot["network_name"] == registry["network_name"]
         expected = policy_digest(registry)
         assert snapshot.get("policy_hash") == expected, "live snapshot policy mismatch"

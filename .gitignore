@@ -2,4 +2,5 @@
 .env
 *.log
 *-report.json
+!fixtures/qfos-exec-report.json
 .DS_Store

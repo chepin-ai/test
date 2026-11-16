@@ -1,0 +1,33 @@
+{
+  "schema_version": "asfa-execution-attack-preregister/v1",
+  "recorded_at": "2026-11-16",
+  "phase": "pre-implementation; no outcome is asserted",
+  "implementation_base": "320b226ca7b605f41744f50e970b2371077bebdb",
+  "cases": {
+    "EXE-01": "Known engine.sum and engine.sha256 jobs must produce independently recomputable outputs; executed jobs must leave pending and have matching consumed tombstones and receipts.",
+    "EXE-02": "Unknown action, invalid payload, arithmetic overflow, excessive input, and expired jobs must become explicit dead letters without a success receipt; each failed key must be consumed exactly once.",
+    "EXE-03": "Replaying the same bound wave after restart must not execute a completed job again, duplicate receipts, or change ledger bytes; recovery after report-output failure must reconstruct the same report from persisted outcomes.",
+    "EXE-04": "A plan with changed job content or hash, a receipt with changed output or hash, and an execution report with changed result or hash must be rejected by Rust and/or the independent Python oracle as predeclared for each artifact.",
+    "EXE-05": "All newly consumed successes and dead letters, their outputs or failures, pending removals, and replay tombstones must be persisted in one LedgerSnapshot v4 atomic rename; old v3 snapshots must not be silently migrated.",
+    "EXE-06": "The previous binary has no execution mode and must leave all jobs pending; the new binary must show actual successful outputs and explicit dead letters under the same verified directive source."
+  },
+  "execution_profile": {
+    "name": "qfos-exec-v1",
+    "allowed_actions": [
+      "engine.sum",
+      "engine.sha256"
+    ],
+    "sum_max_values": 1024,
+    "sha256_max_utf8_bytes": 1048576,
+    "external_process_execution": false,
+    "arbitrary_shell": false,
+    "network_execution": false
+  },
+  "not_claimed": [
+    "canonical QF-OS engine compatibility",
+    "QIOS compatibility",
+    "distributed exactly-once execution",
+    "publisher authentication",
+    "power-loss durability beyond the tested atomic filesystem visibility boundary"
+  ]
+}

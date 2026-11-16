@@ -1,6 +1,15 @@
-# 实现状态（本轮实测证据：2026-11-14）
+# 实现状态（本轮实测证据：2026-11-16）
 
-## 最新续拍：全轮询与 JSON 资源预算
+## 最新续拍：`qfos-exec-v1` 受控执行与恢复
+
+- 当前工作树统一门禁实测通过 92 个 Rust 测试：bridge 单元 32、bridge 集成 46、kernel 11、userspace 3，失败为 0；rustfmt、Clippy、凭据扫描、五类独立判读、固定夹具重建／字节对拍、执行重放、认知示例和 CLI 烟测均通过。实现提交、无 `.git` 干净归档与干净二进制身份另由本轮综合证据登记，不以工作树结果替代。
+- 执行面只开放 `engine.sum` 与 `engine.sha256`。前者最多 1024 个 `i64` 并逐项检查溢出，后者最多 1048576 个 UTF-8 字节；无 shell、无网络、无动态库、无外部进程。未知动作、非法载荷、输入超限、算术溢出和执行前过期形成五类显式死信。
+- 固定夹具含 7 项指令，初次执行为 2 个成功回执＋5 个死信、7 consumed、0 pending；`sum` 真实输出为 `{"count":3,"sum":42}`，Unicode SHA-256 输出可独立复算。计划哈希为 `f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a`，执行报告哈希为 `4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c`。
+- LedgerSnapshot v4 将 pending 删除、consumed tombstone、成功回执和死信保存在同一原子快照。库内执行先在克隆账本暂存，容量失败不留下成功前缀；执行模式先持久化原计划，再保存执行后状态，最后写报告。报告输出失败后，恢复原计划只得到 2＋5 skipped；再次重放的账本与报告字节不变。磁盘原子可见性仍只有临时文件＋rename，不声称 fsync 掉电持久性。
+- 独立 `verify-execution-python.py` 从内建语义重算真实输出、失败类别和全部摘要，并勾稽计划、报告与最终状态。五项自证通过，其中重新计算内部及报告哈希后的假 sum、假失败类别和假报告结果仍被拒绝。旧新真实进程差分九项检查全部通过：旧端提交 `320b226ca7b605f41744f50e970b2371077bebdb` 无执行参数且 7 项保持 pending，新端产生真实结果并在重启后全部 skipped；原始结果见 `evidence/execution-differential-2026-11-16.json`。
+- 当前结论仅覆盖仓内 `qfos-exec-v1`。它不是已验证的外部 QF-OS 正典执行协议，不声称 QIOS 兼容、通用 Skill 沙箱、租约、跨进程分布式 exactly-once、发布者认证、结果签名或形式化执行证明。
+
+## 2026-11-14 全轮询与 JSON 资源预算（历史证据）
 
 - 实现提交为 `33ff4a63d9dfd7e20c6d34b79296cd400d5e07f4`（`feat(bridge): enforce poll and JSON resource budgets`）。85 个 Rust 测试通过：bridge 单元 29、bridge 集成 42、kernel 11、userspace 3，失败为 0；Clippy 零警告。
 - 从该提交的 Git 归档在无 `.git`、空 target 环境完整重建，统一门禁全部通过。归档 SHA-256 为 `f77faa8aca8395bcec297397165dde315ee96b023092f411e2b71df216ac552b`，干净二进制 SHA-256 为 `95a75c596363242c674e8b4ab1a17a6ac40a053d3d28d9b5f348b1c25b48db77`。
@@ -19,7 +28,7 @@
 - 认知示例精确输出为 `skill_output={"sum":42}; edge=1; matches=[1]`。CLI 烟测为 `total=3, verified=1, failed=2`，两个失败是故意设置的非法 JSON 和缺失文件；v3 烟测状态策略摘要为 `d7bb090c4022b10a3f46ca236315cd96a77091ca0edeac038fac4016245d6a19`。
 - 综合机器证据为 `evidence/attack-consistency-2026-11-14.json`，SHA-256 为 `1cd3f9341c83ef647971be2c7c7077466a0bcfac692bb58b3a7de5d92275b108`。其 10 项 artifact 的路径、字节数与 SHA-256 已独立复算，且差分新端哈希与干净重建二进制一致。
 
-## 本轮新增安全性质
+## 2026-11-14 QF-OS 计划面新增安全性质（历史证据）
 
 1. **有界轮询扇出**：Registry 除 2 MiB 字节上限外，最多 64 个 session；第 65 个会话导致任何 socket I/O 前非零失败。
 2. **有界持久队列**：pending、tombstone、单 Outbox 已验证指令分别硬限 4096、16384、1024；CLI 参数只能调低，缺值或试图调高均失败。
@@ -46,7 +55,7 @@
 
 `PASS` 只表示五项预注册旧新判据成立，不证明非协作写者、跨主机锁、分布式 CAS 或全系统安全。
 
-## QF-OS 融合实测与 QIOS 边界
+## 2026-11-14 QF-OS 计划面实测与 QIOS 边界（历史证据）
 
 静态向量包含两个来源、五条未过期指令、一条过期指令、一个通配目标和非 ASCII 载荷。以 `max_jobs=3`、`max_per_source=2` 生成计划：
 
@@ -59,13 +68,14 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 
 `evidence/wave-oracle-2026-11-14.json` 记录独立重建及两个篡改负例。构建门禁会从原始 fixture 重新生成 state／plan，并与提交字节 `cmp` 相等。
 
-本轮只实现 QF-OS 的**计划面接口**。QF-OS 引擎波次的实际执行、租约、回执、失败重试、poison-message 死信、结果签名与 Skill 沙箱均未接入。QIOS 在仓内、已读在役定义和本轮精确公开检索中均未解析为本项目正典实体；搜索结果中的同名医疗或其他领域术语不是适配依据。因此当前没有 QIOS adapter、兼容性或互操作完成声称。
+该历史阶段只实现 QF-OS 的**计划面接口**；上述 `fefb2704…3302` 是当时 v3 状态夹具的计划哈希，不回写为当前 v4 静态计划哈希。2026-11-16 已新增仓内 `qfos-exec-v1` 的两种内建动作、本地原子回执／死信与重启跳过，但引擎租约、失败重试策略、结果签名、通用 Skill 沙箱和外部正典适配仍未接入。QIOS 在仓内、已读在役定义和精确公开检索中均未解析为本项目正典实体；搜索结果中的同名医疗或其他领域术语不是适配依据。因此当前没有 QIOS adapter、兼容性或互操作完成声称。
 
 ## 独立判读与跨语言勾稽
 
 - `verify-outbox-python.py`：无浮点 V1 链重算、指令来源检查、已知答案和篡改自证；不是 RFC 8785 JCS。
 - `verify-policy-python.py`：Registry 安全投影、策略摘要、三项自证和 live snapshot 对拍；fixture 摘要仍为 `d5805bd450f0778f996fd6094d3a1723114da35be1adee5ca8bd0f361a3c7a21`。
-- `verify-wave-python.py`：从原始 snapshot 重建完整波次计划；两个篡改自证通过，范围为无浮点 qfos-wave-v1 子集，不是签名、执行或 QIOS 证明。
+- `verify-wave-python.py`：从原始 snapshot 重建完整波次计划；两个篡改自证通过，范围为无浮点 qfos-wave-v1 子集，不是签名、执行或 QIOS 证明。当前 v4 静态计划哈希为 `5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34`。
+- `verify-execution-python.py`：独立推导执行输出与五类失败、重算全部摘要并勾稽计划／报告／最终状态；五项自证含 rehashed 假语义，固定执行夹具为 2 回执＋5 死信。
 
 ## 公网交叉验证
 
@@ -88,7 +98,7 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 5. 整份快照回滚、分裂视图、签名 checkpoint、独立 witness／quorum；
 6. 发布者与指令授权、可信时间；
 7. 完整 JCS V2、Merkle consistency proof、后量子 witness；
-8. QF-OS 引擎执行、租约、回执、死信和结果证明；QIOS 正典定义与适配器；
+8. 仓内 `qfos-exec-v1` 之外的通用动作与 Skill 沙箱、引擎租约、失败重试策略、结果签名／形式化证明、跨进程分布式 exactly-once、外部 QF-OS 正典与 QIOS 定义／适配器；
 9. 联盟 active、cisvr ACK、KEY-SYNC-01、旧 PAT 撤销、本轮远端同步和外部 CI 回执；
 10. Boot／裸机内核、WASM、TEE、ZK-SNARK／STARK、HoTT-ZK、涌现类型系统、量子调度、神经网络推理、Holo-Lang 与完整形式化安全证明。
 

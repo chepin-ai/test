@@ -11,11 +11,12 @@ cargo test --workspace --all-targets --locked
 python3 scripts/check-no-secrets.py
 python3 scripts/verify-outbox-python.py --self-test \
   fixtures/python-oracle-outbox.json \
+  fixtures/qfos-exec-outbox.json \
   outbox/asfa-ai-outbox.json
 python3 scripts/verify-policy-python.py --fixture fixtures/policy-oracle.json
 python3 scripts/verify-json-budget-python.py
 python3 scripts/verify-wave-python.py \
-  --expect-plan-hash fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
+  --expect-plan-hash 5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34
 rm -f /tmp/asfa-wave-report.json /tmp/asfa-wave-state.json \
   /tmp/asfa-wave-state.json.lock /tmp/asfa-wave-plan.json
 cargo run --locked -p asfa-bridge-poller -- \
@@ -30,7 +31,69 @@ python3 scripts/verify-wave-python.py \
   --registry config/sessions.wave.json \
   --snapshot /tmp/asfa-wave-state.json \
   --plan /tmp/asfa-wave-plan.json \
-  --expect-plan-hash fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
+  --expect-plan-hash 5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34
+python3 scripts/verify-wave-python.py \
+  --registry config/sessions.execution.json \
+  --snapshot fixtures/qfos-exec-pre-state.json \
+  --plan fixtures/qfos-exec-plan.json \
+  --expect-plan-hash f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a
+python3 scripts/verify-execution-python.py \
+  --closed-world --self-test \
+  --expect-plan-hash f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a \
+  --expect-execution-hash 4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c
+rm -f /tmp/asfa-exec-state.json /tmp/asfa-exec-state.json.lock \
+  /tmp/asfa-exec-pre-state.json /tmp/asfa-exec-plan.json /tmp/asfa-exec-report.json \
+  /tmp/asfa-exec-replay-report.json /tmp/asfa-exec-bridge.json \
+  /tmp/asfa-exec-committed.json
+cargo run --locked -p asfa-bridge-poller -- \
+  --config config/sessions.execution.json \
+  --state /tmp/asfa-exec-state.json \
+  --out /tmp/asfa-exec-bridge.json \
+  --wave-out /tmp/asfa-exec-plan.json \
+  --now 50
+cmp fixtures/qfos-exec-pre-state.json /tmp/asfa-exec-state.json
+cp /tmp/asfa-exec-state.json /tmp/asfa-exec-pre-state.json
+cmp fixtures/qfos-exec-plan.json /tmp/asfa-exec-plan.json
+cargo run --locked -p asfa-bridge-poller -- \
+  --config config/sessions.execution.json \
+  --state /tmp/asfa-exec-state.json \
+  --out /tmp/asfa-exec-bridge.json \
+  --wave-out /tmp/asfa-exec-plan.json \
+  --execute-wave --execution-out /tmp/asfa-exec-report.json \
+  --now 100
+cmp fixtures/qfos-exec-state.json /tmp/asfa-exec-state.json
+cmp fixtures/qfos-exec-report.json /tmp/asfa-exec-report.json
+python3 scripts/verify-execution-python.py \
+  --registry config/sessions.execution.json \
+  --pre-snapshot /tmp/asfa-exec-pre-state.json \
+  --snapshot /tmp/asfa-exec-state.json \
+  --plan /tmp/asfa-exec-plan.json \
+  --report /tmp/asfa-exec-report.json \
+  --closed-world --self-test \
+  --expect-plan-hash f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a \
+  --expect-execution-hash 4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c
+cp /tmp/asfa-exec-state.json /tmp/asfa-exec-committed.json
+cargo run --locked -p asfa-bridge-poller -- \
+  --config config/sessions.execution.json \
+  --state /tmp/asfa-exec-state.json \
+  --out /tmp/asfa-exec-bridge.json \
+  --wave-out /tmp/asfa-exec-plan.json \
+  --execute-wave --execution-out /tmp/asfa-exec-replay-report.json \
+  --now 100
+cmp /tmp/asfa-exec-committed.json /tmp/asfa-exec-state.json
+python3 - <<'PY'
+import json
+with open('/tmp/asfa-exec-replay-report.json') as f:
+    report = json.load(f)
+assert report['summary'] == {
+    'offered': 7,
+    'succeeded': 0,
+    'dead_lettered': 0,
+    'skipped_succeeded': 2,
+    'skipped_dead_lettered': 5,
+}, report['summary']
+print('execution replay: PASS', report['summary'])
+PY
 COGNITIVE_OUTPUT="$(cargo run --locked --quiet --example cognitive_demo -p asfa-userspace)"
 COGNITIVE_OUTPUT="$COGNITIVE_OUTPUT" python3 - <<'PY'
 import os

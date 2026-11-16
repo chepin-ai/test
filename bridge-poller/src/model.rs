@@ -101,6 +101,125 @@ pub struct Directive {
     pub expires_epoch: Option<u64>,
 }
 
+pub const EXECUTION_INPUT_DIGEST_DOMAIN: &str = "ASFA-OS-XI/QFOS-EXECUTION-INPUT/V1\n";
+pub const EXECUTION_OUTPUT_DIGEST_DOMAIN: &str = "ASFA-OS-XI/QFOS-EXECUTION-OUTPUT/V1\n";
+pub const EXECUTION_RECEIPT_DIGEST_DOMAIN: &str = "ASFA-OS-XI/QFOS-EXECUTION-RECEIPT/V1\n";
+pub const EXECUTION_DEAD_LETTER_DIGEST_DOMAIN: &str = "ASFA-OS-XI/QFOS-DEAD-LETTER/V1\n";
+
+fn execution_digest(domain: &str, value: &Value) -> String {
+    let mut encoded = domain.as_bytes().to_vec();
+    encoded.extend(serde_json::to_vec(value).expect("execution projection always serializes"));
+    format!("{:x}", Sha256::digest(&encoded))
+}
+
+pub fn execution_input_digest(
+    session: &str,
+    id: &str,
+    action: &str,
+    payload: &Value,
+    expires_epoch: Option<u64>,
+) -> String {
+    execution_digest(
+        EXECUTION_INPUT_DIGEST_DOMAIN,
+        &json!({
+            "session": session,
+            "id": id,
+            "action": action,
+            "payload": payload,
+            "expires_epoch": expires_epoch,
+        }),
+    )
+}
+
+pub fn execution_output_digest(output: &Value) -> String {
+    execution_digest(EXECUTION_OUTPUT_DIGEST_DOMAIN, output)
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(deny_unknown_fields)]
+pub struct ExecutionReceipt {
+    pub session: String,
+    pub id: String,
+    pub action: String,
+    pub engine: String,
+    pub plan_hash: String,
+    pub input_hash: String,
+    pub output: Value,
+    pub output_hash: String,
+    pub executed_at_epoch: u64,
+    pub receipt_hash: String,
+}
+
+impl ExecutionReceipt {
+    pub fn compute_hash(&self) -> String {
+        execution_digest(
+            EXECUTION_RECEIPT_DIGEST_DOMAIN,
+            &json!({
+                "session": self.session,
+                "id": self.id,
+                "action": self.action,
+                "engine": self.engine,
+                "plan_hash": self.plan_hash,
+                "input_hash": self.input_hash,
+                "output": self.output,
+                "output_hash": self.output_hash,
+                "executed_at_epoch": self.executed_at_epoch,
+            }),
+        )
+    }
+
+    pub fn refresh_hash(&mut self) {
+        self.receipt_hash = self.compute_hash();
+    }
+
+    pub fn has_valid_hash(&self) -> bool {
+        self.receipt_hash == self.compute_hash()
+            && self.output_hash == execution_output_digest(&self.output)
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[serde(deny_unknown_fields)]
+pub struct DeadLetterRecord {
+    pub session: String,
+    pub id: String,
+    pub action: String,
+    pub engine: String,
+    pub plan_hash: String,
+    pub input_hash: String,
+    pub code: String,
+    pub message: String,
+    pub failed_at_epoch: u64,
+    pub dead_letter_hash: String,
+}
+
+impl DeadLetterRecord {
+    pub fn compute_hash(&self) -> String {
+        execution_digest(
+            EXECUTION_DEAD_LETTER_DIGEST_DOMAIN,
+            &json!({
+                "session": self.session,
+                "id": self.id,
+                "action": self.action,
+                "engine": self.engine,
+                "plan_hash": self.plan_hash,
+                "input_hash": self.input_hash,
+                "code": self.code,
+                "message": self.message,
+                "failed_at_epoch": self.failed_at_epoch,
+            }),
+        )
+    }
+
+    pub fn refresh_hash(&mut self) {
+        self.dead_letter_hash = self.compute_hash();
+    }
+
+    pub fn has_valid_hash(&self) -> bool {
+        self.dead_letter_hash == self.compute_hash()
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct ChainBlock {

@@ -1,0 +1,137 @@
+{
+  "schema_version": "asfa-directive-ledger/v4",
+  "network_name": "qfos-execution-fixture",
+  "policy_hash": "4129f854e993bcae88b260eb12d01c8d9babd53ce1194ab45915e637d67e6867",
+  "directives": [],
+  "consumed": [
+    {
+      "session": "exec",
+      "id": "expired"
+    },
+    {
+      "session": "exec",
+      "id": "invalid"
+    },
+    {
+      "session": "exec",
+      "id": "overflow"
+    },
+    {
+      "session": "exec",
+      "id": "sha"
+    },
+    {
+      "session": "exec",
+      "id": "sum"
+    },
+    {
+      "session": "exec",
+      "id": "too-many"
+    },
+    {
+      "session": "exec",
+      "id": "unknown"
+    }
+  ],
+  "checkpoints": [
+    {
+      "session": "exec",
+      "height": 1,
+      "latest": "4997c61f4cc4a52b0851b2b29d0bd15e8872271ed64bf81a28f0332b2f93a5f4"
+    }
+  ],
+  "receipts": [
+    {
+      "session": "exec",
+      "id": "sha",
+      "action": "engine.sha256",
+      "engine": "builtin.sha256/qfos-exec-v1",
+      "plan_hash": "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a",
+      "input_hash": "44ed49b29091c79f20f6ed2dff5225cbdded92b70e96c7ca169b06e5b375c3bd",
+      "output": {
+        "bytes": 12,
+        "sha256": "ce088755bce61c36c1da693f5101eba681521b69281ee4d5e1856c28526feecc"
+      },
+      "output_hash": "ab5591610e530e026ed549d4792618d82d5ba6d849c739c5f4cec6fb8f392387",
+      "executed_at_epoch": 100,
+      "receipt_hash": "2f5cf25898518e6d088e02e6bd0fd362b0e641cf7a14ea5b9a073e892ef6ab90"
+    },
+    {
+      "session": "exec",
+      "id": "sum",
+      "action": "engine.sum",
+      "engine": "builtin.sum/qfos-exec-v1",
+      "plan_hash": "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a",
+      "input_hash": "c85ec4d3bc0205cd8471cc3aa79fa6af095d2512a40d5378def992e8a3e1f442",
+      "output": {
+        "count": 3,
+        "sum": 42
+      },
+      "output_hash": "f651e4ebdbd8ff82848fcf62878abfefbee985088cebe0bee9d1fa1f6e29a436",
+      "executed_at_epoch": 100,
+      "receipt_hash": "911101d2b591e6b2f276c2fc37ed256c89bd74d7d7432baefb4fe60b37cfad41"
+    }
+  ],
+  "dead_letters": [
+    {
+      "session": "exec",
+      "id": "expired",
+      "action": "engine.sum",
+      "engine": "dispatcher/qfos-exec-v1",
+      "plan_hash": "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a",
+      "input_hash": "00d959e305b1dda931e5dca18198fe5a93329107f1e888a512d407a44551c60e",
+      "code": "expired",
+      "message": "directive expired before execution at 100",
+      "failed_at_epoch": 100,
+      "dead_letter_hash": "8cc17ab2dd2f4a5b8ec6fca754ca84d6446db37aaeda14026e9f25f349df1a4c"
+    },
+    {
+      "session": "exec",
+      "id": "invalid",
+      "action": "engine.sum",
+      "engine": "builtin.sum/qfos-exec-v1",
+      "plan_hash": "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a",
+      "input_hash": "a907f0f7d5127881dd473c7186529fdd3a9db0d2d7bcf6c4cd7e4e6c5792d217",
+      "code": "invalid_payload",
+      "message": "invalid type: string \"not-an-array\", expected a sequence",
+      "failed_at_epoch": 100,
+      "dead_letter_hash": "97f50fdbb6dd3f8e2a743640dcddde598c64e4790988ccac3be8cca081d25207"
+    },
+    {
+      "session": "exec",
+      "id": "overflow",
+      "action": "engine.sum",
+      "engine": "builtin.sum/qfos-exec-v1",
+      "plan_hash": "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a",
+      "input_hash": "e55a5d641d27108c44ab8d56b4e2d067c69272239b6205f8673aebcfe424ca9c",
+      "code": "arithmetic_overflow",
+      "message": "checked i64 sum overflowed",
+      "failed_at_epoch": 100,
+      "dead_letter_hash": "062f60f1a47b2a7807c98ce96b1680059114956c212175d4c5b5c933fb1edaa6"
+    },
+    {
+      "session": "exec",
+      "id": "too-many",
+      "action": "engine.sum",
+      "engine": "builtin.sum/qfos-exec-v1",
+      "plan_hash": "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a",
+      "input_hash": "11c8d640ae1360efb6bd12e70caf20765500d5a227ec89aef55fb3488226ef7a",
+      "code": "input_limit",
+      "message": "sum input exceeds 1024 values: actual=1025",
+      "failed_at_epoch": 100,
+      "dead_letter_hash": "3e47f0261b4c081e5803abf4d67947b18425a9cca6e6063ad785914ed9afca3a"
+    },
+    {
+      "session": "exec",
+      "id": "unknown",
+      "action": "engine.shell",
+      "engine": "dispatcher/qfos-exec-v1",
+      "plan_hash": "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a",
+      "input_hash": "9e4bd31ec0681ac4198b602c3d213ac272f51c361b6dc73e99d1ecb8d9ae2873",
+      "code": "unknown_action",
+      "message": "action is outside qfos-exec-v1: engine.shell",
+      "failed_at_epoch": 100,
+      "dead_letter_hash": "244f3c4b470d5fb08252392f88e7b063f6e41ece6c41de89205eb7c91d3291f6"
+    }
+  ]
+}

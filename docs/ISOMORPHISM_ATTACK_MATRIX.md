@@ -1,4 +1,4 @@
-# 形式化结构、同构映射与攻击矩阵（2026-11-14）
+# 形式化结构、同构映射与攻击矩阵（2026-11-16）
 
 ## 1. 当前绑定的结构
 
@@ -32,7 +32,7 @@ c = session.canonical_url.unwrap_or(session.url)
 网络 `N`、安全策略投影 `P` 的账本记为 `L_(N,H(P))`。CLI 恢复必须满足：
 
 ```text
-schema = asfa-directive-ledger/v3
+schema = asfa-directive-ledger/v4
 snapshot.network_name = N
 snapshot.policy_hash = H(P)
 H(P) = SHA256("ASFA-OS-XI/REGISTRY-POLICY/V1\n" || serde_json::to_vec(P))
@@ -40,7 +40,7 @@ H(P) = SHA256("ASFA-OS-XI/REGISTRY-POLICY/V1\n" || serde_json::to_vec(P))
 
 `P` 包含 Registry 的 `schema_version`、`network_name`、`trust_model`，以及每会话的读取 URL、解析后的正典 URL、trust、`allow_insecure_http` 和 `allow_file`；`role`／`note` 被排除。省略 `canonical_url` 与显式填写相同读取 URL 具有相同投影。
 
-旧 v1／v2、跨网络或同网络不同安全策略的状态均不能隐式迁移。物理指令键仍为 `(session,id)`；网络与策略通过相互隔离且经过身份对拍的状态文件绑定。该摘要是确定性 SHA-256，不是签名；能同时修改 Registry 和 state 的本机攻击者仍可重算。
+旧 v1／v2／v3、跨网络或同网络不同安全策略的状态均不能隐式迁移。物理指令键仍为 `(session,id)`；网络与策略通过相互隔离且经过身份对拍的状态文件绑定。v4 另在同一快照保存成功回执与死信，并在恢复时复核其结果摘要、consumed 对应关系和成功／失败互斥。上述摘要均为确定性 SHA-256，不是签名；能同时修改 Registry 和 state 的本机攻击者仍可重算。
 
 ### 1.4 本地历史一致性
 
@@ -92,7 +92,7 @@ offered = admitted + deferred_wave_quota + deferred_source_quota
 | [C2SP tlog-policy](https://github.com/C2SP/C2SP/blob/main/tlog-policy.md) | log／witness／quorum 是显式信任策略 | 当前只能表达“无 witness 的本地模式” | quorum；不能把 `quorum none` 包装成分裂视图防护 |
 | [A2A 官方规范](https://github.com/a2aproject/A2A/blob/main/docs/specification.md) | Agent Card 可选 JWS；签名前使用 JCS；每次操作需要授权边界；Webhook 需要 SSRF 与重放考虑 | 正典 URL、传输授权、禁重定向与来源字段对拍提供局部协议映射 | 本仓不是 A2A 实现，没有 Agent Card、JWS、任务授权、完整 SSRF 或 Webhook 安全模块 |
 | [OWASP API4:2023](https://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption/) | 执行超时、批操作数、记录数、内存与存储都需限制 | 文档／快照字节、JSON 深度／节点、64 会话、账本基数、全轮询 deadline 与逐请求剩余时间 | 进程级内存／CPU／文件描述符硬隔离与动态费率策略 |
-| [Azure Queue-Based Load Leveling](https://learn.microsoft.com/en-us/azure/architecture/patterns/queue-based-load-leveling)、[Competing Consumers](https://learn.microsoft.com/en-us/azure/architecture/patterns/competing-consumers) | 持续生产快于消费时须容量决策；消费者应幂等并处理 poison message | 有界账本、显式容量失败、消费 tombstone、冲突／非法事件分类 | 持久 broker、租约、delivery count、死信队列与分布式消费者协调 |
+| [Azure Queue-Based Load Leveling](https://learn.microsoft.com/en-us/azure/architecture/patterns/queue-based-load-leveling)、[Competing Consumers](https://learn.microsoft.com/en-us/azure/architecture/patterns/competing-consumers) | 持续生产快于消费时须容量决策；消费者应幂等并处理 poison message | 有界账本、显式容量失败、消费 tombstone、冲突／非法事件分类；`qfos-exec-v1` 本地原子回执／死信与重放跳过 | 持久 broker、租约、delivery count、分布式死信队列与跨进程消费者协调 |
 
 C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 也只能证明相应卡片的签名完整性，不能自动证明后续任务、指令或履约结果可信。
 
@@ -114,7 +114,7 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 | 新链高度低于旧高度 | `Rollback`，指令与检查点不变 | 同上 |
 | 同高不同 latest | `Fork`，无部分应用 | 同上 |
 | 更高链但改写旧高度块 | `Fork`，不能借“更长”绕过 | 同上 |
-| 重启后遇到分叉 | v3 快照恢复检查点后仍拒绝 | 同上，实际 `save_atomic`＋`load_for_registry` |
+| 重启后遇到分叉 | v4 快照恢复检查点后仍拒绝 | 同上，实际 `save_atomic`＋`load_for_registry` |
 | 后续区块伪造来源 | 整份 Outbox 零入库，检查点也为零 | `ingest_outbox_does_not_partially_apply_a_later_forged_block` |
 | 跨语言摘要／Unicode 对应 | Python 生成向量由 Rust 接受；Python 独立复算同一向量 | `python_generated_non_ascii_chain_verifies_in_rust`；`scripts/verify-outbox-python.py` |
 
@@ -126,7 +126,7 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 | 镜像文档伪造正典 URL | `invalid_trust`，明确报告 expected／document 正典 mismatch | `outbox_url_must_match_the_declared_canonical_url` |
 | 未授权 HTTP／file／其他 scheme | 在任何文件或 socket I/O 前失败 | `insecure_transports_require_explicit_opt_in_before_io` |
 | 未知 Outbox／Registry／Snapshot 字段 | `invalid_schema` 或恢复失败，不静默忽略 | `unknown_protocol_fields_are_rejected_instead_of_silently_ignored` |
-| 同网络替换 URL、canonical、trust 或传输授权 | v3 `policy_hash` 对拍失败，state 不变且不生成新报告 | `policy_digest_binds_security_fields_and_excludes_descriptions`；`cli_same_network_policy_change_preserves_state_but_description_change_is_compatible` |
+| 同网络替换 URL、canonical、trust 或传输授权 | v4 `policy_hash` 对拍失败，state 不变且不生成新报告 | `policy_digest_binds_security_fields_and_excludes_descriptions`；`cli_same_network_policy_change_preserves_state_but_description_change_is_compatible` |
 | 只改 `role`／`note` | 策略摘要不变，原 state 可继续加载 | 同上 |
 | v2 状态直接交给新 CLI | 先报 `unsupported ledger schema`，不做字段补全式迁移 | `cli_v2_snapshot_is_not_implicitly_migrated` |
 | Registry 超过 2 MiB | 轮询前非零失败，state／report 均不创建 | `cli_oversized_registry_fails_before_state_or_report_creation` |
@@ -144,8 +144,8 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 | 65 会话扇出 | 任何 socket I/O 前失败 | `cli_registry_fanout_fails_before_transport_or_outputs`；SAT-04：旧端 65 次命中，新端 0 次 |
 | 两 CLI 消费不同 ID | 协作写者竞争必须失败关闭；显式重试后不得丢 tombstone | LCK-01：旧端双成功但只剩 1 个 tombstone；新端竞争者返回 2、零网络命中，重试后 consumed=2 |
 | 单来源垄断波次 | 来源轮转、双配额和 deferred 守恒；计划不改账本 | `wave_is_fair_bounded_deterministic_and_non_mutating`；`cli_wave_plan_is_deterministic_fair_and_state_bound` |
-| 篡改 Job 或账本绑定 | 独立 Python 从原始 snapshot 重建并拒绝 | `scripts/verify-wave-python.py` 两项自证负例；静态计划 `fefb2704…3302` |
-| 把计划当执行或 QIOS 证明 | schema 固定 `plan-only-no-execution`，文档拒绝升级解释 | WAVE-03；QIOS 正典定义未解析，无适配器声称 |
+| 篡改 Job 或账本绑定 | 独立 Python 从原始 snapshot 重建并拒绝 | `scripts/verify-wave-python.py` 两项自证负例；当前 v4 静态计划 `5b27a806…ca34` |
+| 把 plan_hash 当执行或 QIOS 证明 | 计划 schema 固定 `plan-only-no-execution`；执行结果必须使用独立报告 | WAVE-03；`qfos-wave-execution/v1` 分离；QIOS 正典定义未解析，无适配器声称 |
 
 预注册与原始结果分别见 `evidence/qfos-fusion-preregister-2026-11-14.json` 和 `evidence/differential-2026-11-14.json`。PASS 只覆盖预注册差分，不证明非协作写者、分布式锁或下游引擎安全。
 
@@ -160,6 +160,22 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 | Registry／Snapshot 绕过 | 与 Outbox 使用同一严格入口；恢复失败不覆盖状态 | `cli_json_budget_also_covers_registry_and_snapshot_restore`；JSON-03 旧端接受深层 Snapshot，新端轮询前拒绝且字节不变 |
 
 预注册与原始结果见 `evidence/resource-budget-preregister-2026-11-14.json`、`evidence/resource-budget-differential-2026-11-14.json`。独立 `verify-json-budget-python.py` 以迭代遍历复算深度与节点并执行五个已知答案自证。首轮攻击夹具因 genesis 字段错误得到 FAIL，已公开记录并修正重跑；该 FAIL 不计为实现通过。
+
+### 3.5 2026-11-16 `qfos-exec-v1` 受控执行与恢复门禁
+
+| 攻击／碰撞 | 预注册拒绝条件 | 自动化与实测对应 |
+|---|---|---|
+| 把占位 action 当真实执行 | `engine.sum`／`engine.sha256` 必须产生独立可复算输出；pending、consumed、回执一致 | EXE-01；`execution_fixture_replays_exact_known_answers`；固定计划 `f64a8bcc…254a` |
+| shell／未知动作、非法 payload、输入洪泛、i64 溢出、计划后过期 | 不进入外部进程；五类失败均显式死信且只消费一次 | EXE-02；`builtins_dead_letters_and_replay_are_real_and_idempotent`；7 项夹具为 2 回执＋5 死信 |
+| 执行中途容量失败 | 克隆账本全部丢弃，调用者原 snapshot 不变，不能留下成功前缀 | `capacity_failure_leaves_the_caller_ledger_byte_for_byte_equivalent` |
+| consumed 无结果、篡改计划 | fail-closed，不得静默跳过或部分提交 | `consumed_without_an_outcome_fails_closed_without_mutation`；计划负例 |
+| 执行报告输出失败 | 原计划先于结果落盘；v4 状态已保存；随后恢复为 skipped，不重复执行 | `cli_fresh_execution_persists_recovery_plan_before_report_output`；`cli_execution_dead_letters_and_report_failure_resume_without_reexecution` |
+| 重放同一计划 | 不新增回执／死信，不重复执行，账本字节不变 | EXE-03；真实进程 replay 为 0 新成功、0 新死信、2＋5 skipped |
+| 篡改输出／失败类别后重新计算哈希 | 外层摘要合法仍不够，独立 Python 必须从内建语义拒绝 | EXE-04；`verify-execution-python.py` 五项自证含两个 rehashed 假语义样本 |
+| v3 隐式迁移、回执／死信矛盾 | 明确拒绝且原文件不变；恢复时复核自身摘要、consumed 和结果冲突 | EXE-05；`v3_snapshot_is_rejected_without_implicit_migration_or_file_mutation` |
+| 旧版被误报为已有执行能力 | 同源旧端无执行参数且 7 项 pending；新端产生真实结果 | EXE-06；`evidence/execution-differential-2026-11-16.json` 九项检查全部通过 |
+
+预登记见 `evidence/execution-preregister-2026-11-16.json`，旧新真实进程原始结果见 `evidence/execution-differential-2026-11-16.json`。PASS 仅覆盖本仓 `qfos-exec-v1`，不证明外部 QF-OS 正典、QIOS、通用 Skill 沙箱、分布式 exactly-once、发布者认证或掉电持久性。
 
 ## 4. JCS 候选包评估与不采用结论
 
@@ -187,20 +203,24 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 9. **紧凑证明与后量子 witness**：Merkle consistency proof、witness cosignature、ML-DSA-44 均只属后续研究，不在当前代码路径。
 10. **系统级研究目标**：原始 ZK、HoTT、WASM、TEE、完整形式化安全证明和完整 OS 目标不在本轮实现范围。
 11. **外部协作状态**：联盟 active、cisvr ACK、KEY-SYNC-01 和旧 PAT 撤销均需独立外部回执，不能由本地测试、outbox 写入或公网 `verified` 推导。
-12. **QF-OS／QIOS 下游语义**：当前只有计划接口，没有引擎租约、执行回执、poison-message 死信、结果签名或真实 Skill 沙箱；QIOS 定义未解析，适配与兼容性均为零声称。
+12. **QF-OS／QIOS 下游语义**：当前仓内 `qfos-exec-v1` 只有 `engine.sum` 与 `engine.sha256`，已接入本地原子回执、五类死信和重启跳过；引擎租约、通用 Skill 沙箱、结果签名、跨进程分布式 exactly-once 与外部 QF-OS 正典适配仍未实现。QIOS 定义未解析，适配与兼容性均为零声称。
 
 ## 6. 独立判读器范围
 
 `scripts/verify-outbox-python.py` 不用 Rust 中间产物，独立执行 UTF-8／重复键解析、V1 负载摘要、逐块哈希、latest 和指令来源检查，并对已知答案与篡改负例自证。为避免 Python 与 Rust 浮点格式差异，它明确只接受无浮点且整数落在 `serde_json` 整数范围内的 V1 子集；其 canonical bytes **不是 RFC 8785 JCS**。
 
-`scripts/verify-policy-python.py` 独立重建 Registry 安全投影和策略摘要，并自证：说明字段变化不改变摘要、显式默认 canonical 不改变摘要、URL 变化必须改变摘要。它可检查 v3 snapshot 的 `network_name` 与 `policy_hash`，但不验证签名、外部信任或状态文件未被整体替换。
+`scripts/verify-policy-python.py` 独立重建 Registry 安全投影和策略摘要，并自证：说明字段变化不改变摘要、显式默认 canonical 不改变摘要、URL 变化必须改变摘要。它可检查 v4 snapshot 的 `network_name` 与 `policy_hash`，但不验证签名、外部信任或状态文件未被整体替换。
 
 `scripts/verify-json-budget-python.py` 使用独立严格重复键解析与显式栈迭代遍历，复算根深度、最大深度和全文档值节点；对象键不另计。它对 64 层接受、65 层拒绝、16384 节点接受、16385 节点拒绝、跨分支计数和转义重复键进行已知答案自证，不读取 Rust 中间结果，也不证明进程内存上限。
 
 `scripts/verify-wave-python.py` 从 Registry 和原始 snapshot 独立重建分组、过期过滤、来源轮转、双配额、deferred 计数、ledger hash 与 plan hash，并拒绝 Job 篡改和账本绑定篡改。其范围为 qfos-wave-v1 无浮点子集，不是 JCS、发布者认证、执行证明或 QIOS 判读器。
 
+`scripts/verify-execution-python.py` 从 Registry、计划前 snapshot、原计划和执行后 snapshot 独立推导内建动作语义、i64 溢出、输入上限、过期优先级、真实输出及全部输入／输出／回执／死信／报告摘要，并逐项核对报告与最终状态。五项已知答案自证包含重新计算内部及外层哈希后的假 sum、假失败类别和假报告结果，因此不能靠重算摘要绕过。该判读器只覆盖仓内 `qfos-exec-v1` 无浮点子集，不是形式化执行证明、结果签名、外部 QF-OS 正典或 QIOS 判读器。
+
 ## 7. 可复算证据入口
 
+- `evidence/execution-preregister-2026-11-16.json`：真实执行、五类死信、恢复幂等、独立判读、v4 原子性与旧新差分的实现前判据。
+- `evidence/execution-differential-2026-11-16.json`：同一 Registry／Outbox 下旧端无执行能力、新端真实执行与重启跳过的九项进程差分；新端哈希属于工作树 debug 构建，不与后续干净归档哈希混用。
 - `evidence/resource-budget-preregister-2026-11-14.json`：全轮询与 JSON 深度／节点攻击的实现前判据。
 - `evidence/resource-budget-consistency-2026-11-14.json`：实现提交、85 项测试、干净归档、五组差分、独立 JSON 判读、公网复核和七项 artifact 校验的综合证据。
 - `evidence/resource-budget-differential-2026-11-14.json`：TIME-01／02、JSON-01／02／03 的旧新真实进程结果及独立判读。
@@ -220,6 +240,7 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 - `../scripts/verify-policy-python.py`：独立 Python 策略投影、fixture 与 live snapshot 对拍入口。
 - `../scripts/verify-json-budget-python.py`：独立迭代 JSON 深度／节点判读与已知答案入口。
 - `../scripts/verify-wave-python.py`：独立 Python 波次重建、静态已知答案与篡改负例入口。
-- `../scripts/build-all.sh`：格式、Clippy、全部测试、凭据扫描、四类 Python 判读、认知示例、波次字节对拍和 CLI 烟测的统一重建门禁。
+- `../scripts/verify-execution-python.py`：独立执行语义、状态／报告勾稽、固定夹具与 rehashed 假语义负例入口。
+- `../scripts/build-all.sh`：格式、Clippy、全部测试、凭据扫描、五类 Python 判读、认知示例、波次与执行固定夹具字节对拍、执行重放和 CLI 烟测的统一重建门禁。
 
 本轮公网正典已明确迁移到实际发布的 `.../main/...` 形式；当前字节一致只适用于本轮采集时点，不能回改 2026-11-10 的历史差异。镜像 `verified` 也不等于发布者认证。所有外部状态（推送、CI、ACK、正典 active、KEY-SYNC-01）均需要独立回执。

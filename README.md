@@ -19,7 +19,7 @@
   - 404、非 JSON、schema 错误、身份错配、坏链、超限文档均产生显式负结果；
   - 指令只在区块负载内计入已验证集合，并强制 `from == session`；
   - 结构化会话键去重、同 ID 内容冲突拒绝、过期复核、消费 tombstone 防重放；
-  - v3 账本绑定 `network_name` 与完整安全策略 `policy_hash`，跨网络或同网络策略混配直接失败且不覆盖原状态；
+  - v4 账本绑定 `network_name` 与完整安全策略 `policy_hash`，跨网络或同网络策略混配直接失败且不覆盖原状态；
   - 每会话持久化 `(height,latest)` 检查点，拒绝降高、同高分叉及长链改写旧前缀；
   - 确定性账本快照、原子保存、恢复矛盾检查，重载后仍拒绝已消费指令与历史分叉；
   - CLI 可直接执行“轮询→完整链复验→入库→显式消费→原子保存”，并输出逐指令 ingestion 事件；
@@ -30,7 +30,8 @@
   - CLI 默认 60 秒全轮询墙钟预算，`--poll-timeout-ms` 只能调低；会话间检查 deadline，活动 HTTP 请求只获得剩余时间；
   - Registry 最多 64 个会话；pending、消费 tombstone、单 Outbox 指令数与 Snapshot 写字节均有硬上限，容量失败整批回滚；
   - `--state` 使用稳定 sidecar 的 OS 排他锁，协作写者竞争时失败关闭，不再以原子 rename 冒充多写者互斥；
-  - QF-OS `qfos-wave-plan/v1`：从已验证账本生成确定性、按来源轮转、全局／来源双配额的计划，绑定 network、policy、snapshot 与 plan 摘要；只规划，不执行引擎。
+  - QF-OS `qfos-wave-plan/v1`：从已验证账本生成确定性、按来源轮转、全局／来源双配额的计划，绑定 network、policy、snapshot 与 plan 摘要；计划生成本身只读；
+  - 仓内 `qfos-exec-v1`：显式执行计划中的 `engine.sum`／`engine.sha256`，无 shell、网络或外部进程；真实输出、成功回执、五类死信与 consumed tombstone 在同一 v4 快照提交，重启只恢复、不重复执行。
 
 ## 复验
 
@@ -44,7 +45,10 @@ python3 scripts/verify-outbox-python.py --self-test \
 python3 scripts/verify-policy-python.py --fixture fixtures/policy-oracle.json
 python3 scripts/verify-json-budget-python.py
 python3 scripts/verify-wave-python.py \
-  --expect-plan-hash fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
+  --expect-plan-hash 5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34
+python3 scripts/verify-execution-python.py --closed-world --self-test \
+  --expect-plan-hash f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a \
+  --expect-execution-hash 4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c
 cargo run -p asfa-bridge-poller -- \
   --config config/sessions.smoke.json \
   --out /tmp/asfa-smoke-report.json \
@@ -74,9 +78,20 @@ cargo run -p asfa-bridge-poller -- \
   --state /tmp/asfa-wave-state.json \
   --wave-out /tmp/asfa-wave-plan.json \
   --now 100 --wave-max-jobs 3 --wave-max-per-source 2
+
+# 先在 50 时刻保存执行恢复锚点，再在 100 时刻执行同一计划
+cargo run -p asfa-bridge-poller -- \
+  --config config/sessions.execution.json \
+  --state /tmp/asfa-exec-state.json \
+  --wave-out /tmp/asfa-exec-plan.json --now 50
+cargo run -p asfa-bridge-poller -- \
+  --config config/sessions.execution.json \
+  --state /tmp/asfa-exec-state.json \
+  --wave-out /tmp/asfa-exec-plan.json \
+  --execute-wave --execution-out /tmp/asfa-exec-report.json --now 100
 ```
 
-`--fail-on-error` 会把轮询失败、入库冲突／非法指令和消费目标不存在变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v3 状态同时绑定 `network_name` 与 Registry 安全策略摘要 `policy_hash`；旧 v1／v2、跨网络及同网络策略变化均不做隐式迁移，说明性 `role`／`note` 变化不影响兼容性。CLI 容量参数只能把硬上限调低，不能调高；sidecar 锁只约束使用相同词法状态路径的协作进程，不是分布式锁。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、非协作写者、DNS 完整超时覆盖与进程级内存／CPU 隔离仍不在保障范围内。
+`--fail-on-error` 会把轮询失败、入库冲突／非法指令、消费目标不存在以及新产生或恢复的执行死信变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v4 状态同时绑定 `network_name` 与 Registry 安全策略摘要 `policy_hash`；旧 v1／v2／v3、跨网络及同网络策略变化均不做隐式迁移，说明性 `role`／`note` 变化不影响兼容性。执行模式先保存原计划，再暂存执行并原子保存 v4 状态，最后写执行报告；报告写坏后可从计划与持久回执恢复。CLI 容量参数只能把硬上限调低，不能调高；sidecar 锁只约束使用相同词法状态路径的协作进程，不是分布式锁。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、非协作写者、DNS 完整超时覆盖与进程级内存／CPU 隔离仍不在保障范围内。
 
 一键全部门禁（`/mnt` 等禁止执行位挂载下也能构建）：
 
@@ -84,7 +99,7 @@ cargo run -p asfa-bridge-poller -- \
 bash scripts/build-all.sh
 ```
 
-预期：85 项 Rust 测试通过；烟测汇总为 `total=3, verified=1, failed=2`，两个失败分别是故意设置的非法 JSON 和缺失文件。QF-OS 静态向量准入 `a1 → b1 → a2`，两个延后项分别由来源配额和全局配额解释，Python 独立重建与字节对拍通过。独立 JSON 判读以迭代遍历复核深度、全文档节点数、转义重复键及五个已知答案负例。
+预期：92 项 Rust 测试通过；烟测汇总为 `total=3, verified=1, failed=2`，两个失败分别是故意设置的非法 JSON 和缺失文件。QF-OS 静态向量准入 `a1 → b1 → a2`，两个延后项分别由来源配额和全局配额解释。执行夹具包含 7 项作业，实测 2 个真实成功回执与 5 个显式死信，重放为 7 项 skipped 且账本字节不变；Python 独立重建输出与失败类别，并以 5 个篡改样本自证，其中包含篡改后重算哈希的假输出与假失败类别。独立 JSON 判读以迭代遍历复核深度、全文档节点数、转义重复键及五个已知答案负例。
 
 ## 证据与协议
 
@@ -97,4 +112,4 @@ bash scripts/build-all.sh
 
 ## 诚实边界
 
-“无签名哈希链”只证明数据内部一致性，不证明发布者身份。当前 Coq 文件只是一个高度定理示例，不能据此宣称系统经过形式化安全验证。详细限制见状态文档。
+“无签名哈希链”只证明数据内部一致性，不证明发布者身份。`qfos-exec-v1` 是本仓定义的纯内置执行契约，不是已验证的外部 QF-OS 正典或 QIOS 适配器；回执与报告 SHA-256 不是签名，本地恢复幂等也不是分布式 exactly-once。当前 Coq 文件只是一个高度定理示例，不能据此宣称系统经过形式化安全验证。详细限制见状态文档。

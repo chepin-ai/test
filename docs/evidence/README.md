@@ -54,3 +54,10 @@
 - `json-budget-oracle-2026-11-14.json`：独立 Python 以显式栈迭代复算深度与全文档节点；64 层接受、65 层拒绝、16384 节点接受、16385 节点拒绝、跨分支计数与转义重复键五个已知答案自证通过，不读取 Rust 中间结果。
 - `resource-budget-poll-2026-11-14.json`：干净二进制于 2026-11-14T15:17:42Z、显式 60 秒总预算下采集的七端点报告。asfa-ai 为 `verified`，cfts／cisvr／qgl／ucif2／usrm 为 404，vinf 为 `invalid_schema`；只描述采集时点，不证明远端实现提交、发布者身份或联盟状态。
 - PASS 只覆盖本轮预注册判据，不证明 DNS 完整受控、进程级内存／CPU／文件描述符隔离、分布式锁、QF-OS 执行或 QIOS 兼容。cisvr ACK、正典 active、KEY-SYNC-01、旧 PAT 撤销、远端同步和外部 CI 均无完成证据；最终推送结果另以实际推送与读回为准。
+
+## 2026-11-16
+
+- `execution-preregister-2026-11-16.json`：实现前登记的 EXE-01–06，覆盖真实内建输出、五类死信、恢复与重放、独立语义判读、v4 原子快照和旧新进程差分；不含结果声称。
+- `execution-differential-2026-11-16.json`：同一 Registry／Outbox 下的九项真实进程差分，旧端提交 `320b226ca7b605f41744f50e970b2371077bebdb` 无 `--execute-wave` 且 7 项保持 pending；新端产生 2 个成功回执＋5 个死信，重放为 2＋5 skipped 且账本字节不变，独立判读通过。旧二进制 SHA-256 为 `096359978a6b4d814605687828e70d09cf3197d62f941145c5792cd02c2cfa6f`，工作树 debug 新二进制 SHA-256 为 `07444fd68cca8d9f8d49e1e2d9297fb3df777bfc1fa894db8b1e3811f2a78e24`；后者不得当作提交后干净归档二进制哈希。
+- 工作树统一门禁实测 92／92 Rust 测试通过，固定计划哈希为 `f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a`，执行报告哈希为 `4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c`。实现提交、干净归档重建与综合证据身份在重建完成后单独登记。
+- PASS 只覆盖仓内 `qfos-exec-v1`，不证明外部 QF-OS 正典、QIOS、通用 Skill 沙箱、租约、分布式 exactly-once、发布者认证、结果签名或掉电持久性。

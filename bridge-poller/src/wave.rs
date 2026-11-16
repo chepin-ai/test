@@ -62,6 +62,8 @@ pub enum WaveError {
     ZeroQuota,
     #[error("wave planning requires a ledger bound to network and registry policy")]
     UnboundLedger,
+    #[error("invalid wave plan: {0}")]
+    InvalidPlan(String),
 }
 
 fn digest(domain: &str, value: &Value) -> String {
@@ -73,6 +75,55 @@ fn digest(domain: &str, value: &Value) -> String {
 pub fn ledger_digest(ledger: &DirectiveLedger) -> String {
     let snapshot = serde_json::to_value(ledger.snapshot()).expect("ledger snapshot serializes");
     digest(LEDGER_DIGEST_DOMAIN, &snapshot)
+}
+
+pub fn compute_wave_plan_hash(plan: &WavePlan) -> String {
+    let projection = json!({
+        "schema_version": &plan.schema_version,
+        "mode": &plan.mode,
+        "network_name": &plan.network_name,
+        "policy_hash": &plan.policy_hash,
+        "ledger_hash": &plan.ledger_hash,
+        "target": &plan.target,
+        "generated_at_epoch": plan.generated_at_epoch,
+        "max_jobs": plan.max_jobs,
+        "max_per_source": plan.max_per_source,
+        "jobs": &plan.jobs,
+        "deferred": plan.deferred,
+        "sources": &plan.sources,
+    });
+    digest(WAVE_PLAN_DIGEST_DOMAIN, &projection)
+}
+
+pub fn verify_wave_plan(plan: &WavePlan) -> Result<(), WaveError> {
+    if plan.schema_version != WAVE_PLAN_SCHEMA_VERSION || plan.mode != "plan-only-no-execution" {
+        return Err(WaveError::InvalidPlan(
+            "unsupported schema or execution mode".into(),
+        ));
+    }
+    if plan.plan_hash != compute_wave_plan_hash(plan) {
+        return Err(WaveError::InvalidPlan("plan_hash mismatch".into()));
+    }
+    let mut keys = BTreeSet::new();
+    if plan
+        .jobs
+        .iter()
+        .any(|job| !keys.insert((job.session.clone(), job.id.clone())))
+    {
+        return Err(WaveError::InvalidPlan("duplicate planned job".into()));
+    }
+    let admitted: usize = plan.sources.iter().map(|source| source.admitted).sum();
+    let deferred: usize = plan
+        .sources
+        .iter()
+        .map(|source| source.deferred_wave_quota + source.deferred_source_quota)
+        .sum();
+    if admitted != plan.jobs.len() || deferred != plan.deferred {
+        return Err(WaveError::InvalidPlan(
+            "source accounting does not match jobs and deferred totals".into(),
+        ));
+    }
+    Ok(())
 }
 
 fn job(session: &str, directive: &Directive) -> WaveJob {
@@ -182,21 +233,7 @@ pub fn plan_wave(
         sources,
         plan_hash: String::new(),
     };
-    let projection = json!({
-        "schema_version": &plan.schema_version,
-        "mode": &plan.mode,
-        "network_name": &plan.network_name,
-        "policy_hash": &plan.policy_hash,
-        "ledger_hash": &plan.ledger_hash,
-        "target": &plan.target,
-        "generated_at_epoch": plan.generated_at_epoch,
-        "max_jobs": plan.max_jobs,
-        "max_per_source": plan.max_per_source,
-        "jobs": &plan.jobs,
-        "deferred": plan.deferred,
-        "sources": &plan.sources,
-    });
-    plan.plan_hash = digest(WAVE_PLAN_DIGEST_DOMAIN, &projection);
+    plan.plan_hash = compute_wave_plan_hash(&plan);
     Ok(plan)
 }
 

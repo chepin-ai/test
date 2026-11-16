@@ -1,0 +1,13 @@
+{
+  "schema_version": "2026-11-16",
+  "network_name": "qfos-execution-fixture",
+  "trust_model": "unsigned-hash-chain",
+  "sessions": {
+    "exec": {
+      "url": "file://fixtures/qfos-exec-outbox.json",
+      "role": "qfos-exec-v1-fixture",
+      "trust": "unsigned-hash-chain",
+      "allow_file": true
+    }
+  }
+}

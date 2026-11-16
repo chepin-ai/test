@@ -1,7 +1,8 @@
 use asfa_bridge_poller::{
-    append_block, append_directives, ingest_outbox, strict_json, verified_directives,
-    CapacityError, ChainError, Directive, DirectiveLedger, IngestError, IngestOutcome, Outbox,
-    PollStatus, Poller, Registry, ResourceLimits, Session, TrustMode,
+    append_block, append_directives, execute_wave, ingest_outbox, strict_json, verified_directives,
+    CapacityError, ChainError, Directive, DirectiveLedger, IngestError, IngestOutcome,
+    LedgerSnapshot, Outbox, PollStatus, Poller, Registry, ResourceLimits, Session, TrustMode,
+    WaveExecutionReport, WavePlan,
 };
 use serde_json::json;
 use std::collections::BTreeMap;
@@ -660,7 +661,7 @@ fn cli_cross_network_state_reuse_fails_without_overwrite() {
     let snapshot: serde_json::Value = serde_json::from_slice(&before).unwrap();
     assert_eq!(
         snapshot["schema_version"],
-        json!("asfa-directive-ledger/v3")
+        json!("asfa-directive-ledger/v4")
     );
     assert_eq!(snapshot["network_name"], json!("alpha"));
 
@@ -968,7 +969,7 @@ fn cli_same_network_policy_change_preserves_state_but_description_change_is_comp
     let snapshot: serde_json::Value = serde_json::from_slice(&before).unwrap();
     assert_eq!(
         snapshot["schema_version"],
-        json!("asfa-directive-ledger/v3")
+        json!("asfa-directive-ledger/v4")
     );
     assert_eq!(
         snapshot["policy_hash"],
@@ -1557,4 +1558,309 @@ fn cli_poll_timeout_flag_requires_a_bounded_value() {
             .unwrap();
         assert!(!output.status.success());
     }
+}
+
+fn executable_directive(
+    id: &str,
+    action: &str,
+    payload: serde_json::Value,
+    expires: Option<u64>,
+) -> Directive {
+    Directive {
+        id: id.into(),
+        from: "node".into(),
+        to: "qfos".into(),
+        action: action.into(),
+        payload,
+        expires_epoch: expires,
+    }
+}
+
+#[test]
+fn cli_execution_dead_letters_and_report_failure_resume_without_reexecution() {
+    let mut outbox = Outbox::genesis("node", "file:///unused");
+    append_directives(
+        &mut outbox,
+        vec![
+            executable_directive("sum", "engine.sum", json!({"values": [20, 22]}), None),
+            executable_directive("sha", "engine.sha256", json!({"text": "abc"}), None),
+            executable_directive("unknown", "engine.shell", json!({"command": "true"}), None),
+            executable_directive("invalid", "engine.sum", json!({"values": null}), None),
+            executable_directive(
+                "overflow",
+                "engine.sum",
+                json!({"values": [i64::MAX, 1]}),
+                None,
+            ),
+            executable_directive("expired", "engine.sum", json!({"values": [1]}), Some(99)),
+        ],
+        1,
+        0,
+    )
+    .unwrap();
+    let (outbox_path, outbox_url) = outbox_file(outbox);
+    let registry = Registry {
+        schema_version: "test".into(),
+        network_name: "exec-alpha".into(),
+        trust_model: "unsigned-hash-chain".into(),
+        sessions: BTreeMap::from([("node".into(), session(outbox_url))]),
+    };
+    let config = temp_file(&serde_json::to_string(&registry).unwrap());
+    let state = unused_path("execution-state");
+    let wave = unused_path("execution-wave");
+    let execution = unused_path("execution-report");
+    let replay_execution = unused_path("execution-replay-report");
+    let bad_execution = unused_path("execution-report-directory");
+    fs::create_dir(&bad_execution).unwrap();
+
+    let planned = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--config", config.to_str().unwrap()])
+        .args(["--state", state.to_str().unwrap()])
+        .args(["--wave-out", wave.to_str().unwrap(), "--now", "50"])
+        .output()
+        .unwrap();
+    assert!(
+        planned.status.success(),
+        "{}",
+        String::from_utf8_lossy(&planned.stderr)
+    );
+
+    let failed_output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--config", config.to_str().unwrap()])
+        .args(["--state", state.to_str().unwrap()])
+        .args(["--wave-out", wave.to_str().unwrap()])
+        .args([
+            "--execute-wave",
+            "--execution-out",
+            bad_execution.to_str().unwrap(),
+        ])
+        .args(["--now", "100"])
+        .output()
+        .unwrap();
+    assert!(!failed_output.status.success());
+    assert!(state.exists());
+    let committed = fs::read(&state).unwrap();
+    let snapshot: serde_json::Value = serde_json::from_slice(&committed).unwrap();
+    assert_eq!(snapshot["schema_version"], "asfa-directive-ledger/v4");
+    assert_eq!(snapshot["directives"].as_array().unwrap().len(), 0);
+    assert_eq!(snapshot["consumed"].as_array().unwrap().len(), 6);
+    assert_eq!(snapshot["receipts"].as_array().unwrap().len(), 2);
+    assert_eq!(snapshot["dead_letters"].as_array().unwrap().len(), 4);
+
+    let resumed = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--config", config.to_str().unwrap()])
+        .args(["--state", state.to_str().unwrap()])
+        .args(["--wave-out", wave.to_str().unwrap()])
+        .args([
+            "--execute-wave",
+            "--execution-out",
+            execution.to_str().unwrap(),
+        ])
+        .args(["--now", "100"])
+        .output()
+        .unwrap();
+    assert!(
+        resumed.status.success(),
+        "{}",
+        String::from_utf8_lossy(&resumed.stderr)
+    );
+    assert_eq!(fs::read(&state).unwrap(), committed);
+    let report: serde_json::Value =
+        strict_json::from_str(&fs::read_to_string(&execution).unwrap()).unwrap();
+    assert_eq!(report["profile"], "qfos-exec-v1");
+    assert_eq!(report["summary"]["offered"], 6);
+    assert_eq!(report["summary"]["succeeded"], 0);
+    assert_eq!(report["summary"]["dead_lettered"], 0);
+    assert_eq!(report["summary"]["skipped_succeeded"], 2);
+    assert_eq!(report["summary"]["skipped_dead_lettered"], 4);
+    let results = report["results"].as_array().unwrap();
+    let sum = results
+        .iter()
+        .find(|result| result["id"] == "sum")
+        .and_then(|result| result["receipt"].as_object())
+        .unwrap();
+    assert_eq!(sum["output"], json!({"count": 2, "sum": 42}));
+    let sha = results
+        .iter()
+        .find(|result| result["id"] == "sha")
+        .and_then(|result| result["receipt"].as_object())
+        .unwrap();
+    assert_eq!(
+        sha["output"]["sha256"],
+        "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    );
+
+    let replayed = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--config", config.to_str().unwrap()])
+        .args(["--state", state.to_str().unwrap()])
+        .args(["--wave-out", wave.to_str().unwrap()])
+        .args([
+            "--execute-wave",
+            "--execution-out",
+            replay_execution.to_str().unwrap(),
+        ])
+        .args(["--now", "100"])
+        .output()
+        .unwrap();
+    assert!(
+        replayed.status.success(),
+        "{}",
+        String::from_utf8_lossy(&replayed.stderr)
+    );
+    assert_eq!(fs::read(&state).unwrap(), committed);
+    assert_eq!(
+        fs::read(&execution).unwrap(),
+        fs::read(&replay_execution).unwrap()
+    );
+
+    let mut tampered_snapshot = snapshot.clone();
+    tampered_snapshot["receipts"][0]["output"]["sum"] = json!(-1);
+    let tampered = temp_file(&tampered_snapshot.to_string());
+    assert!(DirectiveLedger::load(&tampered).is_err());
+
+    for path in [
+        outbox_path,
+        config,
+        wave,
+        execution,
+        replay_execution,
+        tampered,
+    ] {
+        fs::remove_file(path).unwrap();
+    }
+    fs::remove_file(&state).unwrap();
+    fs::remove_dir(bad_execution).unwrap();
+    let _ = fs::remove_file(format!("{}.lock", state.display()));
+}
+
+#[test]
+fn cli_fresh_execution_persists_recovery_plan_before_report_output() {
+    let mut outbox = Outbox::genesis("node", "file:///unused");
+    append_directives(
+        &mut outbox,
+        vec![executable_directive(
+            "sum",
+            "engine.sum",
+            json!({"values": [40, 2]}),
+            None,
+        )],
+        1,
+        0,
+    )
+    .unwrap();
+    let (outbox_path, outbox_url) = outbox_file(outbox);
+    let registry = Registry {
+        schema_version: "test".into(),
+        network_name: "exec-fresh".into(),
+        trust_model: "unsigned-hash-chain".into(),
+        sessions: BTreeMap::from([("node".into(), session(outbox_url))]),
+    };
+    let config = temp_file(&serde_json::to_string(&registry).unwrap());
+    let state = unused_path("fresh-execution-state");
+    let wave = unused_path("fresh-execution-wave");
+    let bad_execution = unused_path("fresh-execution-directory");
+    let execution = unused_path("fresh-execution-report");
+    fs::create_dir(&bad_execution).unwrap();
+
+    let first = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--config", config.to_str().unwrap()])
+        .args(["--state", state.to_str().unwrap()])
+        .args(["--wave-out", wave.to_str().unwrap()])
+        .args([
+            "--execute-wave",
+            "--execution-out",
+            bad_execution.to_str().unwrap(),
+        ])
+        .args(["--now", "100"])
+        .output()
+        .unwrap();
+    assert!(!first.status.success());
+    assert!(
+        wave.exists(),
+        "recovery plan must survive report output failure"
+    );
+    let snapshot: serde_json::Value =
+        strict_json::from_str(&fs::read_to_string(&state).unwrap()).unwrap();
+    assert_eq!(snapshot["receipts"].as_array().unwrap().len(), 1);
+    assert_eq!(snapshot["receipts"][0]["output"]["sum"], 42);
+
+    let recovered = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+        .args(["--config", config.to_str().unwrap()])
+        .args(["--state", state.to_str().unwrap()])
+        .args(["--wave-out", wave.to_str().unwrap()])
+        .args([
+            "--execute-wave",
+            "--execution-out",
+            execution.to_str().unwrap(),
+        ])
+        .args(["--now", "100"])
+        .output()
+        .unwrap();
+    assert!(
+        recovered.status.success(),
+        "{}",
+        String::from_utf8_lossy(&recovered.stderr)
+    );
+    let report: serde_json::Value =
+        strict_json::from_str(&fs::read_to_string(&execution).unwrap()).unwrap();
+    assert_eq!(report["summary"]["succeeded"], 0);
+    assert_eq!(report["summary"]["skipped_succeeded"], 1);
+
+    for path in [outbox_path, config, wave, execution] {
+        fs::remove_file(path).unwrap();
+    }
+    fs::remove_file(&state).unwrap();
+    fs::remove_dir(bad_execution).unwrap();
+    let _ = fs::remove_file(format!("{}.lock", state.display()));
+}
+
+#[test]
+fn v3_snapshot_is_rejected_without_implicit_migration_or_file_mutation() {
+    let snapshot = json!({
+        "schema_version": "asfa-directive-ledger/v3",
+        "network_name": null,
+        "policy_hash": null,
+        "directives": [],
+        "consumed": [],
+        "checkpoints": [],
+        "receipts": [],
+        "dead_letters": []
+    });
+    let path = temp_file(&snapshot.to_string());
+    let before = fs::read(&path).unwrap();
+    let error = DirectiveLedger::load(&path).unwrap_err();
+    assert!(error.to_string().contains("unsupported ledger schema"));
+    assert!(error.to_string().contains("refusing implicit migration"));
+    assert_eq!(fs::read(&path).unwrap(), before);
+    fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn execution_fixture_replays_exact_known_answers() {
+    let registry: Registry =
+        strict_json::from_str(include_str!("../../config/sessions.execution.json")).unwrap();
+    let pre: LedgerSnapshot =
+        strict_json::from_str(include_str!("../../fixtures/qfos-exec-pre-state.json")).unwrap();
+    let expected_snapshot: LedgerSnapshot =
+        strict_json::from_str(include_str!("../../fixtures/qfos-exec-state.json")).unwrap();
+    let plan: WavePlan =
+        strict_json::from_str(include_str!("../../fixtures/qfos-exec-plan.json")).unwrap();
+    let expected_report: WaveExecutionReport =
+        strict_json::from_str(include_str!("../../fixtures/qfos-exec-report.json")).unwrap();
+    assert_eq!(
+        pre.network_name.as_deref(),
+        Some(registry.network_name.as_str())
+    );
+    let mut ledger = DirectiveLedger::from_snapshot(pre).unwrap();
+    let actual = execute_wave(&mut ledger, &plan, 100).unwrap();
+    assert_eq!(actual, expected_report);
+    assert_eq!(ledger.snapshot(), expected_snapshot);
+    assert_eq!(
+        plan.plan_hash,
+        "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a"
+    );
+    assert_eq!(
+        actual.execution_hash,
+        "4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c"
+    );
 }

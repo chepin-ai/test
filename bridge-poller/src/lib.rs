@@ -3,6 +3,7 @@
 #![forbid(unsafe_code)]
 
 pub mod chain;
+pub mod execution;
 pub mod ingest;
 pub mod ledger;
 pub mod model;
@@ -14,12 +15,18 @@ pub mod wave;
 pub use chain::{
     append_block, append_directives, make_block, verified_directives, verify_chain, ChainError,
 };
+pub use execution::{
+    execute_wave, ExecutionError, ExecutionResult, ExecutionSummary, WaveExecutionReport,
+};
 pub use ingest::{ingest_outbox, IngestError};
 pub use ledger::{
     CapacityError, ChainCheckpoint, CheckpointEntry, ConsumedKey, DirectiveEntry, DirectiveLedger,
-    IngestOutcome, LedgerSnapshot, ResourceLimits, RestoreError,
+    ExecutionCommitError, IngestOutcome, LedgerSnapshot, ResourceLimits, RestoreError,
 };
 pub use model::*;
 pub use poller::{PollDeadlineError, Poller};
 pub use state_lock::StateLock;
-pub use wave::{plan_wave, WaveError, WaveJob, WavePlan, WaveSourceStats};
+pub use wave::{
+    compute_wave_plan_hash, ledger_digest, plan_wave, verify_wave_plan, WaveError, WaveJob,
+    WavePlan, WaveSourceStats,
+};
