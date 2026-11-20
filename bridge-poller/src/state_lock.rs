@@ -24,12 +24,29 @@ impl StateLock {
         let mut lock_name = state_path.as_os_str().to_os_string();
         lock_name.push(".lock");
         let lock_path = PathBuf::from(lock_name);
-        let file = OpenOptions::new()
-            .create(true)
-            .truncate(false)
-            .read(true)
-            .write(true)
-            .open(&lock_path)?;
+        match std::fs::symlink_metadata(&lock_path) {
+            Ok(metadata) if metadata.file_type().is_symlink() => {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    format!(
+                        "state lock path must not be a symbolic link: {}",
+                        lock_path.display()
+                    ),
+                ));
+            }
+            Ok(_) => {}
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+            Err(error) => return Err(error),
+        }
+        let mut options = OpenOptions::new();
+        options.create(true).truncate(false).read(true).write(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+
+            options.custom_flags(libc::O_NOFOLLOW);
+        }
+        let file = options.open(&lock_path)?;
         file.try_lock_exclusive().map_err(|error| {
             if error.kind() == io::ErrorKind::WouldBlock {
                 io::Error::new(
@@ -91,6 +108,88 @@ mod tests {
         drop(first);
         let second = StateLock::acquire(&alias).unwrap();
         drop(second);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn regular_sidecar_excludes_second_writer_after_state_rename() {
+        let root = std::env::temp_dir().join(format!(
+            "asfa-state-lock-regular-rename-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir(&root).unwrap();
+        let state = root.join("state.json");
+        std::fs::write(&state, "old-state").unwrap();
+        let first = StateLock::acquire(&state).unwrap();
+        let lock_path = first.lock_path().to_path_buf();
+
+        crate::DirectiveLedger::for_network("alpha")
+            .save_atomic(&state)
+            .unwrap();
+
+        let error = StateLock::acquire(&state).err().unwrap();
+        assert_eq!(error.kind(), io::ErrorKind::WouldBlock);
+        assert!(!std::fs::symlink_metadata(&lock_path)
+            .unwrap()
+            .file_type()
+            .is_symlink());
+        drop(first);
+        let second = StateLock::acquire(&state).unwrap();
+        drop(second);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn symlink_sidecar_is_rejected_without_touching_state() {
+        let root = std::env::temp_dir().join(format!(
+            "asfa-state-lock-reject-symlink-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir(&root).unwrap();
+        let state = root.join("state.json");
+        let lock = root.join("state.json.lock");
+        std::fs::write(&state, "sentinel").unwrap();
+        std::os::unix::fs::symlink(&state, &lock).unwrap();
+
+        let error = StateLock::acquire(&state).err().unwrap();
+
+        assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
+        assert!(error.to_string().contains("must not be a symbolic link"));
+        assert_eq!(std::fs::read_to_string(&state).unwrap(), "sentinel");
+        assert!(std::fs::symlink_metadata(&lock)
+            .unwrap()
+            .file_type()
+            .is_symlink());
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn dangling_symlink_sidecar_is_rejected_without_creating_target() {
+        let root = std::env::temp_dir().join(format!(
+            "asfa-state-lock-reject-dangling-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir(&root).unwrap();
+        let state = root.join("state.json");
+        let lock = root.join("state.json.lock");
+        let missing = root.join("missing.lock.target");
+        std::os::unix::fs::symlink(&missing, &lock).unwrap();
+
+        let error = StateLock::acquire(&state).err().unwrap();
+
+        assert_eq!(error.kind(), io::ErrorKind::InvalidInput);
+        assert!(error.to_string().contains("must not be a symbolic link"));
+        assert!(!state.exists());
+        assert!(!missing.exists());
+        assert!(std::fs::symlink_metadata(&lock)
+            .unwrap()
+            .file_type()
+            .is_symlink());
         std::fs::remove_dir_all(root).unwrap();
     }
 }

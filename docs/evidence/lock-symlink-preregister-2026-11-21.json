@@ -1,0 +1,59 @@
+{
+  "schema_version": "asfa-lock-symlink-preregister/v1",
+  "recorded_at": "2026-11-21T04:54:57+08:00",
+  "baseline_commit": "be95cba53c25cd04e1f1dd25fe437a09f6a9f2bd",
+  "baseline_binary_sha256": "d7c7d8ee03616322193c5a4a7db92171b5dc9fb1b03346cca9f307b816a92280",
+  "target": "Reject symbolic-link state-lock sidecars before acquisition, and on Unix open the lock with O_NOFOLLOW, so an atomic state rename cannot migrate subsequent acquisitions from the locked old inode to a new state inode.",
+  "baseline_observations": [
+    {
+      "id": "LOCK-BASELINE-01",
+      "case": "Pre-create <state>.lock as a relative symlink to state.json; hold the first CLI at a FIFO report write after its atomic state save, then run a second consuming CLI while the first remains alive.",
+      "first_process": "Still alive and blocked on FIFO after replacing state; its lock file descriptor refers to the pre-rename state inode.",
+      "second_process": "Exit 0; acquired through the same lock symlink after state rename, consumed exec/sum and wrote its own report.",
+      "state_transition": "pending directives 6 -> 5; consumed tombstones 0 -> 1 while the first lock holder remained alive.",
+      "initial_state_sha256": "16345f502c1b73e97f7055ddb9c74c10a13bda79aa6baf7894fca77b9992a8d7",
+      "after_first_state_sha256": "16345f502c1b73e97f7055ddb9c74c10a13bda79aa6baf7894fca77b9992a8d7",
+      "verdict": "CONFIRMED"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "LOCK-01",
+      "pass": "A pre-existing final or dangling lock symlink is rejected before polling, consumption, state mutation or report output; the error is explicit and no lock target is followed."
+    },
+    {
+      "id": "LOCK-02",
+      "pass": "The real old two-process FIFO scenario permits the second consumer while the first is alive, while the new first process exits nonzero before changing the initial state; all sentinel files and the symlink remain unchanged."
+    },
+    {
+      "id": "LOCK-03",
+      "pass": "Regular lock files retain exclusion before and after save_atomic, and a pre-existing hard-link sidecar does not migrate to the replacement state inode."
+    },
+    {
+      "id": "LOCK-04",
+      "pass": "Unix lock acquisition uses O_NOFOLLOW in addition to the portable symlink precheck; other open and lock errors remain explicit and fail closed."
+    },
+    {
+      "id": "LOCK-05",
+      "pass": "An independent Python oracle reconstructs process and filesystem transitions, checks liveness, FIFO evidence, state schema and hashes, and passes known-answer self-tests plus synthetic fake-report rejection before accepting real old/new reports."
+    },
+    {
+      "id": "LOCK-06",
+      "pass": "Normal state/report controls remain byte-identical where applicable; existing wave, execution, replay, output-path and atomic-write anchors do not drift, and the complete Rust/Python gate passes."
+    },
+    {
+      "id": "LOCK-07",
+      "pass": "A no-.git archive of the implementation commit with an initially absent CARGO_TARGET_DIR rebuilds successfully, and that clean new binary generates the final real-process differential."
+    }
+  ],
+  "development_corrections": [
+    "The first fixture assumed a snapshot field named pending; actual v4 uses directives. It stopped during setup before the attack processes ran.",
+    "The second fixture printed the successful exploit but its final assertion incorrectly expected six directives after consuming one instead of five; the assertion was corrected and the entire scenario rerun to exit 0 before CONFIRMED was recorded."
+  ],
+  "not_proven": [
+    "Rejecting symbolic-link sidecars does not prevent a hostile actor from replacing a regular lock pathname after acquisition, nor does it constrain non-cooperating writers or a hostile OS.",
+    "No distributed lock, cross-host semantics, CAS, WAL, fsync, crash-power-loss durability or post-create ledger-temporary race defense is added.",
+    "The portable precheck alone is not claimed to eliminate non-Unix check/open races; Unix uses O_NOFOLLOW for the actual open.",
+    "No publisher authentication, federation activation, external QF-OS/QIOS compatibility, formal execution proof or zero-knowledge proof is claimed."
+  ]
+}

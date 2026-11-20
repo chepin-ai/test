@@ -14,3 +14,6 @@ thiserror.workspace = true
 fs2.workspace = true
 ureq.workspace = true
 url.workspace = true
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
