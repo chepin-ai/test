@@ -1,0 +1,2382 @@
+{
+  "baseline_commit": "be95cba53c25cd04e1f1dd25fe437a09f6a9f2bd",
+  "cases": [
+    {
+      "id": "symlink",
+      "new": {
+        "armed": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785890
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "symlink",
+            "identity": [
+              65040,
+              1785888
+            ],
+            "is_symlink": true,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785885
+            ],
+            "link_target": "state.json",
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785888
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785888
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "at_second": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785890
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "symlink",
+            "identity": [
+              65040,
+              1785888
+            ],
+            "is_symlink": true,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785885
+            ],
+            "link_target": "state.json",
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785888
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785888
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "at_second_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "final": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785890
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "symlink",
+            "identity": [
+              65040,
+              1785888
+            ],
+            "is_symlink": true,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785885
+            ],
+            "link_target": "state.json",
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785888
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785888
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "final_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "first": {
+          "alive_after_second": false,
+          "alive_before_second": false,
+          "exit_code": 2,
+          "fifo": {
+            "bytes": 0,
+            "json_schema": null,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "pid": 19275,
+          "state_replaced_before_second": false,
+          "stderr": "bridge-poller: state lock path must not be a symbolic link: /tmp/asfa-lock-symlink-final/symlink/new/state.json.lock\n",
+          "stdout": ""
+        },
+        "initial": {
+          "initial_report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785889
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785889
+            ],
+            "nlink": 1,
+            "sha256": "eebcff50187e203bb88a9c80f16bba6ee7d267ba9b803820221c1b6882fbfd7e"
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785885
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785885
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785888
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785888
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "initial_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "paths": {
+          "fifo": "/tmp/asfa-lock-symlink-final/symlink/new/first-report.fifo",
+          "lock": "/tmp/asfa-lock-symlink-final/symlink/new/state.json.lock",
+          "second_report": "/tmp/asfa-lock-symlink-final/symlink/new/second-report.json",
+          "state": "/tmp/asfa-lock-symlink-final/symlink/new/state.json"
+        },
+        "second": {
+          "exit_code": 2,
+          "stderr": "bridge-poller: state lock path must not be a symbolic link: /tmp/asfa-lock-symlink-final/symlink/new/state.json.lock\n",
+          "stdout": ""
+        },
+        "setup": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        }
+      },
+      "old": {
+        "armed": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785884
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "symlink",
+            "identity": [
+              65040,
+              1785882
+            ],
+            "is_symlink": true,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785881
+            ],
+            "link_target": "state.json",
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785882
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785882
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "at_second": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785884
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "symlink",
+            "identity": [
+              65040,
+              1785886
+            ],
+            "is_symlink": true,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785881
+            ],
+            "link_target": "state.json",
+            "nlink": 1,
+            "sha256": "0d5e53c22ed44f93b15b0e157937756a1ddff358f75a301865786f2410060099"
+          },
+          "second_report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785887
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785887
+            ],
+            "nlink": 1,
+            "sha256": "92ae2e20782a40267b620fe5b9d52640cc44876eb2c62774b3664e8f59178f15"
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785886
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785886
+            ],
+            "nlink": 1,
+            "sha256": "0d5e53c22ed44f93b15b0e157937756a1ddff358f75a301865786f2410060099"
+          }
+        },
+        "at_second_state": {
+          "consumed": 1,
+          "pending": 5,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "0d5e53c22ed44f93b15b0e157937756a1ddff358f75a301865786f2410060099"
+        },
+        "final": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785884
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "symlink",
+            "identity": [
+              65040,
+              1785886
+            ],
+            "is_symlink": true,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785881
+            ],
+            "link_target": "state.json",
+            "nlink": 1,
+            "sha256": "0d5e53c22ed44f93b15b0e157937756a1ddff358f75a301865786f2410060099"
+          },
+          "second_report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785887
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785887
+            ],
+            "nlink": 1,
+            "sha256": "92ae2e20782a40267b620fe5b9d52640cc44876eb2c62774b3664e8f59178f15"
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785886
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785886
+            ],
+            "nlink": 1,
+            "sha256": "0d5e53c22ed44f93b15b0e157937756a1ddff358f75a301865786f2410060099"
+          }
+        },
+        "final_state": {
+          "consumed": 1,
+          "pending": 5,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "0d5e53c22ed44f93b15b0e157937756a1ddff358f75a301865786f2410060099"
+        },
+        "first": {
+          "alive_after_second": true,
+          "alive_before_second": true,
+          "exit_code": 0,
+          "fifo": {
+            "bytes": 1439,
+            "json_schema": "asfa-bridge-report/v1",
+            "sha256": "f6ea25d48ef1700d1ddd7b7a2ddbadfd2615e6d1a6d5728f1be1b4448c0d213c"
+          },
+          "pid": 19272,
+          "state_replaced_before_second": true,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        },
+        "initial": {
+          "initial_report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785883
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785883
+            ],
+            "nlink": 1,
+            "sha256": "eebcff50187e203bb88a9c80f16bba6ee7d267ba9b803820221c1b6882fbfd7e"
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785881
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785881
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785882
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785882
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "initial_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "paths": {
+          "fifo": "/tmp/asfa-lock-symlink-final/symlink/old/first-report.fifo",
+          "lock": "/tmp/asfa-lock-symlink-final/symlink/old/state.json.lock",
+          "second_report": "/tmp/asfa-lock-symlink-final/symlink/old/second-report.json",
+          "state": "/tmp/asfa-lock-symlink-final/symlink/old/state.json"
+        },
+        "second": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        },
+        "setup": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        }
+      }
+    },
+    {
+      "id": "dangling",
+      "new": {
+        "final": {
+          "lock": {
+            "exists": false,
+            "file_type": "symlink",
+            "identity": null,
+            "is_symlink": true,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785899
+            ],
+            "link_target": "missing-lock-target",
+            "nlink": 1,
+            "sha256": null
+          },
+          "report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785900
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785900
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "target": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          }
+        },
+        "final_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "initial": {
+          "initial_report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785901
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785901
+            ],
+            "nlink": 1,
+            "sha256": "eebcff50187e203bb88a9c80f16bba6ee7d267ba9b803820221c1b6882fbfd7e"
+          },
+          "lock": {
+            "exists": false,
+            "file_type": "symlink",
+            "identity": null,
+            "is_symlink": true,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785899
+            ],
+            "link_target": "missing-lock-target",
+            "nlink": 1,
+            "sha256": null
+          },
+          "report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785900
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785900
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "target": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          }
+        },
+        "initial_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "paths": {
+          "lock": "/tmp/asfa-lock-symlink-final/dangling/new/state.json.lock",
+          "report": "/tmp/asfa-lock-symlink-final/dangling/new/report.json",
+          "state": "/tmp/asfa-lock-symlink-final/dangling/new/state.json",
+          "target": "/tmp/asfa-lock-symlink-final/dangling/new/missing-lock-target"
+        },
+        "run": {
+          "exit_code": 2,
+          "stderr": "bridge-poller: state lock path must not be a symbolic link: /tmp/asfa-lock-symlink-final/dangling/new/state.json.lock\n",
+          "stdout": ""
+        },
+        "setup": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        }
+      },
+      "old": {
+        "final": {
+          "lock": {
+            "exists": true,
+            "file_type": "symlink",
+            "identity": [
+              65040,
+              1785896
+            ],
+            "is_symlink": true,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785893
+            ],
+            "link_target": "missing-lock-target",
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785894
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785894
+            ],
+            "nlink": 1,
+            "sha256": "f6ea25d48ef1700d1ddd7b7a2ddbadfd2615e6d1a6d5728f1be1b4448c0d213c"
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785897
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785897
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "target": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785896
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785896
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "final_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "initial": {
+          "initial_report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785895
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785895
+            ],
+            "nlink": 1,
+            "sha256": "eebcff50187e203bb88a9c80f16bba6ee7d267ba9b803820221c1b6882fbfd7e"
+          },
+          "lock": {
+            "exists": false,
+            "file_type": "symlink",
+            "identity": null,
+            "is_symlink": true,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785893
+            ],
+            "link_target": "missing-lock-target",
+            "nlink": 1,
+            "sha256": null
+          },
+          "report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785894
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785894
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "target": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          }
+        },
+        "initial_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "paths": {
+          "lock": "/tmp/asfa-lock-symlink-final/dangling/old/state.json.lock",
+          "report": "/tmp/asfa-lock-symlink-final/dangling/old/report.json",
+          "state": "/tmp/asfa-lock-symlink-final/dangling/old/state.json",
+          "target": "/tmp/asfa-lock-symlink-final/dangling/old/missing-lock-target"
+        },
+        "run": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        },
+        "setup": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        }
+      }
+    },
+    {
+      "id": "regular",
+      "new": {
+        "armed": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785912
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785909
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785909
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785910
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785910
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "at_second": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785912
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785909
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785909
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785913
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785913
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "at_second_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "final": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785912
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785909
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785909
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785913
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785913
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "final_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "first": {
+          "alive_after_second": true,
+          "alive_before_second": true,
+          "exit_code": 0,
+          "fifo": {
+            "bytes": 1439,
+            "json_schema": "asfa-bridge-report/v1",
+            "sha256": "f6ea25d48ef1700d1ddd7b7a2ddbadfd2615e6d1a6d5728f1be1b4448c0d213c"
+          },
+          "pid": 19285,
+          "state_replaced_before_second": true,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        },
+        "initial": {
+          "initial_report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785911
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785911
+            ],
+            "nlink": 1,
+            "sha256": "eebcff50187e203bb88a9c80f16bba6ee7d267ba9b803820221c1b6882fbfd7e"
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785909
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785909
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785910
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785910
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "initial_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "paths": {
+          "fifo": "/tmp/asfa-lock-symlink-final/regular/new/first-report.fifo",
+          "lock": "/tmp/asfa-lock-symlink-final/regular/new/state.json.lock",
+          "second_report": "/tmp/asfa-lock-symlink-final/regular/new/second-report.json",
+          "state": "/tmp/asfa-lock-symlink-final/regular/new/state.json"
+        },
+        "second": {
+          "exit_code": 2,
+          "stderr": "bridge-poller: state is already locked: /tmp/asfa-lock-symlink-final/regular/new/state.json.lock\n",
+          "stdout": ""
+        },
+        "setup": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        }
+      },
+      "old": {
+        "armed": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785907
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785904
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785904
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785905
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785905
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "at_second": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785907
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785904
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785904
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785908
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785908
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "at_second_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "final": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785907
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785904
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785904
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785908
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785908
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "final_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "first": {
+          "alive_after_second": true,
+          "alive_before_second": true,
+          "exit_code": 0,
+          "fifo": {
+            "bytes": 1439,
+            "json_schema": "asfa-bridge-report/v1",
+            "sha256": "f6ea25d48ef1700d1ddd7b7a2ddbadfd2615e6d1a6d5728f1be1b4448c0d213c"
+          },
+          "pid": 19282,
+          "state_replaced_before_second": true,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        },
+        "initial": {
+          "initial_report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785906
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785906
+            ],
+            "nlink": 1,
+            "sha256": "eebcff50187e203bb88a9c80f16bba6ee7d267ba9b803820221c1b6882fbfd7e"
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785904
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785904
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785905
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785905
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "initial_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "paths": {
+          "fifo": "/tmp/asfa-lock-symlink-final/regular/old/first-report.fifo",
+          "lock": "/tmp/asfa-lock-symlink-final/regular/old/state.json.lock",
+          "second_report": "/tmp/asfa-lock-symlink-final/regular/old/second-report.json",
+          "state": "/tmp/asfa-lock-symlink-final/regular/old/state.json"
+        },
+        "second": {
+          "exit_code": 2,
+          "stderr": "bridge-poller: state is already locked: /tmp/asfa-lock-symlink-final/regular/old/state.json.lock\n",
+          "stdout": ""
+        },
+        "setup": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        }
+      }
+    },
+    {
+      "id": "hardlink",
+      "new": {
+        "armed": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785920
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785921
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785921
+            ],
+            "nlink": 2,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785921
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785921
+            ],
+            "nlink": 2,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "at_second": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785920
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785921
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785921
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785923
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785923
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "at_second_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "final": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785920
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785921
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785921
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785923
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785923
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "final_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "first": {
+          "alive_after_second": true,
+          "alive_before_second": true,
+          "exit_code": 0,
+          "fifo": {
+            "bytes": 1439,
+            "json_schema": "asfa-bridge-report/v1",
+            "sha256": "f6ea25d48ef1700d1ddd7b7a2ddbadfd2615e6d1a6d5728f1be1b4448c0d213c"
+          },
+          "pid": 19291,
+          "state_replaced_before_second": true,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        },
+        "initial": {
+          "initial_report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785922
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785922
+            ],
+            "nlink": 1,
+            "sha256": "eebcff50187e203bb88a9c80f16bba6ee7d267ba9b803820221c1b6882fbfd7e"
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785920
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785920
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785921
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785921
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "initial_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "paths": {
+          "fifo": "/tmp/asfa-lock-symlink-final/hardlink/new/first-report.fifo",
+          "lock": "/tmp/asfa-lock-symlink-final/hardlink/new/state.json.lock",
+          "second_report": "/tmp/asfa-lock-symlink-final/hardlink/new/second-report.json",
+          "state": "/tmp/asfa-lock-symlink-final/hardlink/new/state.json"
+        },
+        "second": {
+          "exit_code": 2,
+          "stderr": "bridge-poller: state is already locked: /tmp/asfa-lock-symlink-final/hardlink/new/state.json.lock\n",
+          "stdout": ""
+        },
+        "setup": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        }
+      },
+      "old": {
+        "armed": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785915
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785916
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785916
+            ],
+            "nlink": 2,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785916
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785916
+            ],
+            "nlink": 2,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "at_second": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785915
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785916
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785916
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785918
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785918
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "at_second_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "final": {
+          "fifo": {
+            "exists": true,
+            "file_type": "fifo",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785915
+            ],
+            "nlink": 1,
+            "sha256": null
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785916
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785916
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          },
+          "second_report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785918
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785918
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "final_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "first": {
+          "alive_after_second": true,
+          "alive_before_second": true,
+          "exit_code": 0,
+          "fifo": {
+            "bytes": 1439,
+            "json_schema": "asfa-bridge-report/v1",
+            "sha256": "f6ea25d48ef1700d1ddd7b7a2ddbadfd2615e6d1a6d5728f1be1b4448c0d213c"
+          },
+          "pid": 19288,
+          "state_replaced_before_second": true,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        },
+        "initial": {
+          "initial_report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785917
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785917
+            ],
+            "nlink": 1,
+            "sha256": "eebcff50187e203bb88a9c80f16bba6ee7d267ba9b803820221c1b6882fbfd7e"
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785915
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785915
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785916
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785916
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "initial_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "paths": {
+          "fifo": "/tmp/asfa-lock-symlink-final/hardlink/old/first-report.fifo",
+          "lock": "/tmp/asfa-lock-symlink-final/hardlink/old/state.json.lock",
+          "second_report": "/tmp/asfa-lock-symlink-final/hardlink/old/second-report.json",
+          "state": "/tmp/asfa-lock-symlink-final/hardlink/old/state.json"
+        },
+        "second": {
+          "exit_code": 2,
+          "stderr": "bridge-poller: state is already locked: /tmp/asfa-lock-symlink-final/hardlink/old/state.json.lock\n",
+          "stdout": ""
+        },
+        "setup": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        }
+      }
+    },
+    {
+      "id": "control",
+      "new": {
+        "final": {
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785931
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785931
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785932
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785932
+            ],
+            "nlink": 1,
+            "sha256": "f6ea25d48ef1700d1ddd7b7a2ddbadfd2615e6d1a6d5728f1be1b4448c0d213c"
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785934
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785934
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "final_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "initial": {
+          "initial_report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785933
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785933
+            ],
+            "nlink": 1,
+            "sha256": "eebcff50187e203bb88a9c80f16bba6ee7d267ba9b803820221c1b6882fbfd7e"
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785931
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785931
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785932
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785932
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "initial_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "paths": {
+          "lock": "/tmp/asfa-lock-symlink-final/control/new/state.json.lock",
+          "report": "/tmp/asfa-lock-symlink-final/control/new/report.json",
+          "state": "/tmp/asfa-lock-symlink-final/control/new/state.json"
+        },
+        "run": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        },
+        "setup": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        }
+      },
+      "old": {
+        "final": {
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785926
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785926
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785927
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785927
+            ],
+            "nlink": 1,
+            "sha256": "f6ea25d48ef1700d1ddd7b7a2ddbadfd2615e6d1a6d5728f1be1b4448c0d213c"
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785929
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785929
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "final_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "initial": {
+          "initial_report": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785928
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785928
+            ],
+            "nlink": 1,
+            "sha256": "eebcff50187e203bb88a9c80f16bba6ee7d267ba9b803820221c1b6882fbfd7e"
+          },
+          "lock": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785926
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785926
+            ],
+            "nlink": 1,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "report": {
+            "exists": false,
+            "file_type": "absent",
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "link_identity": null,
+            "nlink": null,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "file_type": "regular",
+            "identity": [
+              65040,
+              1785927
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_identity": [
+              65040,
+              1785927
+            ],
+            "nlink": 1,
+            "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+          }
+        },
+        "initial_state": {
+          "consumed": 0,
+          "pending": 6,
+          "schema_version": "asfa-directive-ledger/v4",
+          "sha256": "bc51e47430858daae236879902afec9415e131730bd818a453021fb81f372651"
+        },
+        "paths": {
+          "lock": "/tmp/asfa-lock-symlink-final/control/old/state.json.lock",
+          "report": "/tmp/asfa-lock-symlink-final/control/old/report.json",
+          "state": "/tmp/asfa-lock-symlink-final/control/old/state.json"
+        },
+        "run": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        },
+        "setup": {
+          "exit_code": 0,
+          "stderr": "polled=1 verified=1 failed=0\n",
+          "stdout": ""
+        }
+      }
+    }
+  ],
+  "new_binary_sha256": "e84ad1550f5a3d17bfaff78784460a66bf66483e30c8ad9af3357238fa65afbf",
+  "old_binary_sha256": "d7c7d8ee03616322193c5a4a7db92171b5dc9fb1b03346cca9f307b816a92280",
+  "schema_version": "asfa-lock-symlink-differential/v1"
+}

@@ -1,0 +1,65 @@
+{
+  "schema_version": "asfa-lock-symlink-publication/v1",
+  "observed_at_utc": "2026-11-20T21:28:52Z",
+  "observed_at_local": "2026-11-21T05:28:52+08:00",
+  "implementation_commit": "c10d190ad9e96ed162bb46dd2f55cbd4a00ce62d",
+  "evidence_candidate_commit": "9d220eedebc9e4f05e43e03e950fa0b724ed60c3",
+  "remote": {
+    "url": "https://github.com/chepin-ai/test.git",
+    "ref": "refs/heads/main",
+    "main": "2a40df076c0d4f63a1f5dd25f368f2916a8d0d50",
+    "credential_in_url": false,
+    "readback_command": "git -c http.version=HTTP/1.1 ls-remote origin refs/heads/main",
+    "readback_verdict": "PASS"
+  },
+  "divergence_at_readback": {
+    "local_head": "9d220eedebc9e4f05e43e03e950fa0b724ed60c3",
+    "ahead_by": 4,
+    "behind_by": 0,
+    "remote_equals_local": false,
+    "remote_is_ancestor_of_local": true
+  },
+  "push": {
+    "attempted": false,
+    "verdict": "NOT_PUSHED",
+    "fresh_one_time_credential_available": false,
+    "reason": "No fresh one-time push credential was available. Previously consumed or historical credential values were not recovered, printed or reused."
+  },
+  "previous_publication_boundary": {
+    "commit": "2a40df076c0d4f63a1f5dd25f368f2916a8d0d50",
+    "actions_run_id": "44784042393",
+    "actions_conclusion": "success",
+    "covers_current_implementation": false,
+    "covers_current_evidence_candidate": false,
+    "note": "The historical push and successful run cover only their recorded head. They are not publication or CI evidence for c10d190ad9e96ed162bb46dd2f55cbd4a00ce62d or the current evidence candidate."
+  },
+  "external_ci": {
+    "status": "NO_NEW_EXTERNAL_CI_EVIDENCE",
+    "new_run_for_current_commits": false
+  },
+  "collaboration_boundary": {
+    "evidence": "docs/evidence/lock-symlink-collaboration-2026-11-21.json",
+    "sha256": "2fe7772fa8e0bc1b0f6c22f84aed8e4a83a954f816a882c1eae9aeeb5071f471",
+    "verdict": "LOCAL_CARD_AND_REAL_NEGATIVE_DISPATCH_ONLY",
+    "delivery": "NOT_DELIVERED",
+    "external_acks": 0
+  },
+  "transport_corrections": [
+    "An outer /bin/sh invocation rejected set -o pipefail before any remote read; the command was rerun explicitly under bash and that pre-execution failure is not counted as a transport result.",
+    "One HTTP/1.1 ls-remote attempt failed during TLS handshake with expected flush after ref listing. A later HTTP/1.1 retry succeeded; only the successful readback anchors the remote main and divergence counts."
+  ],
+  "finalization": {
+    "method": "amend this publication record and its documentation index into the evidence candidate",
+    "post_amend_head_self_embedded": false,
+    "divergence_expected_to_remain": {
+      "ahead_by": 4,
+      "behind_by": 0
+    },
+    "note": "Amendment preserves the parent and adds no separate commit, so the candidate and post-amend head have the same divergence from the recorded remote main. The actual post-amend HEAD is obtained from Git rather than self-embedded in this file."
+  },
+  "verdict": "NOT_PUSHED",
+  "not_proven": [
+    "Neither the implementation nor the evidence candidate is present on the recorded remote main.",
+    "No new push, external CI run, collaborator delivery, ACK, publisher authentication, federation activation or zero-knowledge proof is established by this record."
+  ]
+}

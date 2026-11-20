@@ -21,7 +21,7 @@ asfa-bridge-poller
   ingest                  全链复验＋历史检查点对拍＋暂存账本容量事务
   ledger                  网络＋安全策略绑定、指令去重、有界 tombstone、链头检查点、v4 回执／死信原子快照、create_new 独占临时分配
   output_paths            输出目标解析、dangling symlink 跟随、同路径与既有文件身份判重
-  state_lock              解析后状态目标对应的稳定 sidecar 协作 CLI 排他锁
+  state_lock              解析后状态目标对应的 sidecar 协作 CLI 排他锁；拒绝 lock symlink，Unix open 使用 O_NOFOLLOW
   wave                    QF-OS 来源轮转、双配额、deferred 计数与计划／账本摘要
   execution               qfos-exec-v1 纯内置执行、真实输出、五类死信、暂存提交与恢复幂等
   main                    一次性 CLI：轮询、入库、显式消费、波次计划、受控执行、状态保存；不是守护进程
@@ -62,7 +62,7 @@ DirectiveLedger（绑定 network_name＋policy_hash＋容量上限）
     │    └─已有结果 → skipped；consumed 无结果 → fail-closed
     ▼
 save_atomic(v4 state；create_new 独占临时项，≤128 冲突重试) → ingestion／qfos-wave-plan/v1／qfos-wave-execution/v1
-所有输出先经 output_paths 判重，再在加载前取得 <resolved-state>.lock，覆盖整个 CLI 状态与输出临界区
+所有输出先经 output_paths 判重，再在加载前取得 <resolved-state>.lock，覆盖整个 CLI 状态与输出临界区；lock symlink 预检拒绝，Unix open 加 O_NOFOLLOW
 ```
 
-顶层 `directives` 是未认证兼容元数据，不进入可信指令计数。CLI 是进程级一次性运行；跨重启防重放与历史一致性依赖调用方提供 `--state`，没有自动后台轮询或 WAL。状态恢复强制网络身份、完整安全策略摘要和本地资源上限对拍；协作 CLI 由解析目标后的 sidecar 排他锁隔离；所有声明输出另做同路径与既有文件身份预检；账本临时项由 `create_new` 独占分配并有界处理冲突，但验证后恶意改名、临时项创建后至 rename 前的恶意替换、跨进程硬链接通用锁、非协作写者和分布式 CAS 未覆盖。本地检查点也不能抵御整份快照被旧文件替换。独立 Python 判读器提供无浮点 V1 链、Registry 策略、迭代 JSON 资源计数、egress 地址分类／假报告反证、输出路径 realpath／samefile／stat 复核、原子写文件类型／链接目标／身份／SHA-256 重读、QF-OS 波次重建及 `qfos-exec-v1` 内置输出／失败类别／持久结果复核，不是 JCS、签名、外部 witness 或通用引擎证明。HTTP(S) 已有应用层 public-only 分类、全答案验证、单次解析与实际连接固定，但仍需外层 egress 隔离应对非协作进程或 hostile OS；DNS 调用方等待有界不等于底层解析被强制取消。`qfos-exec-v1` 仅是本仓两个确定性内置函数的受控执行契约，不是外部 QF-OS 正典；QIOS 没有已核验适配器，分布式 exactly-once、系统调用即证明、涌现即类型、ZK-ML 等先前概念不在当前实现路径中。
+顶层 `directives` 是未认证兼容元数据，不进入可信指令计数。CLI 是进程级一次性运行；跨重启防重放与历史一致性依赖调用方提供 `--state`，没有自动后台轮询或 WAL。状态恢复强制网络身份、完整安全策略摘要和本地资源上限对拍；协作 CLI 由解析目标后的 sidecar 排他锁隔离；所有声明输出另做同路径与既有文件身份预检；账本临时项由 `create_new` 独占分配并有界处理冲突，但验证后恶意改名、临时项创建后至 rename 前的恶意替换、跨进程硬链接通用锁、非协作写者和分布式 CAS 未覆盖。本地检查点也不能抵御整份快照被旧文件替换。独立 Python 判读器提供无浮点 V1 链、Registry 策略、迭代 JSON 资源计数、egress 地址分类／假报告反证、输出路径 realpath／samefile／stat 复核、原子写文件类型／链接目标／身份／SHA-256 重读、state-lock 双进程 liveness／FIFO／inode 迁移复核、QF-OS 波次重建及 `qfos-exec-v1` 内置输出／失败类别／持久结果复核，不是 JCS、签名、外部 witness 或通用引擎证明。HTTP(S) 已有应用层 public-only 分类、全答案验证、单次解析与实际连接固定，但仍需外层 egress 隔离应对非协作进程或 hostile OS；DNS 调用方等待有界不等于底层解析被强制取消。`qfos-exec-v1` 仅是本仓两个确定性内置函数的受控执行契约，不是外部 QF-OS 正典；QIOS 没有已核验适配器，分布式 exactly-once、系统调用即证明、涌现即类型、ZK-ML 等先前概念不在当前实现路径中。

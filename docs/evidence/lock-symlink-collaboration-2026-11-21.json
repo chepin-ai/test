@@ -1,0 +1,51 @@
+{
+  "schema_version": "asfa-lock-symlink-collaboration/v1",
+  "observed_at": "2026-11-20T21:19:56.968360+00:00",
+  "nonce": "ASFA-FLEET-SELF-CHECK-20261121-01",
+  "classification": "L1_EVENT_NONCE_ONLY",
+  "local_card": {
+    "path": "ci-control/bridge/inbox/MAIL-20261120T205457Z-ASFA-FLEET-SELF-CHECK-01.md",
+    "sha256": "4cd046f30a088a7f320b87cdc8f04fef84a2ef0ffd59ec3c820774d9d1ca9563",
+    "status": "GENERATED_LOCALLY"
+  },
+  "requested_lines": ["cisvr", "usrm", "vinf", "ucif2", "qgl", "cfts", "qtlv", "lgt", "qlv", "lvlu"],
+  "authorization_carrier_name_scan": {
+    "names_checked": ["AI_FULL_PAT", "INBOX_SK", "CMD_AUTH", "GITHUB_TOKEN", "GH_TOKEN", "LVLU_TOKEN", "LVLU_API_KEY", "OTP", "CI_OPS_HUB_KEY", "CI_OPS_LINE_KEY"],
+    "present_names": [],
+    "gh_cli_available": false,
+    "git_credential_helper_configured": false,
+    "note": "Names only; no credential value was read into the report, printed, recovered or reused."
+  },
+  "public_dispatch_attempt": {
+    "method": "POST",
+    "url": "https://api.github.com/repos/chepin-ai/vci-inbox/dispatches",
+    "event_type": "asfa_fleet_self_check",
+    "payload_sha256": "54e4932b6a0aaa94504d5e7a82108e69250a16d4b1aa9949ea58cc274e984603",
+    "payload_bytes": 157,
+    "payload_scope": "nonce, classification and from only",
+    "transport_exit": 0,
+    "http_status": 401,
+    "response_message": "Requires authentication",
+    "response_sha256": "b7dbd173f33b19650f61b1c528737e2037cf768d90076fdfce5d32541765e29e",
+    "delivery_verdict": "NOT_DELIVERED"
+  },
+  "line_status": [
+    {"line": "cisvr", "delivery": "NOT_DELIVERED", "ack": "NONE"},
+    {"line": "usrm", "delivery": "NOT_DELIVERED", "ack": "NONE"},
+    {"line": "vinf", "delivery": "NOT_DELIVERED", "ack": "NONE"},
+    {"line": "ucif2", "delivery": "NOT_DELIVERED", "ack": "NONE"},
+    {"line": "qgl", "delivery": "NOT_DELIVERED", "ack": "NONE"},
+    {"line": "cfts", "delivery": "NOT_DELIVERED", "ack": "NONE"},
+    {"line": "qtlv", "delivery": "NOT_DELIVERED", "ack": "NONE"},
+    {"line": "lgt", "delivery": "NOT_DELIVERED", "ack": "NONE"},
+    {"line": "qlv", "delivery": "NOT_DELIVERED", "ack": "NONE"},
+    {"line": "lvlu", "delivery": "NOT_DELIVERED", "ack": "NONE"}
+  ],
+  "external_acks": [],
+  "verdict": "LOCAL_CARD_AND_REAL_NEGATIVE_DISPATCH_ONLY",
+  "not_proven": [
+    "No external line received the card, no lvlu response was observed and no cisvr ACK exists.",
+    "The 401 response is an authentication boundary for this dispatch attempt, not proof that every repository credential is invalid or revoked.",
+    "No private payload, credential value, new QPU job or QPU shot was included or triggered."
+  ]
+}

@@ -1,6 +1,17 @@
 # 实现状态（本轮实测证据：2026-11-16—21）
 
-## 最新续拍：账本临时项独占分配与原子写攻击闭环
+## 最新续拍：state-lock symlink 与跨 rename inode 迁移闭环
+
+- 实现提交为 `c10d190ad9e96ed162bb46dd2f55cbd4a00ce62d`（`fix(bridge): reject symbolic-link state locks`），基线为 `be95cba53c25cd04e1f1dd25fe437a09f6a9f2bd`。旧端真实双 CLI 实测：预置 `<state>.lock -> state.json` 后，首进程在原子替换 state 后阻断于 FIFO 且仍存活；第二进程却 exit 0 并消费 `exec/sum`，pending/consumed 从 6/0 变为 5/1，lock symlink 已指向替换后的 state inode。
+- 新实现以可移植 `symlink_metadata` 预检显式拒绝预置最终／dangling lock symlink，Unix 实际 open 使用 `O_NOFOLLOW`。新端两个攻击进程均 exit 2，无轮询完成、消费、状态变化或报告输出，初始 state 字节与 inode 不变，dangling target 不创建。
+- 常规 sidecar 与预置 hardlink sidecar 的旧新对照均在首进程存活、state 已 rename 时让第二进程 exit 2；常规 sidecar 保持独立 inode，hardlink sidecar 保持初始 state inode而不迁移。正常控制旧新 state／report 字节分别相等。
+- 从实现提交的 Git 归档在无 `.git`、空 target 环境完整重建，109 个 Rust 测试通过：bridge 单元 47、bridge 集成 48、kernel 11、userspace 3；rustfmt、Clippy、凭据扫描、九类独立判读、固定夹具、执行重放、认知示例和 CLI 烟测全部通过。干净 tar SHA-256 为 `a94032f2fe0fa0356f449b18766f32faa3bd05ab55bcac667a39a96184ed63c6`，干净新二进制 SHA-256 为 `e84ad1550f5a3d17bfaff78784460a66bf66483e30c8ad9af3357238fa65afbf`。
+- 最终五组差分使用该干净二进制，原始报告 SHA-256 为 `402d44d240af51648f496691b116f6eb5c305bfcc7465626a15f87ee5255d99d`。独立 `verify-lock-symlink-python.py` 复核进程 liveness、FIFO、schema、链接目标、inode 与 SHA-256；五项文件系统已知答案和六类假报告拒绝先于真实报告验收。综合证据为 `evidence/lock-symlink-consistency-2026-11-21.json`，SHA-256 为 `e0926355e8f3c8bf56a59e062f732ec29948f55e90e75fec150e969f2b438c8d`。
+- 协作面只生成了本地 nonce-only 卡片并执行一次真实公共 dispatch：传输 exit 0，但 HTTP 401／`Requires authentication`，故为 `NOT_DELIVERED`；cisvr、usrm、vinf、ucif2、qgl、cfts、qtlv、lgt、qlv、lvlu 十线均为 `ACK=NONE`，没有 lvlu 回应或 cisvr ACK。原始记录为 `evidence/lock-symlink-collaboration-2026-11-21.json`，SHA-256 为 `2fe7772fa8e0bc1b0f6c22f84aed8e4a83a954f816a882c1eae9aeeb5071f471`；本地卡片未包装成广播或送达。
+- 发布边界实测：证据候选 `9d220eedebc9e4f05e43e03e950fa0b724ed60c3` 相对唯一允许远端 `main=2a40df076c0d4f63a1f5dd25f368f2916a8d0d50` 为 `ahead_by=4, behind_by=0`，故 `remote≠local`、`NOT_PUSHED`。无新鲜一次一钥，未发起认证推送或复用已消费凭证；旧推送及成功 run `44784042393` 只覆盖 `2a40df0…`，不覆盖本轮实现或证据候选，也没有本轮新外部 CI 证据。原始记录为 `evidence/lock-symlink-publication-2026-11-21.json`，SHA-256 为 `68841e31a7f1d88ca6e79dd63cf02dbfef818927cb85c1129c0d11ae0f7892ce`。
+- 夹具字段／计数、Registry 策略身份、判读器 inode 与 hardlink 锚点的开发纠偏均保留在综合证据。PASS 不覆盖取得锁后的常规 lock pathname 替换、非 Unix check/open 竞态、非协作写者、hostile OS、跨主机锁、CAS、WAL／fsync、掉电持久性或临时项创建后竞态；本地通过也不是外部投递、ACK、推送、CI、外部 QF-OS／QIOS、签名 witness 或 ZK 证明。
+
+## 2026-11-21 账本临时项独占分配与原子写攻击闭环（历史证据）
 
 - 实现提交为 `46cf446b85d27e380b1771161c3c7adce70aa245`（`fix(ledger): allocate snapshot temporaries exclusively`），基线为 `2a40df076c0d4f63a1f5dd25f368f2916a8d0d50`。基线真实进程实测：在 exec 前预置 `state.tmp-<pid>-1` symlink，旧端 exit 0，sentinel victim 被覆盖为 v4 账本，最终 state 成为指向 victim 的 symlink；hardlink 与普通文件冲突也可被旧端覆盖或改名。
 - 新实现以 `OpenOptions::write(true).create_new(true)` 独占分配每个临时候选，预置链接或文件只计为 `AlreadyExists`；最多尝试 128 个候选，其他 I/O 错误立即返回，写入、rename 与清理错误显式上报。可绕过冲突时安全成功，128 项全部占用时 exit 2、无 state 且全部 sentinel 保留。
@@ -108,6 +119,7 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 - `verify-egress-python.py`：独立 `ipaddress`／CIDR 地址分类、48 条已知答案与 blocked 报告复核；四类假报告自证通过，不证明外层网络隔离。
 - `verify-path-python.py`：独立 realpath／samefile／stat、八组旧新结果与文件系统 after-state 复核；五项路径已知答案和五类假报告自证通过，不证明预检后路径名不可被敌对修改。
 - `verify-atomic-write-python.py`：从真实 PID 独立重建临时名，复核五组旧新结果及当前文件系统的类型、链接目标、身份和 SHA-256；四项已知答案和五类假报告自证通过，不证明临时项创建后至 rename 前无竞态。
+- `verify-lock-symlink-python.py`：独立复核真实双进程 liveness、FIFO 字节、v4 状态迁移、链接目标、inode 和 SHA-256，并检查 Unix `O_NOFOLLOW` 的实际 open 顺序；五项已知答案和六类假报告自证通过，不覆盖取锁后的路径名替换或非 Unix 竞态。
 - `verify-wave-python.py`：从原始 snapshot 重建完整波次计划；两个篡改自证通过，范围为无浮点 qfos-wave-v1 子集，不是签名、执行或 QIOS 证明。当前 v4 静态计划哈希为 `5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34`。
 - `verify-execution-python.py`：独立推导执行输出与五类失败、重算全部摘要并勾稽计划／报告／最终状态；五项自证含 rehashed 假语义，固定执行夹具为 2 回执＋5 死信。
 
@@ -134,12 +146,12 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 1. 本 HTTP client 之外的出口流量、network namespace、外层 egress proxy、hostile OS 与通用 SSRF 防护；
 2. 底层 DNS 强制取消、阻塞 resolver 线程回收与资源隔离；应用层单次解析、全答案验证和连接固定已实现；
 3. 进程级内存、CPU、文件描述符硬隔离与 CLI 轮询阶段外的整体执行预算；全轮询 deadline、解析等待与逐请求剩余时间、JSON 深度／节点预算已实现；
-4. 输出预检后的恶意路径改名、账本临时项创建后至 rename 前的恶意替换、跨进程硬链接通用锁、非协作写者、跨主机锁语义、CAS、WAL 和原子 check-and-persist；CLI 同路径／symlink／既有硬链接判重、最终 symlink 锁汇聚与临时项 `create_new` 独占分配已实现；
+4. 输出预检后的恶意路径改名、取得锁后的常规 lock pathname 替换、账本临时项创建后至 rename 前的恶意替换、非 Unix check/open 竞态、跨进程硬链接通用锁、非协作写者、跨主机锁语义、CAS、WAL 和原子 check-and-persist；CLI 同路径／symlink／既有硬链接判重、最终状态路径 symlink 锁汇聚、预置 lock symlink 拒绝＋Unix `O_NOFOLLOW`、常规／hardlink sidecar 跨 rename 排他与临时项 `create_new` 独占分配已实现；
 5. 整份快照回滚、分裂视图、签名 checkpoint、独立 witness／quorum；
 6. 发布者与指令授权、可信时间；
 7. 完整 JCS V2、Merkle consistency proof、后量子 witness；
 8. 仓内 `qfos-exec-v1` 之外的通用动作与 Skill 沙箱、引擎租约、失败重试策略、结果签名／形式化证明、跨进程分布式 exactly-once、外部 QF-OS 正典与 QIOS 定义／适配器；
-9. 联盟 active、cisvr ACK、KEY-SYNC-01、旧 PAT 撤销，以及原子写实现／后续证据提交的远端同步和外部 CI 回执；`2a40df0…` 的推送与 run `44784042393` 不回写成这些新提交的发布证据；
+9. 联盟 active、cisvr ACK、KEY-SYNC-01、旧 PAT 撤销，以及原子写／状态锁实现与后续证据提交的远端同步和外部 CI 回执；`2a40df0…` 的推送与 run `44784042393` 不回写成这些新提交的发布证据；
 10. Boot／裸机内核、WASM、TEE、ZK-SNARK／STARK、HoTT-ZK、涌现类型系统、量子调度、神经网络推理、Holo-Lang 与完整形式化安全证明。
 
 ## 形式化内容边界

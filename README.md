@@ -32,7 +32,7 @@
   - 三类 JSON 入口共用 64 层深度与 16384 个值节点的全文档预算，开放 `mailbox`／`payload` 也不能绕过；
   - CLI 默认 60 秒全轮询墙钟预算，`--poll-timeout-ms` 只能调低；会话间检查 deadline，活动 HTTP 请求只获得剩余时间；
   - Registry 最多 64 个会话；pending、消费 tombstone、单 Outbox 指令数与 Snapshot 写字节均有硬上限，容量失败整批回滚；
-  - `--state` 使用解析后目标对应的稳定 sidecar OS 排他锁，最终符号链接别名也会竞争同一把锁；
+  - `--state` 使用解析后目标对应的稳定 sidecar OS 排他锁，最终状态路径符号链接别名也会竞争同一把锁；预置 lock symlink（含 dangling）在轮询、消费、状态变化和报告前显式拒绝，Unix 实际 open 使用 `O_NOFOLLOW`；常规／hardlink sidecar 跨状态 rename 仍锁定原 inode；
   - `--state`、`--out`、`--wave-out`、`--execution-out` 在锁、轮询、执行和写入前做路径身份预检；解析后同路径、符号链接／`..` 别名及既有硬链接均失败关闭；
   - QF-OS `qfos-wave-plan/v1`：从已验证账本生成确定性、按来源轮转、全局／来源双配额的计划，绑定 network、policy、snapshot 与 plan 摘要；计划生成本身只读；
   - 仓内 `qfos-exec-v1`：显式执行计划中的 `engine.sum`／`engine.sha256`，无 shell、网络或外部进程；真实输出、成功回执、五类死信与 consumed tombstone 在同一 v4 快照提交，重启只恢复、不重复执行。
@@ -51,6 +51,7 @@ python3 scripts/verify-egress-python.py --self-test
 python3 scripts/verify-json-budget-python.py
 python3 scripts/verify-path-python.py --self-test
 python3 scripts/verify-atomic-write-python.py --self-test
+python3 scripts/verify-lock-symlink-python.py --self-test
 python3 scripts/verify-wave-python.py \
   --expect-plan-hash 5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34
 python3 scripts/verify-execution-python.py --closed-world --self-test \
@@ -98,7 +99,7 @@ cargo run -p asfa-bridge-poller -- \
   --execute-wave --execution-out /tmp/asfa-exec-report.json --now 100
 ```
 
-`--fail-on-error` 会把轮询失败、入库冲突／非法指令、消费目标不存在以及新产生或恢复的执行死信变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v4 状态同时绑定 `network_name` 与 Registry 安全策略摘要 `policy_hash`；旧 v1／v2／v3、跨网络及同网络策略变化均不做隐式迁移，说明性 `role`／`note` 变化不影响兼容性。执行模式先保存原计划，再暂存执行并原子保存 v4 状态，最后写执行报告；报告写坏后可从计划与持久回执恢复。CLI 容量参数只能把硬上限调低，不能调高；所有声明输出先解析实际目标并判重，sidecar 锁也使用解析后的状态目标。账本保存只使用本进程以 `create_new` 成功创建的临时项，冲突有界重试；但创建成功后至 rename 前的恶意路径替换仍未关闭。该预检不能消除验证后遭恶意改名的 TOCTOU，也不提供跨进程硬链接通用锁、分布式锁或非协作写者隔离。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、底层 DNS 强制取消／线程回收与进程级内存／CPU／文件描述符隔离仍不在保障范围内。
+`--fail-on-error` 会把轮询失败、入库冲突／非法指令、消费目标不存在以及新产生或恢复的执行死信变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v4 状态同时绑定 `network_name` 与 Registry 安全策略摘要 `policy_hash`；旧 v1／v2／v3、跨网络及同网络策略变化均不做隐式迁移，说明性 `role`／`note` 变化不影响兼容性。执行模式先保存原计划，再暂存执行并原子保存 v4 状态，最后写执行报告；报告写坏后可从计划与持久回执恢复。CLI 容量参数只能把硬上限调低，不能调高；所有声明输出先解析实际目标并判重，sidecar 锁也使用解析后的状态目标；lock sidecar 自身不得是符号链接，Unix 实际 open 使用 `O_NOFOLLOW`。账本保存只使用本进程以 `create_new` 成功创建的临时项，冲突有界重试；但创建成功后至 rename 前的恶意路径替换仍未关闭。上述预检不能消除验证后遭恶意改名的 TOCTOU 或取锁后的 lock pathname 替换，也不提供跨进程硬链接通用锁、分布式锁或非协作写者隔离；非 Unix check/open 竞态不作已关闭声称。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、底层 DNS 强制取消／线程回收与进程级内存／CPU／文件描述符隔离仍不在保障范围内。
 
 一键全部门禁（`/mnt` 等禁止执行位挂载下也能构建）：
 
@@ -106,7 +107,7 @@ cargo run -p asfa-bridge-poller -- \
 bash scripts/build-all.sh
 ```
 
-预期：106 项 Rust 测试通过；烟测汇总为 `total=3, verified=1, failed=2`，两个失败分别是故意设置的非法 JSON 和缺失文件。egress 预注册 48 个 IPv4／IPv6 已知答案由 Rust 与独立 Python 同时复核；旧新真实进程差分证明旧端访问 loopback 并 verified，新默认端在零 TCP accept 下返回 `blocked_egress`，显式本地放权仍可达目标且六类恶意代理环境变量零命中。输出路径八组旧新差分覆盖轮询、wave、execution、父路径、dangling symlink、符号链接父目录和硬链接：六个攻击用例旧端退出 0 并发生覆盖，干净新端均在锁和写入前退出 2；独立 Python 以 realpath／samefile／stat 复判并拒绝五类假报告。原子写五组差分覆盖预置 symlink、hardlink、普通文件、128 项冲突耗尽与正常控制：旧端在前三类攻击中均 exit 0 并覆盖或改名既有项；干净新端对可绕过冲突安全重试，对耗尽显式 exit 2，且全部 sentinel 保留。独立 Python 重读文件类型、链接目标、文件身份与 SHA-256，并以四项文件系统已知答案和五类假报告先行自证。QF-OS 静态向量准入 `a1 → b1 → a2`，两个延后项分别由来源配额和全局配额解释。执行夹具包含 7 项作业，实测 2 个真实成功回执与 5 个显式死信，重放为 7 项 skipped 且账本字节不变；Python 独立重建输出与失败类别，并以 5 个篡改样本自证，其中包含篡改后重算哈希的假输出与假失败类别。独立 JSON 判读以迭代遍历复核深度、全文档节点数、转义重复键及五个已知答案负例。
+预期：109 项 Rust 测试通过；烟测汇总为 `total=3, verified=1, failed=2`，两个失败分别是故意设置的非法 JSON 和缺失文件。egress 预注册 48 个 IPv4／IPv6 已知答案由 Rust 与独立 Python 同时复核；旧新真实进程差分证明旧端访问 loopback 并 verified，新默认端在零 TCP accept 下返回 `blocked_egress`，显式本地放权仍可达目标且六类恶意代理环境变量零命中。输出路径八组旧新差分覆盖轮询、wave、execution、父路径、dangling symlink、符号链接父目录和硬链接：六个攻击用例旧端退出 0 并发生覆盖，干净新端均在锁和写入前退出 2；独立 Python 以 realpath／samefile／stat 复判并拒绝五类假报告。原子写五组差分覆盖预置 symlink、hardlink、普通文件、128 项冲突耗尽与正常控制：旧端在前三类攻击中均 exit 0 并覆盖或改名既有项；干净新端对可绕过冲突安全重试，对耗尽显式 exit 2，且全部 sentinel 保留。独立 Python 重读文件类型、链接目标、文件身份与 SHA-256，并以四项文件系统已知答案和五类假报告先行自证。状态锁五组差分进一步覆盖预置 lock symlink 的跨 rename inode 迁移、dangling symlink、常规锁、hardlink 锁和正常控制：旧端首进程存活时第二进程可消费，干净新端在轮询、状态变化和 FIFO 输出前失败；独立 Python 以五项已知答案和六类假报告自证后复判。QF-OS 静态向量准入 `a1 → b1 → a2`，两个延后项分别由来源配额和全局配额解释。执行夹具包含 7 项作业，实测 2 个真实成功回执与 5 个显式死信，重放为 7 项 skipped 且账本字节不变；Python 独立重建输出与失败类别，并以 5 个篡改样本自证，其中包含篡改后重算哈希的假输出与假失败类别。独立 JSON 判读以迭代遍历复核深度、全文档节点数、转义重复键及五个已知答案负例。
 
 ## 证据与协议
 

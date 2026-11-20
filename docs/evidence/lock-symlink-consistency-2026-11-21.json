@@ -1,0 +1,177 @@
+{
+  "schema_version": "asfa-lock-symlink-consistency/v1",
+  "recorded_at": "2026-11-21T05:15:15+08:00",
+  "baseline_commit": "be95cba53c25cd04e1f1dd25fe437a09f6a9f2bd",
+  "implementation_commit": "c10d190ad9e96ed162bb46dd2f55cbd4a00ce62d",
+  "implementation_subject": "fix(bridge): reject symbolic-link state locks",
+  "verdict": "PASS",
+  "evidence_status": "Local reproducible evidence for pre-existing state-lock symlinks and cross-rename inode migration; not a publisher signature, zero-knowledge proof, hostile-OS defense or distributed-lock proof.",
+  "criteria": [
+    {
+      "id": "LOCK-01",
+      "verdict": "PASS",
+      "evidence": "New final and dangling lock-symlink processes exit 2 with an explicit symbolic-link diagnostic. They do not poll to completion, create a report, consume a directive, replace state or create a dangling target."
+    },
+    {
+      "id": "LOCK-02",
+      "verdict": "PASS",
+      "evidence": "In the old two-process symlink case the first process remains alive after state replacement while the second exits 0 and changes pending/consumed from 6/0 to 5/1; the lock symlink resolves to the replacement state inode. Both new processes exit 2 and the initial state bytes and inode remain unchanged."
+    },
+    {
+      "id": "LOCK-03",
+      "verdict": "PASS",
+      "evidence": "Regular and hard-link sidecar cases retain exclusion across save_atomic on both binaries: the first process remains alive, the second exits 2 with state-is-already-locked, and pending/consumed stay 6/0. The regular sidecar remains a separate stable inode; the hard-link sidecar remains on the initial state inode rather than migrating to the replacement."
+    },
+    {
+      "id": "LOCK-04",
+      "verdict": "PASS",
+      "evidence": "The independent source check confirms the portable symlink_metadata rejection and that Unix OpenOptions custom_flags(libc::O_NOFOLLOW) is applied before options.open; acquisition then uses try_lock_exclusive and propagates other errors."
+    },
+    {
+      "id": "LOCK-05",
+      "verdict": "PASS",
+      "evidence": "verify-lock-symlink-python.py independently reconstructs file types, link targets, target and link identities, SHA-256 values, v4 transitions, process liveness and FIFO report bytes. Five filesystem known answers and six synthetic fake-report rejections run before the real five-case report is accepted."
+    },
+    {
+      "id": "LOCK-06",
+      "verdict": "PASS",
+      "evidence": "The normal old/new control produces byte-identical state and report files. The complete gate passes 109 Rust tests and nine independent Python oracle entries; wave, execution, replay, output-path, atomic-write, cognitive and smoke anchors do not drift."
+    },
+    {
+      "id": "LOCK-07",
+      "verdict": "PASS",
+      "evidence": "The implementation commit was archived into a directory without .git and built with an initially absent CARGO_TARGET_DIR. build-all exited 0; the resulting clean binary generated the final differential, whose new-binary hash equals the clean binary hash."
+    }
+  ],
+  "test_totals": {
+    "rust_total": 109,
+    "bridge_unit": 47,
+    "bridge_integration": 48,
+    "kernel": 11,
+    "userspace": 3,
+    "rust_failed": 0,
+    "independent_python_oracle_entries": 9,
+    "differential_cases": 5,
+    "filesystem_known_answers": 5,
+    "fake_reports_rejected": 6
+  },
+  "clean_rebuild": {
+    "source": "git archive of implementation_commit",
+    "no_git_directory": true,
+    "target_initially_absent": true,
+    "build_all_exit": 0,
+    "archive_sha256": "a94032f2fe0fa0356f449b18766f32faa3bd05ab55bcac667a39a96184ed63c6",
+    "archive_bytes": 1228800,
+    "new_binary_sha256": "e84ad1550f5a3d17bfaff78784460a66bf66483e30c8ad9af3357238fa65afbf",
+    "new_binary_bytes": 43212936,
+    "old_binary_sha256": "d7c7d8ee03616322193c5a4a7db92171b5dc9fb1b03346cca9f307b816a92280",
+    "old_binary_bytes": 43208072,
+    "differential_uses_clean_new_binary": true
+  },
+  "fixed_anchors": {
+    "wave_plan_hash": "5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34",
+    "execution_plan_hash": "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a",
+    "execution_report_hash": "4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c",
+    "replay_report_hash": "9dce14b4b357f72851dff2d67af085bd8c10e560aca51c414fd07ffe416be36f",
+    "path_consistency_sha256": "82461aac0486df8ee1add33f33147a5a3f09e70fbd1762af9e260b8055e200a5",
+    "atomic_write_consistency_sha256": "502f2e2e8539aea1268d77e116d9b3f2d6df546debd1587748b08ce4d4030d2e"
+  },
+  "differential_summary": [
+    {
+      "case": "symlink",
+      "old": "first=0, second=0; first alive during consumption; pending/consumed=5/1; lock follows replacement state inode",
+      "new": "first=2, second=2; pending/consumed=6/0; initial state inode and bytes unchanged; zero FIFO bytes"
+    },
+    {
+      "case": "dangling",
+      "old": "exit=0; followed lock symlink and created its missing target",
+      "new": "exit=2; target and report absent; state and symlink unchanged"
+    },
+    {
+      "case": "regular",
+      "old": "first=0, second=2; stable regular sidecar excludes across state rename",
+      "new": "first=0, second=2; same exclusion and unchanged ledger"
+    },
+    {
+      "case": "hardlink",
+      "old": "first=0, second=2; sidecar remains on initial state inode",
+      "new": "first=0, second=2; sidecar does not migrate to replacement state inode"
+    },
+    {
+      "case": "control",
+      "old": "exit=0; normal state and report",
+      "new": "exit=0; state and report SHA-256 equal old control"
+    }
+  ],
+  "development_corrections": [
+    {
+      "id": "LOCK-DEV-01",
+      "record": "The first exploratory fixture read a nonexistent pending field instead of v4 directives and stopped before attack execution. The second printed the exploit but incorrectly expected six directives after consuming one; it was corrected to five and rerun from scratch before CONFIRMED was recorded."
+    },
+    {
+      "id": "LOCK-DEV-02",
+      "record": "The first differential setup incorrectly demanded byte equality with qfos-exec-pre-state despite using a different Registry policy identity. It stopped after fixture setup, before the attack process. The replacement checks the preregistered v4 6/0 shape, while the independent oracle requires one common initial hash across every old/new case."
+    },
+    {
+      "id": "LOCK-DEV-03",
+      "record": "The independent oracle initially conflated unchanged state bytes with an unchanged inode for regular and hard-link rename cases, then incorrectly compared a hard-link sidecar with its pre-arm lock. These oracle errors rejected the real report; the predicates were split and anchored to the armed sidecar, followed by full self-test and real-report reruns."
+    },
+    {
+      "id": "LOCK-DEV-04",
+      "record": "One outer /bin/sh invocation rejected set -o pipefail before the gate started. It was rerun explicitly under bash; only the latter complete log is counted as a gate result."
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "docs/evidence/lock-symlink-preregister-2026-11-21.json",
+      "bytes": 4218,
+      "sha256": "2a4509918509b5f39e6bc6016d85cfaa09408f8a026e61e37b50f30d3510d31b"
+    },
+    {
+      "path": "docs/evidence/lock-symlink-differential-2026-11-21.json",
+      "bytes": 70921,
+      "sha256": "402d44d240af51648f496691b116f6eb5c305bfcc7465626a15f87ee5255d99d"
+    },
+    {
+      "path": "docs/evidence/lock-symlink-clean-rebuild-2026-11-21.log",
+      "bytes": 20404,
+      "sha256": "011b178a86305275cb30005bc977aa5935021d4de85f5d67b2eb9485d40f7279"
+    },
+    {
+      "path": "bridge-poller/src/state_lock.rs",
+      "bytes": 7137,
+      "sha256": "12776caa41f6f9ece19b6c629eb23c97fda96555552548ba78b9f004107b574d"
+    },
+    {
+      "path": "bridge-poller/Cargo.toml",
+      "bytes": 473,
+      "sha256": "386a72fc0b36b57d3e40747e49f2498049d0b0d13348c5fa487da4f039dc4621"
+    },
+    {
+      "path": "Cargo.lock",
+      "bytes": 21288,
+      "sha256": "260fa572fc25b6766c50a51ccfd3efaee0bb552137f858b44c107d2cfddc1e4f"
+    },
+    {
+      "path": "scripts/lock-symlink-differential.py",
+      "bytes": 10682,
+      "sha256": "7d2e7fa9dbc3a3dcf975b91d5ebda7dd2c39ebb1ae2ffd2b22e4fab13a1853aa"
+    },
+    {
+      "path": "scripts/verify-lock-symlink-python.py",
+      "bytes": 17632,
+      "sha256": "e0b6d677866c44b101cdf929db26010a0656819aa529bd133de51f8a0af361e0"
+    },
+    {
+      "path": "scripts/build-all.sh",
+      "bytes": 5637,
+      "sha256": "7dfebf31bacbc57a440a2426438e900dff6678a2a080551cef6d3ac78b0fcfb3"
+    }
+  ],
+  "not_proven": [
+    "The repair rejects symbolic-link sidecars but does not prevent replacement of a regular lock pathname after acquisition, constrain non-cooperating writers or provide a distributed/cross-host lock.",
+    "The portable precheck alone is not claimed to close non-Unix check/open races; Unix uses O_NOFOLLOW for the actual open. No non-Unix runtime differential was executed.",
+    "No CAS, WAL, fsync, crash-power-loss durability, hostile-OS confinement or post-create ledger-temporary race defense is added.",
+    "This local PASS does not establish publisher authentication, external delivery or ACK, federation activation, external QF-OS/QIOS compatibility, formal execution proof, zero-knowledge proof, a new push or external CI."
+  ]
+}

@@ -94,3 +94,14 @@
 - `atomic-write-clean-rebuild-2026-11-21.log`：无 `.git`、空 target 的完整门禁输出，SHA-256 为 `e4cc3aa365c6092d93999b5c7fd55e8f1ba4ae0df6da7b3f73795bf6a41a0266`；最终差分使用这次重建的新二进制。
 - `../scripts/verify-atomic-write-python.py`：独立重读 path state、stat、SHA-256、schema、链接目标与文件身份，四项文件系统已知答案和五类假报告自证先于真实报告验收；`../scripts/atomic-write-differential.py` 在子进程 exec 前按真实 PID 布置精确冲突并执行五组旧新进程。
 - 首次 PoC 的 `with_extension` 夹具错误没有执行目标进程，修正为 `with_suffix` 后才确认漏洞；sidecar 候选未包装成锁互斥突破。PASS 不覆盖临时项创建后至 rename 前的恶意替换、hostile OS、非协作写者、WAL／fsync、掉电持久性、分布式事务、发布者认证或 ZK 证明。
+
+## 2026-11-21 state-lock symlink 与跨 rename inode 迁移
+
+- `lock-symlink-preregister-2026-11-21.json`：LOCK-01–07 的实现前判据、基线提交和二进制锚点，以及真实双进程 FIFO 突破；SHA-256 为 `2a4509918509b5f39e6bc6016d85cfaa09408f8a026e61e37b50f30d3510d31b`。
+- `lock-symlink-differential-2026-11-21.json`：symlink、dangling、regular、hardlink、control 五组真实旧新结果。旧 symlink 首进程存活时第二进程 exit 0、pending/consumed 6/0→5/1，lock 跟随替换后 state inode；新端 first/second 均 exit 2、state 字节和 inode 不变、FIFO 零字节。常规与 hardlink sidecar 两端均阻止跨 rename 的第二消费者；正常控制 state/report 字节相等。SHA-256 为 `402d44d240af51648f496691b116f6eb5c305bfcc7465626a15f87ee5255d99d`。
+- `lock-symlink-consistency-2026-11-21.json`：实现提交 `c10d190ad9e96ed162bb46dd2f55cbd4a00ce62d` 的综合证据。109／109 测试分解为 bridge 单元 47、bridge 集成 48、kernel 11、userspace 3；干净归档 SHA-256 为 `a94032f2fe0fa0356f449b18766f32faa3bd05ab55bcac667a39a96184ed63c6`，干净新二进制 SHA-256 为 `e84ad1550f5a3d17bfaff78784460a66bf66483e30c8ad9af3357238fa65afbf`。综合证据 SHA-256 为 `e0926355e8f3c8bf56a59e062f732ec29948f55e90e75fec150e969f2b438c8d`，九项 artifact 已登记。
+- `lock-symlink-clean-rebuild-2026-11-21.log`：无 `.git`、空 target 的完整门禁输出，SHA-256 为 `011b178a86305275cb30005bc977aa5935021d4de85f5d67b2eb9485d40f7279`；最终差分使用这次重建的新二进制。
+- `lock-symlink-collaboration-2026-11-21.json`：本地协作卡与一次真实公共 nonce-only dispatch 的负结果。传输 exit 0，但 HTTP 401／`Requires authentication`，结论为 `NOT_DELIVERED`；cisvr、usrm、vinf、ucif2、qgl、cfts、qtlv、lgt、qlv、lvlu 十线均为 `ACK=NONE`，总判定为 `LOCAL_CARD_AND_REAL_NEGATIVE_DISPATCH_ONLY`。证据 SHA-256 为 `2fe7772fa8e0bc1b0f6c22f84aed8e4a83a954f816a882c1eae9aeeb5071f471`；本地卡片不等于送达，更不等于 ACK。
+- `lock-symlink-publication-2026-11-21.json`：证据候选 `9d220eedebc9e4f05e43e03e950fa0b724ed60c3` 的发布边界。2026-11-21T05:28:52+08:00 经 TLS 失败后的 HTTP/1.1 重试读回成功，唯一允许远端 `main` 仍为 `2a40df076c0d4f63a1f5dd25f368f2916a8d0d50`，候选 `ahead_by=4, behind_by=0`；无新鲜一次一钥，未发起认证推送，结论为 `NOT_PUSHED`。旧 run `44784042393` 不覆盖本轮实现或证据候选。记录 SHA-256 为 `68841e31a7f1d88ca6e79dd63cf02dbfef818927cb85c1129c0d11ae0f7892ce`；发布记录及索引 amend 后分叉计数不变，最终 HEAD 以 Git 实测为准。
+- `../scripts/verify-lock-symlink-python.py`：独立重读进程 liveness、FIFO 字节、v4 pending/consumed、链接目标、inode 和 SHA-256，并检查 Unix `O_NOFOLLOW` 位于实际 open 之前；五项已知答案和六类假报告拒绝先于真实报告验收。`../scripts/lock-symlink-differential.py` 执行真实双 CLI 与五组旧新差分。
+- 夹具与判读器开发纠偏均保留在综合证据。PASS 不覆盖取得锁后的常规 lock pathname 替换、非 Unix check/open 竞态、非协作写者、hostile OS、跨主机锁、WAL／fsync、掉电持久性、外部协作投递／ACK、远端同步、发布者认证或 ZK 证明。
