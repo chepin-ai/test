@@ -1,0 +1,1259 @@
+{
+  "baseline_commit": "4ae57d5106b2f46dc0579e58520766abe4a9df46",
+  "cases": [
+    {
+      "id": "poll_parent",
+      "new": {
+        "after": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "exit_code": 2,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/poll_parent/new/state.json.lock",
+          "out": "/tmp/asfa-path-differential/poll_parent/new/sub/../state.json",
+          "state": "/tmp/asfa-path-differential/poll_parent/new/state.json"
+        },
+        "stderr": "bridge-poller: output path alias (resolved path): --state=/tmp/asfa-path-differential/poll_parent/new/state.json and --out=/tmp/asfa-path-differential/poll_parent/new/sub/../state.json\n",
+        "stdout": ""
+      },
+      "old": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818630
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "out": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818631
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "sha256": "d6b928020f1ba9fa17f3b756ffbdbdcb60cd06bc22b75c495e68a4713eba04c1"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818631
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "sha256": "d6b928020f1ba9fa17f3b756ffbdbdcb60cd06bc22b75c495e68a4713eba04c1"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/poll_parent/old/state.json.lock",
+          "out": "/tmp/asfa-path-differential/poll_parent/old/sub/../state.json",
+          "state": "/tmp/asfa-path-differential/poll_parent/old/state.json"
+        },
+        "stderr": "polled=0 verified=0 failed=0\n",
+        "stdout": ""
+      }
+    },
+    {
+      "id": "wave_parent",
+      "new": {
+        "after": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "wave": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "wave": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "exit_code": 2,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/wave_parent/new/state.json.lock",
+          "state": "/tmp/asfa-path-differential/wave_parent/new/state.json",
+          "wave": "/tmp/asfa-path-differential/wave_parent/new/sub/../state.json"
+        },
+        "stderr": "bridge-poller: output path alias (resolved path): --state=/tmp/asfa-path-differential/wave_parent/new/state.json and --wave-out=/tmp/asfa-path-differential/wave_parent/new/sub/../state.json\n",
+        "stdout": ""
+      },
+      "old": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818637
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818638
+            ],
+            "is_symlink": false,
+            "json_schema": "qfos-wave-plan/v1",
+            "lexists": true,
+            "sha256": "bf4ed239d5a520fd7dd1771d08a5245d7f2d6cf63856e4e7de38457c01868f63"
+          },
+          "wave": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818638
+            ],
+            "is_symlink": false,
+            "json_schema": "qfos-wave-plan/v1",
+            "lexists": true,
+            "sha256": "bf4ed239d5a520fd7dd1771d08a5245d7f2d6cf63856e4e7de38457c01868f63"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "wave": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/wave_parent/old/state.json.lock",
+          "state": "/tmp/asfa-path-differential/wave_parent/old/state.json",
+          "wave": "/tmp/asfa-path-differential/wave_parent/old/sub/../state.json"
+        },
+        "stderr": "wave_jobs=0 wave_deferred=0 plan_hash=559683b25a1e99dda35172d95273b21d788fbe8fe1d79bbc4318f9896c4210b4\npolled=0 verified=0 failed=0\n",
+        "stdout": "{\n  \"schema_version\": \"asfa-bridge-report/v1\",\n  \"network_name\": \"path-poc\",\n  \"generated_at_epoch\": 100,\n  \"summary\": {\n    \"total\": 0,\n    \"verified\": 0,\n    \"failed\": 0\n  },\n  \"records\": [],\n  \"ingestion\": {\n    \"inserted\": 0,\n    \"duplicate\": 0,\n    \"replayed_consumed\": 0,\n    \"conflict\": 0,\n    \"expired\": 0,\n    \"invalid\": 0,\n    \"chain_checkpoints\": 0,\n    \"pending\": 0,\n    \"tombstones\": 0,\n    \"state_saved\": true,\n    \"events\": []\n  }\n}\n"
+      }
+    },
+    {
+      "id": "execution_parent",
+      "new": {
+        "after": {
+          "execution": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818649
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "702ec095d0c529d654c9d5585efada2fd8885b40b2a67e03b8a23b014449bd7a"
+          },
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818649
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "702ec095d0c529d654c9d5585efada2fd8885b40b2a67e03b8a23b014449bd7a"
+          },
+          "wave": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818650
+            ],
+            "is_symlink": false,
+            "json_schema": "qfos-wave-plan/v1",
+            "lexists": true,
+            "sha256": "cdc6cd33bcc3e155dfab134759dc0c603a3a9f740f490b63ab642f7462fdf718"
+          }
+        },
+        "before": {
+          "execution": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818649
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "702ec095d0c529d654c9d5585efada2fd8885b40b2a67e03b8a23b014449bd7a"
+          },
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818649
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "702ec095d0c529d654c9d5585efada2fd8885b40b2a67e03b8a23b014449bd7a"
+          },
+          "wave": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818650
+            ],
+            "is_symlink": false,
+            "json_schema": "qfos-wave-plan/v1",
+            "lexists": true,
+            "sha256": "cdc6cd33bcc3e155dfab134759dc0c603a3a9f740f490b63ab642f7462fdf718"
+          }
+        },
+        "exit_code": 2,
+        "paths": {
+          "execution": "/tmp/asfa-path-differential/execution_parent/new/sub/../state.json",
+          "lock": "/tmp/asfa-path-differential/execution_parent/new/state.json.lock",
+          "state": "/tmp/asfa-path-differential/execution_parent/new/state.json",
+          "wave": "/tmp/asfa-path-differential/execution_parent/new/plan.json"
+        },
+        "stderr": "bridge-poller: output path alias (resolved path): --state=/tmp/asfa-path-differential/execution_parent/new/state.json and --execution-out=/tmp/asfa-path-differential/execution_parent/new/sub/../state.json\n",
+        "stdout": ""
+      },
+      "old": {
+        "after": {
+          "execution": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818647
+            ],
+            "is_symlink": false,
+            "json_schema": "qfos-wave-execution/v1",
+            "lexists": true,
+            "sha256": "5b394e59c96fcf6762bca8ac4f6322c86ec3cdf8b9f909fcb74acf5693df72de"
+          },
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818646
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818647
+            ],
+            "is_symlink": false,
+            "json_schema": "qfos-wave-execution/v1",
+            "lexists": true,
+            "sha256": "5b394e59c96fcf6762bca8ac4f6322c86ec3cdf8b9f909fcb74acf5693df72de"
+          },
+          "wave": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818645
+            ],
+            "is_symlink": false,
+            "json_schema": "qfos-wave-plan/v1",
+            "lexists": true,
+            "sha256": "cdc6cd33bcc3e155dfab134759dc0c603a3a9f740f490b63ab642f7462fdf718"
+          }
+        },
+        "before": {
+          "execution": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818644
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "702ec095d0c529d654c9d5585efada2fd8885b40b2a67e03b8a23b014449bd7a"
+          },
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818644
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "702ec095d0c529d654c9d5585efada2fd8885b40b2a67e03b8a23b014449bd7a"
+          },
+          "wave": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818645
+            ],
+            "is_symlink": false,
+            "json_schema": "qfos-wave-plan/v1",
+            "lexists": true,
+            "sha256": "cdc6cd33bcc3e155dfab134759dc0c603a3a9f740f490b63ab642f7462fdf718"
+          }
+        },
+        "exit_code": 0,
+        "paths": {
+          "execution": "/tmp/asfa-path-differential/execution_parent/old/sub/../state.json",
+          "lock": "/tmp/asfa-path-differential/execution_parent/old/state.json.lock",
+          "state": "/tmp/asfa-path-differential/execution_parent/old/state.json",
+          "wave": "/tmp/asfa-path-differential/execution_parent/old/plan.json"
+        },
+        "stderr": "wave_jobs=7 wave_deferred=0 plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a\nexecution_succeeded=2 execution_dead_lettered=5 execution_skipped=0 execution_hash=4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c\npolled=1 verified=1 failed=0\n",
+        "stdout": "{\n  \"schema_version\": \"asfa-bridge-report/v1\",\n  \"network_name\": \"qfos-execution-fixture\",\n  \"generated_at_epoch\": 100,\n  \"summary\": {\n    \"total\": 1,\n    \"verified\": 1,\n    \"failed\": 0\n  },\n  \"records\": [\n    {\n      \"session\": \"exec\",\n      \"url\": \"file://fixtures/qfos-exec-outbox.json\",\n      \"fetched_at_epoch\": 100,\n      \"status\": {\n        \"kind\": \"verified\",\n        \"verified_blocks\": 1,\n        \"verified_directives\": 7,\n        \"untrusted_directives\": 0\n      }\n    }\n  ],\n  \"ingestion\": {\n    \"inserted\": 0,\n    \"duplicate\": 6,\n    \"replayed_consumed\": 0,\n    \"conflict\": 0,\n    \"expired\": 1,\n    \"invalid\": 0,\n    \"chain_checkpoints\": 1,\n    \"pending\": 0,\n    \"tombstones\": 7,\n    \"state_saved\": true,\n    \"events\": [\n      {\n        \"session\": \"exec\",\n        \"id\": \"sum\",\n        \"outcome\": \"duplicate\"\n      },\n      {\n        \"session\": \"exec\",\n        \"id\": \"sha\",\n        \"outcome\": \"duplicate\"\n      },\n      {\n        \"session\": \"exec\",\n        \"id\": \"unknown\",\n        \"outcome\": \"duplicate\"\n      },\n      {\n        \"session\": \"exec\",\n        \"id\": \"invalid\",\n        \"outcome\": \"duplicate\"\n      },\n      {\n        \"session\": \"exec\",\n        \"id\": \"overflow\",\n        \"outcome\": \"duplicate\"\n      },\n      {\n        \"session\": \"exec\",\n        \"id\": \"too-many\",\n        \"outcome\": \"duplicate\"\n      },\n      {\n        \"session\": \"exec\",\n        \"id\": \"expired\",\n        \"outcome\": \"expired\"\n      }\n    ]\n  }\n}\n"
+      }
+    },
+    {
+      "id": "dangling_symlink",
+      "new": {
+        "after": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": true,
+            "json_schema": null,
+            "lexists": true,
+            "link_target": "/tmp/asfa-path-differential/dangling_symlink/new/state.json",
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": true,
+            "json_schema": null,
+            "lexists": true,
+            "link_target": "/tmp/asfa-path-differential/dangling_symlink/new/state.json",
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "exit_code": 2,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/dangling_symlink/new/state.json.lock",
+          "out": "/tmp/asfa-path-differential/dangling_symlink/new/report.json",
+          "state": "/tmp/asfa-path-differential/dangling_symlink/new/state.json"
+        },
+        "stderr": "bridge-poller: output path alias (resolved path): --state=/tmp/asfa-path-differential/dangling_symlink/new/state.json and --out=/tmp/asfa-path-differential/dangling_symlink/new/report.json\n",
+        "stdout": ""
+      },
+      "old": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818654
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "out": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818655
+            ],
+            "is_symlink": true,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "link_target": "/tmp/asfa-path-differential/dangling_symlink/old/state.json",
+            "sha256": "d6b928020f1ba9fa17f3b756ffbdbdcb60cd06bc22b75c495e68a4713eba04c1"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818655
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "sha256": "d6b928020f1ba9fa17f3b756ffbdbdcb60cd06bc22b75c495e68a4713eba04c1"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": true,
+            "json_schema": null,
+            "lexists": true,
+            "link_target": "/tmp/asfa-path-differential/dangling_symlink/old/state.json",
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/dangling_symlink/old/state.json.lock",
+          "out": "/tmp/asfa-path-differential/dangling_symlink/old/report.json",
+          "state": "/tmp/asfa-path-differential/dangling_symlink/old/state.json"
+        },
+        "stderr": "polled=0 verified=0 failed=0\n",
+        "stdout": ""
+      }
+    },
+    {
+      "id": "symlinked_parent",
+      "new": {
+        "after": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "exit_code": 2,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/symlinked_parent/new/real/state.json.lock",
+          "out": "/tmp/asfa-path-differential/symlinked_parent/new/linked/state.json",
+          "state": "/tmp/asfa-path-differential/symlinked_parent/new/real/state.json"
+        },
+        "stderr": "bridge-poller: output path alias (resolved path): --state=/tmp/asfa-path-differential/symlinked_parent/new/real/state.json and --out=/tmp/asfa-path-differential/symlinked_parent/new/linked/state.json\n",
+        "stdout": ""
+      },
+      "old": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818662
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "out": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818663
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "sha256": "d6b928020f1ba9fa17f3b756ffbdbdcb60cd06bc22b75c495e68a4713eba04c1"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818663
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "sha256": "d6b928020f1ba9fa17f3b756ffbdbdcb60cd06bc22b75c495e68a4713eba04c1"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/symlinked_parent/old/real/state.json.lock",
+          "out": "/tmp/asfa-path-differential/symlinked_parent/old/linked/state.json",
+          "state": "/tmp/asfa-path-differential/symlinked_parent/old/real/state.json"
+        },
+        "stderr": "polled=0 verified=0 failed=0\n",
+        "stdout": ""
+      }
+    },
+    {
+      "id": "hardlink_plan_report",
+      "new": {
+        "after": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818673
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "wave": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818673
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818673
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "wave": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818673
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          }
+        },
+        "exit_code": 2,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/hardlink_plan_report/new/state.json.lock",
+          "out": "/tmp/asfa-path-differential/hardlink_plan_report/new/report.json",
+          "state": "/tmp/asfa-path-differential/hardlink_plan_report/new/state.json",
+          "wave": "/tmp/asfa-path-differential/hardlink_plan_report/new/plan.json"
+        },
+        "stderr": "bridge-poller: output path alias (existing file identity): --out=/tmp/asfa-path-differential/hardlink_plan_report/new/report.json and --wave-out=/tmp/asfa-path-differential/hardlink_plan_report/new/plan.json\n",
+        "stdout": ""
+      },
+      "old": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818670
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "out": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818669
+            ],
+            "is_symlink": false,
+            "json_schema": "qfos-wave-plan/v1",
+            "lexists": true,
+            "sha256": "bf4ed239d5a520fd7dd1771d08a5245d7f2d6cf63856e4e7de38457c01868f63"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818671
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "e34ef7b6010e531d697749ae1ec04e672166c94494b8d6125593d70f40d18a2a"
+          },
+          "wave": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818669
+            ],
+            "is_symlink": false,
+            "json_schema": "qfos-wave-plan/v1",
+            "lexists": true,
+            "sha256": "bf4ed239d5a520fd7dd1771d08a5245d7f2d6cf63856e4e7de38457c01868f63"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818669
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "wave": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818669
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          }
+        },
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/hardlink_plan_report/old/state.json.lock",
+          "out": "/tmp/asfa-path-differential/hardlink_plan_report/old/report.json",
+          "state": "/tmp/asfa-path-differential/hardlink_plan_report/old/state.json",
+          "wave": "/tmp/asfa-path-differential/hardlink_plan_report/old/plan.json"
+        },
+        "stderr": "wave_jobs=0 wave_deferred=0 plan_hash=559683b25a1e99dda35172d95273b21d788fbe8fe1d79bbc4318f9896c4210b4\npolled=0 verified=0 failed=0\n",
+        "stdout": ""
+      }
+    },
+    {
+      "id": "dot_control",
+      "new": {
+        "after": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "exit_code": 2,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/dot_control/new/state.json.lock",
+          "out": "/tmp/asfa-path-differential/dot_control/new/state.json",
+          "state": "/tmp/asfa-path-differential/dot_control/new/state.json"
+        },
+        "stderr": "bridge-poller: output path alias (resolved path): --state=/tmp/asfa-path-differential/dot_control/new/state.json and --out=/tmp/asfa-path-differential/dot_control/new/state.json\n",
+        "stdout": ""
+      },
+      "old": {
+        "after": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "exit_code": 2,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/dot_control/old/state.json.lock",
+          "out": "/tmp/asfa-path-differential/dot_control/old/state.json",
+          "state": "/tmp/asfa-path-differential/dot_control/old/state.json"
+        },
+        "stderr": "bridge-poller: --state and --out must be different files\n",
+        "stdout": ""
+      }
+    },
+    {
+      "id": "distinct_control",
+      "new": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818686
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "out": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818688
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "sha256": "d6b928020f1ba9fa17f3b756ffbdbdcb60cd06bc22b75c495e68a4713eba04c1"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818687
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "e34ef7b6010e531d697749ae1ec04e672166c94494b8d6125593d70f40d18a2a"
+          },
+          "wave": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818689
+            ],
+            "is_symlink": false,
+            "json_schema": "qfos-wave-plan/v1",
+            "lexists": true,
+            "sha256": "bf4ed239d5a520fd7dd1771d08a5245d7f2d6cf63856e4e7de38457c01868f63"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "wave": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/distinct_control/new/nested/state.json.lock",
+          "out": "/tmp/asfa-path-differential/distinct_control/new/report.json",
+          "state": "/tmp/asfa-path-differential/distinct_control/new/nested/state.json",
+          "wave": "/tmp/asfa-path-differential/distinct_control/new/plan.json"
+        },
+        "stderr": "wave_jobs=0 wave_deferred=0 plan_hash=559683b25a1e99dda35172d95273b21d788fbe8fe1d79bbc4318f9896c4210b4\npolled=0 verified=0 failed=0\n",
+        "stdout": ""
+      },
+      "old": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818680
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "out": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818682
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-bridge-report/v1",
+            "lexists": true,
+            "sha256": "d6b928020f1ba9fa17f3b756ffbdbdcb60cd06bc22b75c495e68a4713eba04c1"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818681
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "e34ef7b6010e531d697749ae1ec04e672166c94494b8d6125593d70f40d18a2a"
+          },
+          "wave": {
+            "exists": true,
+            "identity": [
+              65040,
+              1818683
+            ],
+            "is_symlink": false,
+            "json_schema": "qfos-wave-plan/v1",
+            "lexists": true,
+            "sha256": "bf4ed239d5a520fd7dd1771d08a5245d7f2d6cf63856e4e7de38457c01868f63"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "out": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "wave": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-path-differential/distinct_control/old/nested/state.json.lock",
+          "out": "/tmp/asfa-path-differential/distinct_control/old/report.json",
+          "state": "/tmp/asfa-path-differential/distinct_control/old/nested/state.json",
+          "wave": "/tmp/asfa-path-differential/distinct_control/old/plan.json"
+        },
+        "stderr": "wave_jobs=0 wave_deferred=0 plan_hash=559683b25a1e99dda35172d95273b21d788fbe8fe1d79bbc4318f9896c4210b4\npolled=0 verified=0 failed=0\n",
+        "stdout": ""
+      }
+    }
+  ],
+  "new_binary_sha256": "c8c425e8ba0dbec50ead50a0167a647d79d4967afde5510ad4d8c7c3dfde9a42",
+  "old_binary_sha256": "457257a5ea0d33f69af7b019edde1e0c301d1431ec6c0f9f254beebe938659ef",
+  "schema_version": "asfa-output-path-differential/v1"
+}

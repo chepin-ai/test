@@ -74,3 +74,13 @@
 - `../scripts/verify-egress-python.py`：独立使用 Python `ipaddress` 与 CIDR 表重算 48 条地址答案，并拒绝错误状态、伪造 verified 汇总、实际发生连接和额外记录四类假报告；不是网络命名空间或形式化网络安全证明。
 - `../scripts/egress-differential.py`：建立真实 loopback HTTP target／proxy、Registry 和 genesis Outbox，执行旧新进程、采集 socket hits 与报告，再交给独立判读器复核。
 - PASS 只覆盖本 HTTP client 的应用层 public-only 与 rebinding 门禁；不证明底层 DNS 强制取消、线程资源隔离、外层 egress proxy、hostile OS 防护、通用 SSRF、发布者认证、外部 QF-OS／QIOS 或远端 Git 同步。
+
+## 2026-11-21 输出路径身份与状态锁别名
+
+- `path-preregister-2026-11-21.json`：PATH-01–07 的实现前判据、旧端实际覆盖哈希和边界；另记录 `./` 负控制已被旧端拒绝，避免把不存在的缺口包装成成果。
+- `path-differential-2026-11-21.json`：八组真实旧新进程结果。poll／wave／execution 的 `sub/../state`、dangling symlink、符号链接父目录和硬链接六类攻击均为旧 exit=0、新 exit=2；新端所有声明路径 before=after 且不创建锁。dot 控制两端拒绝，distinct 控制产物字节相等。SHA-256 为 `ab87ebe30c21e84662c490466d2306f1be87cb593b3b582518157e5ed53a86ee`。
+- `path-consistency-2026-11-21.json`：实现提交 `111f98a9e3d8d5f63c29d1a18228c6a2ac13cfa9` 的综合证据。104／104 测试分解为 bridge 单元 42、bridge 集成 48、kernel 11、userspace 3；干净归档 SHA-256 为 `9cf890286cdbc3b03c8d17105cc3f5dd51b865cdb5451c5b8b4c720d01d14ddd`，干净新二进制 SHA-256 为 `c8c425e8ba0dbec50ead50a0167a647d79d4967afde5510ad4d8c7c3dfde9a42`。综合证据 SHA-256 为 `82461aac0486df8ee1add33f33147a5a3f09e70fbd1762af9e260b8055e200a5`。
+- `path-clean-rebuild-2026-11-21.log`：无 `.git`、空 target 的完整门禁输出；最终差分使用这次重建的新二进制，不与工作树 debug 哈希混用。
+- `path-publication-2026-11-21.json`：证据候选 `759daf69ea1981753f17f23511efedce88fe1888` 的真实发布边界。2026-11-21T00:17:45+08:00 无凭证读回成功，远端 `main` 仍为 `c573dc496dc3caeab1f0f143373c80859ccd93d4`，候选 `ahead_by=17, behind_by=0`；无当前凭证，未发起认证推送，`NOT_PUSHED`，无新外部 CI、cisvr ACK、KEY-SYNC-01 relay 或 active 声称。证据提交仅 amend 本记录与对应文档，分叉计数不变。
+- `../scripts/verify-path-python.py`：独立 realpath／samefile／stat、文件系统 after-state 重读、五项已知答案和五类假报告自证；`../scripts/path-differential.py` 负责真实旧新进程执行。
+- 首轮 dangling symlink 实现 FAIL 与独立判读器 hardlink 标签 FAIL 均保留在综合证据。PASS 不覆盖预检后恶意改名、跨进程硬链接通用锁、非协作写者、分布式协调、WAL／fsync 或远端发布状态。

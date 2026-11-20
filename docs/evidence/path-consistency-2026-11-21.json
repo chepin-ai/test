@@ -1,0 +1,171 @@
+{
+  "schema_version": "asfa-output-path-consistency/v1",
+  "recorded_at": "2026-11-21",
+  "baseline_commit": "4ae57d5106b2f46dc0579e58520766abe4a9df46",
+  "implementation_commit": "111f98a9e3d8d5f63c29d1a18228c6a2ac13cfa9",
+  "implementation_subject": "fix(bridge): reject aliased output paths before writes",
+  "verdict": "PASS",
+  "evidence_status": "Local, reproducible implementation evidence only; not a publisher signature, zero-knowledge proof, remote synchronization receipt or universal filesystem race defense.",
+  "criteria": [
+    {
+      "id": "PATH-01",
+      "verdict": "PASS",
+      "evidence": "Resolved-path preflight rejects parent/.., final and dangling symlinks, symlinked parents and direct spellings before StateLock, polling, execution or writes. Real cases: poll_parent, wave_parent, execution_parent, dangling_symlink, symlinked_parent and dot_control."
+    },
+    {
+      "id": "PATH-02",
+      "verdict": "PASS",
+      "evidence": "Existing Unix outputs are keyed by device/inode; the hardlink_plan_report case rejects --out with --wave-out while preserving both sentinel names and their shared identity. Windows uses volume serial/file index when both are available; other filesystems retain resolved-path checks only."
+    },
+    {
+      "id": "PATH-03",
+      "verdict": "PASS",
+      "evidence": "Six attack cases produce old exit=0 and new exit=2. The old binary replaces ledgers with poll, wave or execution documents; the new binary leaves every declared before/after snapshot equal and creates no lock."
+    },
+    {
+      "id": "PATH-04",
+      "verdict": "PASS",
+      "evidence": "Dangling-symlink and hard-link attacks are rejected before first write. The hardlink sentinel SHA-256 remains b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51 at both names."
+    },
+    {
+      "id": "PATH-05",
+      "verdict": "PASS",
+      "evidence": "StateLock resolves final symlink targets before deriving the sidecar; direct and alias acquisition contend with WouldBlock. distinct_control succeeds on both binaries and produces byte-identical ledger, report and plan artifacts."
+    },
+    {
+      "id": "PATH-06",
+      "verdict": "PASS",
+      "evidence": "verify-path-python.py independently uses realpath/samefile/stat and recomputes every recorded after-state from the filesystem. Self-test passes five path known answers and rejects five fake reports before adjudicating the eight-case report."
+    },
+    {
+      "id": "PATH-07",
+      "verdict": "PASS",
+      "evidence": "The implementation commit archive has no .git and was built with an initially absent CARGO_TARGET_DIR. build-all exited 0; 104 Rust tests passed. The resulting clean binary repeated all eight differentials and the independent verifier passed."
+    }
+  ],
+  "test_totals": {
+    "rust_total": 104,
+    "bridge_unit": 42,
+    "bridge_integration": 48,
+    "kernel": 11,
+    "userspace": 3,
+    "rust_failed": 0,
+    "differential_cases": 8,
+    "path_oracle_known_answers": 5,
+    "fake_reports_rejected": 5
+  },
+  "clean_rebuild": {
+    "source": "git archive of implementation_commit",
+    "no_git_directory": true,
+    "target_initially_absent": true,
+    "build_all_exit": 0,
+    "archive_sha256": "9cf890286cdbc3b03c8d17105cc3f5dd51b865cdb5451c5b8b4c720d01d14ddd",
+    "new_binary_sha256": "c8c425e8ba0dbec50ead50a0167a647d79d4967afde5510ad4d8c7c3dfde9a42",
+    "old_binary_sha256": "457257a5ea0d33f69af7b019edde1e0c301d1431ec6c0f9f254beebe938659ef",
+    "differential_uses_clean_new_binary": true
+  },
+  "fixed_anchors": {
+    "wave_plan_hash": "5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34",
+    "execution_plan_hash": "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a",
+    "execution_report_hash": "4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c",
+    "replay_report_hash": "9dce14b4b357f72851dff2d67af085bd8c10e560aca51c414fd07ffe416be36f",
+    "execution_consistency_sha256": "6703407ff64ee27226cc197c32baf3df8d3aee3107776db866368931090401b9",
+    "egress_consistency_sha256": "39f0ed02005e8416e74e48c2d2b2e28343a57f942f7b394890ef04ebb3186f66"
+  },
+  "differential_summary": [
+    {
+      "case": "poll_parent",
+      "old": "exit=0; state becomes asfa-bridge-report/v1",
+      "new": "exit=2; no state, output or lock; resolved-path alias"
+    },
+    {
+      "case": "wave_parent",
+      "old": "exit=0; state becomes qfos-wave-plan/v1",
+      "new": "exit=2; no state, output or lock; resolved-path alias"
+    },
+    {
+      "case": "execution_parent",
+      "old": "exit=0; committed state becomes qfos-wave-execution/v1",
+      "new": "exit=2; pre-state remains SHA-256 702ec095d0c529d654c9d5585efada2fd8885b40b2a67e03b8a23b014449bd7a"
+    },
+    {
+      "case": "dangling_symlink",
+      "old": "exit=0; report follows the symlink and replaces state",
+      "new": "exit=2; target remains absent and link remains unchanged"
+    },
+    {
+      "case": "symlinked_parent",
+      "old": "exit=0; linked-parent report replaces state",
+      "new": "exit=2; no state, output or lock"
+    },
+    {
+      "case": "hardlink_plan_report",
+      "old": "exit=0; wave plan overwrites the poll report at both hardlink names",
+      "new": "exit=2; both sentinel files and shared device/inode remain unchanged"
+    },
+    {
+      "case": "dot_control",
+      "old": "exit=2; already rejected",
+      "new": "exit=2; no writes"
+    },
+    {
+      "case": "distinct_control",
+      "old": "exit=0; valid distinct outputs",
+      "new": "exit=0; state/report/plan hashes equal old"
+    }
+  ],
+  "development_corrections": [
+    {
+      "id": "PATH-DEV-01",
+      "type": "negative_probe",
+      "record": "The initial ./ alias probe was rejected by the baseline, so dot-only spelling was not misreported as a vulnerability. Existing-subdirectory/.. and link probes established the actual gap."
+    },
+    {
+      "id": "PATH-DEV-02",
+      "type": "implementation_fail_then_full_rerun",
+      "record": "The first implementation failed dangling_symlink_alias_is_rejected_before_target_creation: 41 passed, 1 failed. Canonicalize fallback had treated the dangling link name as a new file. Layered symlink redirection with a depth bound fixed it; the complete 104-test suite then passed."
+    },
+    {
+      "id": "PATH-DEV-03",
+      "type": "adjudicator_fail_then_same_evidence_recheck",
+      "record": "The independent verifier initially rejected hardlink_plan_report because it incorrectly demanded --state in a --out/--wave-out diagnostic. Only the label expectation was corrected; the same raw development report then passed, followed by a fresh clean-binary differential."
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "docs/evidence/path-preregister-2026-11-21.json",
+      "bytes": 5071,
+      "sha256": "8eac44c135be854cc970627e707c6bac7c2d46521cb96cc65ffe3af0d52b0ed9"
+    },
+    {
+      "path": "docs/evidence/path-differential-2026-11-21.json",
+      "bytes": 41587,
+      "sha256": "ab87ebe30c21e84662c490466d2306f1be87cb593b3b582518157e5ed53a86ee"
+    },
+    {
+      "path": "docs/evidence/path-clean-rebuild-2026-11-21.log",
+      "bytes": 19724,
+      "sha256": "702994d422d0861952c0515614aac8bb67e4f0820a147b50c2d4acea23e7d262"
+    },
+    {
+      "path": "bridge-poller/src/output_paths.rs",
+      "bytes": 11628,
+      "sha256": "5e25c68b2ded5cf9ce7c12bc9cef3a5427e6b12dd99cb3d2a5a33fd00d3ba261"
+    },
+    {
+      "path": "scripts/path-differential.py",
+      "bytes": 7122,
+      "sha256": "332af41cc213b10ce80ea6db8fad7200948552461cdfc875c9f25ae0a9d37cf2"
+    },
+    {
+      "path": "scripts/verify-path-python.py",
+      "bytes": 9865,
+      "sha256": "42e5fa72f35abfa2fbaa12a3d19af68b83c1444a4a434a79d1588c808932e228"
+    }
+  ],
+  "not_proven": [
+    "Preflight is not race-free against hostile pathname mutation after validation and does not confine non-cooperating writers.",
+    "Cross-process hard-link aliases do not obtain a universal persistent inode lock; no distributed lock, CAS, WAL, fsync or crash-power-loss durability claim is added.",
+    "No remote push, external CI, publisher authentication, cisvr ACK, KEY-SYNC-01, QF-OS/QIOS canonical compatibility, zero-knowledge proof or distributed exactly-once claim follows from this local evidence."
+  ]
+}

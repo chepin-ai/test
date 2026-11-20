@@ -1,6 +1,16 @@
-# 实现状态（本轮实测证据：2026-11-16—17）
+# 实现状态（本轮实测证据：2026-11-16—21）
 
-## 最新续拍：public-only egress 与 DNS rebinding 闭环
+## 最新续拍：输出路径身份与状态锁别名闭环
+
+- 实现提交为 `111f98a9e3d8d5f63c29d1a18228c6a2ac13cfa9`（`fix(bridge): reject aliased output paths before writes`），基线为 `4ae57d5106b2f46dc0579e58520766abe4a9df46`。基线实测确认：`existing-subdirectory/../state`、dangling symlink、符号链接父目录和硬链接绕过旧词法检查；旧端在轮询、wave 和 execution 三条链上均以 exit=0 覆盖目标。单纯 `./` 已被旧端拒绝，不作为漏洞成果。
+- 新实现把 `--state`、`--out`、`--wave-out`、`--execution-out` 统一在任何锁、轮询、执行和写入前解析并判重。已存在输出还比较 Unix device/inode 或 Windows volume/file index；状态锁从解析后的状态目标派生，最终 symlink 与直接路径竞争同一 sidecar。
+- 从实现提交的 Git 归档在无 `.git`、空 target 环境完整重建，104 个 Rust 测试通过：bridge 单元 42、bridge 集成 48、kernel 11、userspace 3，失败为 0；rustfmt、Clippy、凭据扫描、七类独立判读、固定夹具、执行重放、认知示例和 CLI 烟测全部通过。
+- 干净 tar 归档 SHA-256 为 `9cf890286cdbc3b03c8d17105cc3f5dd51b865cdb5451c5b8b4c720d01d14ddd`，干净 debug 新二进制 SHA-256 为 `c8c425e8ba0dbec50ead50a0167a647d79d4967afde5510ad4d8c7c3dfde9a42`。八组旧新差分由该干净新二进制重跑：六个攻击用例均为旧 exit=0／新 exit=2，新端 before=after 且不创建锁；dot 控制两端均拒绝，distinct 控制产物旧新字节相等。原始报告 SHA-256 为 `ab87ebe30c21e84662c490466d2306f1be87cb593b3b582518157e5ed53a86ee`。
+- 独立 `verify-path-python.py` 使用 realpath／samefile／stat 并重新读取每个 after-state，先通过五项路径已知答案和五类假报告自证，再判八组真实结果。综合证据为 `evidence/path-consistency-2026-11-21.json`，SHA-256 为 `82461aac0486df8ee1add33f33147a5a3f09e70fbd1762af9e260b8055e200a5`。
+- 首轮 dangling symlink 单元测试 FAIL（41 过、1 失败）暴露出不存在回退未跟随链接；修复为逐层重定向并限制深度后完整重跑。独立判读器随后因误要求 hardlink 诊断包含 `--state` 而 FAIL；只修正判读器标签，复判同一原始报告，再用干净二进制生成最终报告。
+- 本轮只证明协作 CLI 的预检与锁汇聚。验证后恶意改名、跨进程硬链接通用锁、非协作写者、跨主机锁、CAS、WAL／fsync、整份快照回滚、发布者认证、分布式 exactly-once、外部 QF-OS／QIOS 与 ZK 证明仍未获得。
+
+## 2026-11-17 public-only egress 与 DNS rebinding 闭环（历史证据）
 
 - 实现提交为 `32b450b01da77dab77667d930888cb201a913699`（`feat(bridge): pin validated public egress destinations`），基线为 `03cf7d8b7ee71e97fa35f25c6ab9af3ec7a3af26`。从实现提交的 Git 归档在无 `.git`、空 target 环境完整重建，99 个 Rust 测试通过：bridge 单元 37、bridge 集成 48、kernel 11、userspace 3，失败为 0；rustfmt、Clippy、凭据扫描、六类独立判读、固定夹具、执行重放、认知示例和 CLI 烟测全部通过。
 - 干净 tar 归档 SHA-256 为 `84213d0f89ecba27c3f120c2afe82f2132dfaff1e4b79760bcbcaa2059597515`，干净 debug 新二进制 SHA-256 为 `4ce77eb6ce94937c39a6fa2f5b99e4297a5a0092ed777b09e0c00453bd3898af`。综合证据为 `evidence/egress-consistency-2026-11-17.json`，SHA-256 为 `39f0ed02005e8416e74e48c2d2b2e28343a57f942f7b394890ef04ebb3186f66`，11 项 artifact 的路径、字节数与摘要已复算。
@@ -86,6 +96,7 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 - `verify-outbox-python.py`：无浮点 V1 链重算、指令来源检查、已知答案和篡改自证；不是 RFC 8785 JCS。
 - `verify-policy-python.py`：Registry 安全投影、策略摘要、三项自证和 live snapshot 对拍；fixture 摘要仍为 `d5805bd450f0778f996fd6094d3a1723114da35be1adee5ca8bd0f361a3c7a21`。
 - `verify-egress-python.py`：独立 `ipaddress`／CIDR 地址分类、48 条已知答案与 blocked 报告复核；四类假报告自证通过，不证明外层网络隔离。
+- `verify-path-python.py`：独立 realpath／samefile／stat、八组旧新结果与文件系统 after-state 复核；五项路径已知答案和五类假报告自证通过，不证明预检后路径名不可被敌对修改。
 - `verify-wave-python.py`：从原始 snapshot 重建完整波次计划；两个篡改自证通过，范围为无浮点 qfos-wave-v1 子集，不是签名、执行或 QIOS 证明。当前 v4 静态计划哈希为 `5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34`。
 - `verify-execution-python.py`：独立推导执行输出与五类失败、重算全部摘要并勾稽计划／报告／最终状态；五项自证含 rehashed 假语义，固定执行夹具为 2 回执＋5 死信。
 
@@ -103,12 +114,14 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 
 本轮 egress 证据候选为 `713a3608bee51b9ac44aa1728e06fdecc9b5a71c`。2026-11-17 无凭证 `ls-remote` 第一次即成功，远端仍为同一 `c573dc4…`；候选相对远端为 `ahead_by=15, behind_by=0`。当前无可用 PAT／CMD，未发起认证推送，结论为 `NOT_PUSHED`、`remote≠local`，没有新外部 CI；未恢复或输出任何历史凭证。证据提交仅 amend 发布记录与对应文档，分叉计数不变。原始记录见 `evidence/egress-publication-2026-11-17.json`。
 
+本轮输出路径证据候选为 `759daf69ea1981753f17f23511efedce88fe1888`。2026-11-21T00:17:45+08:00 无凭证 `ls-remote` 成功，远端 `main` 仍为 `c573dc496dc3caeab1f0f143373c80859ccd93d4`；候选相对远端为 `ahead_by=17, behind_by=0`。当前无可用 PAT／CMD，未发起认证推送，结论为 `NOT_PUSHED`、`remote≠local`，没有新外部 CI、cisvr ACK、KEY-SYNC-01 relay 或 active 声称；未恢复或输出任何历史凭证。证据提交仅 amend 发布记录与对应文档，分叉计数不变。原始记录见 `evidence/path-publication-2026-11-21.json`。
+
 ## 明确未实现与后续债
 
 1. 本 HTTP client 之外的出口流量、network namespace、外层 egress proxy、hostile OS 与通用 SSRF 防护；
 2. 底层 DNS 强制取消、阻塞 resolver 线程回收与资源隔离；应用层单次解析、全答案验证和连接固定已实现；
 3. 进程级内存、CPU、文件描述符硬隔离与 CLI 轮询阶段外的整体执行预算；全轮询 deadline、解析等待与逐请求剩余时间、JSON 深度／节点预算已实现；
-4. 路径别名、非协作写者、跨主机锁语义、CAS、WAL 和原子 check-and-persist；
+4. 输出预检后的恶意路径改名、跨进程硬链接通用锁、非协作写者、跨主机锁语义、CAS、WAL 和原子 check-and-persist；CLI 同路径／symlink／既有硬链接判重与最终 symlink 锁汇聚已实现；
 5. 整份快照回滚、分裂视图、签名 checkpoint、独立 witness／quorum；
 6. 发布者与指令授权、可信时间；
 7. 完整 JCS V2、Merkle consistency proof、后量子 witness；

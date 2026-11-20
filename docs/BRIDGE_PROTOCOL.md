@@ -83,7 +83,7 @@ policy_hash = SHA256(
 
 `save_atomic` 使用同目录临时文件原子替换，并拒绝生成超过 16 MiB 的快照；恢复时校验 schema、重复／未知 JSON 成员、重复结构化键、非法指令、非法／重复检查点、“已消费但仍待办”矛盾、回执／死信自身摘要、输出摘要、结果对应 consumed 及同键成功／失败冲突，并执行本地基数上限。恢复后重放仍返回 `Consumed`，历史分叉仍被拒绝。该原子替换尚未增加 fsync，不声称覆盖掉电持久性。
 
-检查点规则：新高度低于旧高度为 `Rollback`；同高不同 latest 为 `Fork`；更高高度在旧高度处的块哈希必须等于旧 latest，否则为 `Fork`。合法重读和保留旧前缀的延长放行。该检查是 O(n) 全链前缀对拍，不是 Merkle consistency proof；整份状态文件被替换仍需外部单调锚或独立 witness。持久化不是隐式副作用：调用方必须在状态变更后保存，否则重启只恢复到最后一次快照。CLI 在加载前取得 `<state>.lock` sidecar 的 OS 排他锁并持有到输出结束，锁竞争返回非零；sidecar 不随原子 rename 换 inode。它只约束使用相同词法路径的协作 CLI，不约束路径别名、非协作写者或跨主机锁。
+检查点规则：新高度低于旧高度为 `Rollback`；同高不同 latest 为 `Fork`；更高高度在旧高度处的块哈希必须等于旧 latest，否则为 `Fork`。合法重读和保留旧前缀的延长放行。该检查是 O(n) 全链前缀对拍，不是 Merkle consistency proof；整份状态文件被替换仍需外部单调锚或独立 witness。持久化不是隐式副作用：调用方必须在状态变更后保存，否则重启只恢复到最后一次快照。CLI 在加载前把状态路径解析为实际目标，取得其 `<resolved-state>.lock` sidecar OS 排他锁并持有到输出结束，锁竞争返回非零；最终符号链接别名因此与同一路径竞争同一把锁，sidecar 不随状态原子 rename 换 inode。所有 `--state`、`--out`、`--wave-out`、`--execution-out` 在取锁前统一做目标预检：已存在路径完整 canonicalize；尚未创建的输出解析最深已存在祖先并跟随各层 dangling symlink；解析后同路径即拒绝。既有输出还以 Unix device/inode 或 Windows volume/file index 判重，因而硬链接不能用不同名称绕过。该机制只约束协作 CLI，不能消除验证后恶意改名的 TOCTOU，也不提供跨进程硬链接通用锁、非协作写者防护或跨主机锁。
 
 ## 5. CLI 入库与消费闭环
 
@@ -102,7 +102,7 @@ StateLock.acquire(<state>.lock)
   → 输出 BridgeReport.ingestion / qfos-wave-plan/v1 / qfos-wave-execution/v1
 ```
 
-`--consume-session` 与 `--consume-id` 必须成对提供，且消费必须同时指定 `--state`；`--state` 与 `--out` 不得相同。状态文件不存在时从空账本开始，存在但无法解析或恢复矛盾时直接失败，不覆盖原文件。`state_saved=true` 只表示本次原子保存已返回成功，不表示收到外部 ACK。
+`--consume-session` 与 `--consume-id` 必须成对提供，且消费必须同时指定 `--state`；`--state`、`--out`、`--wave-out` 与 `--execution-out` 不得指向同一解析路径或既有文件身份，冲突在锁、轮询、执行和任何输出前以 `output path alias` 非零失败。状态文件不存在时从空账本开始，存在但无法解析或恢复矛盾时直接失败，不覆盖原文件。`state_saved=true` 只表示本次原子保存已返回成功，不表示收到外部 ACK。
 
 `ingestion` 汇总 `inserted`、`duplicate`、`replayed_consumed`、`conflict`、`expired`、`invalid`、`chain_checkpoints`、`pending`、`tombstones` 和逐指令事件；`chain_checkpoints` 统计完成本地一致性对拍并提交的会话检查点次数。`--fail-on-error` 将轮询失败、`conflict`、`invalid`、消费 `not_found` 以及新产生或恢复的执行死信转为非零退出；`duplicate`、`replayed_consumed` 与入库阶段的 `expired` 是已显式分类的协议结果，不单独触发该门禁。
 
@@ -152,4 +152,4 @@ ASFA-OS-XI/QFOS-EXECUTION-REPORT/V1\n
 
 `http_status`、`blocked_egress`、`transport`、`invalid_json`、`invalid_schema`、`invalid_trust`、`unsupported_trust` 都保留在报告中。非公开目的地址在任何 TCP 连接前形成 `blocked_egress`；重定向、正典 URL 错配、未知字段、未授权 scheme、超限输入、解析失败均不得静默跳过。策略／版本恢复失败发生在轮询之前，因此不生成新报告、不覆盖原状态。全轮询 deadline 是整次 CLI 错误而非降级为普通成功报告；超时发生在状态保存前时不生成报告或新状态。开放 Outbox 字段的深度／节点超限分类为 `invalid_json`，配合 `--fail-on-error` 返回非零。
 
-64 层与 16384 节点是应用自身预算，不再依赖 serde_json 默认递归限制充当安全边界。session 数、pending／tombstone／单 Outbox 基数和协作 CLI 写者锁也已具备门禁；这些仍不能替代非协作写者防护、路径规范化、CAS、WAL、分布式协调、底层 DNS 强制取消或进程级内存／CPU／文件描述符隔离。
+64 层与 16384 节点是应用自身预算，不再依赖 serde_json 默认递归限制充当安全边界。session 数、pending／tombstone／单 Outbox 基数、输出路径身份预检和协作 CLI 写者锁也已具备门禁；这些仍不能替代验证后路径突变防护、非协作写者隔离、CAS、WAL、分布式协调、底层 DNS 强制取消或进程级内存／CPU／文件描述符隔离。
