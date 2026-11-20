@@ -4,9 +4,9 @@ use asfa_bridge_poller::ledger::{
 };
 use asfa_bridge_poller::wave::{DEFAULT_WAVE_MAX_JOBS, DEFAULT_WAVE_MAX_PER_SOURCE};
 use asfa_bridge_poller::{
-    execute_wave, ingest_outbox, ledger_digest, plan_wave, strict_json, verify_wave_plan,
-    BridgeReport, DirectiveLedger, EgressPolicy, IngestionReport, Poller, Registry, ResourceLimits,
-    SessionPoll, StateLock, WaveExecutionReport, WavePlan,
+    ensure_distinct, execute_wave, ingest_outbox, ledger_digest, plan_wave, strict_json,
+    verify_wave_plan, BridgeReport, DirectiveLedger, EgressPolicy, IngestionReport, OutputPath,
+    Poller, Registry, ResourceLimits, SessionPoll, StateLock, WaveExecutionReport, WavePlan,
 };
 use std::error::Error;
 use std::fs;
@@ -129,24 +129,35 @@ fn run() -> Result<(), Box<dyn Error>> {
     if execution_out.is_some() && !execute_wave_mode {
         return Err("--execution-out requires --execute-wave".into());
     }
-    if let (Some(state_path), Some(out_path)) = (&state, &out) {
-        if state_path == out_path {
-            return Err("--state and --out must be different files".into());
-        }
-    }
-    if let Some(wave_path) = &wave_out {
-        if state.as_ref() == Some(wave_path) || out.as_ref() == Some(wave_path) {
-            return Err("--wave-out must differ from --state and --out".into());
-        }
-    }
-    if let Some(execution_path) = &execution_out {
-        if state.as_ref() == Some(execution_path)
-            || out.as_ref() == Some(execution_path)
-            || wave_out.as_ref() == Some(execution_path)
+    let state_output = state
+        .map(|path| OutputPath::new("--state", path))
+        .transpose()?;
+    let out_output = out.map(|path| OutputPath::new("--out", path)).transpose()?;
+    let wave_output = wave_out
+        .map(|path| OutputPath::new("--wave-out", path))
+        .transpose()?;
+    let execution_output = execution_out
+        .map(|path| OutputPath::new("--execution-out", path))
+        .transpose()?;
+    {
+        let mut declared = Vec::new();
+        for output in [
+            state_output.as_ref(),
+            out_output.as_ref(),
+            wave_output.as_ref(),
+            execution_output.as_ref(),
+        ]
+        .into_iter()
+        .flatten()
         {
-            return Err("--execution-out must differ from --state, --out and --wave-out".into());
+            declared.push(output);
         }
+        ensure_distinct(&declared)?;
     }
+    let state = state_output.map(OutputPath::into_path);
+    let out = out_output.map(OutputPath::into_path);
+    let wave_out = wave_output.map(OutputPath::into_path);
+    let execution_out = execution_output.map(OutputPath::into_path);
     let limits = ResourceLimits {
         max_pending_directives: parse_cap(
             max_pending,

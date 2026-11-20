@@ -1,0 +1,85 @@
+{
+  "schema_version": "asfa-output-path-preregister/v1",
+  "recorded_at": "2026-11-21T00:00:40+08:00",
+  "baseline_commit": "4ae57d5106b2f46dc0579e58520766abe4a9df46",
+  "baseline_binary_sha256": "457257a5ea0d33f69af7b019edde1e0c301d1431ec6c0f9f254beebe938659ef",
+  "target": "Fail closed before locking, polling, execution or writing when any declared CLI output paths resolve to the same path or existing file identity; make cooperating state locks converge for symbolic-link aliases.",
+  "baseline_observations": [
+    {
+      "id": "PATH-BASELINE-00",
+      "case": "state.json versus ./state.json",
+      "exit_code": 2,
+      "result": "Rejected by the existing PathBuf equality check; dot-only spelling is a negative result, not the vulnerability."
+    },
+    {
+      "id": "PATH-BASELINE-01",
+      "case": "state.json versus existing-subdirectory/../state.json for --out",
+      "exit_code": 0,
+      "result": "The final ledger was replaced by asfa-bridge-report/v1.",
+      "final_sha256": "d6b928020f1ba9fa17f3b756ffbdbdcb60cd06bc22b75c495e68a4713eba04c1"
+    },
+    {
+      "id": "PATH-BASELINE-02",
+      "case": "state.json versus existing-subdirectory/../state.json for --wave-out",
+      "exit_code": 0,
+      "result": "The final ledger was replaced by qfos-wave-plan/v1.",
+      "final_sha256": "bf4ed239d5a520fd7dd1771d08a5245d7f2d6cf63856e4e7de38457c01868f63"
+    },
+    {
+      "id": "PATH-BASELINE-03",
+      "case": "A dangling report symlink targeting the not-yet-created state path",
+      "exit_code": 0,
+      "result": "The final ledger was replaced by asfa-bridge-report/v1.",
+      "final_sha256": "d6b928020f1ba9fa17f3b756ffbdbdcb60cd06bc22b75c495e68a4713eba04c1"
+    },
+    {
+      "id": "PATH-BASELINE-04",
+      "case": "Existing hard-linked --out and --wave-out paths",
+      "exit_code": 0,
+      "result": "Both names retained one device/inode identity and the wave plan overwrote the earlier poll report."
+    },
+    {
+      "id": "PATH-BASELINE-05",
+      "case": "Existing execution state and plan, with --execution-out spelled through an existing subdirectory and .. to name the state",
+      "exit_code": 0,
+      "pre_state_sha256": "702ec095d0c529d654c9d5585efada2fd8885b40b2a67e03b8a23b014449bd7a",
+      "result": "The committed ledger was replaced by qfos-wave-execution/v1 with succeeded=2 and dead_lettered=5.",
+      "final_sha256": "5b394e59c96fcf6762bca8ac4f6322c86ec3cdf8b9f909fcb74acf5693df72de"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "PATH-01",
+      "pass": "Before acquiring a state lock or performing any poll, plan, execution or output write, reject every pair of output names with equal resolved absolute paths, including relative spelling, an existing ancestor plus .., symlinked parents, final symlinks and dangling final symlinks."
+    },
+    {
+      "id": "PATH-02",
+      "pass": "On supported desktop filesystems, reject distinct existing output names for the same file identity, including Unix device/inode hard links; absence of a file is not silently treated as a failed metadata check other than NotFound."
+    },
+    {
+      "id": "PATH-03",
+      "pass": "Old-versus-new real-process differentials reproduce baseline poll, wave and execution overwrite cases; the new binary exits nonzero with an output-path-alias error and leaves pre-existing inputs byte-identical, without creating a state lock or new output."
+    },
+    {
+      "id": "PATH-04",
+      "pass": "The new binary rejects dangling-symlink and hard-link aliases before their first write; preregistered sentinel bytes and link identities remain unchanged on rejection."
+    },
+    {
+      "id": "PATH-05",
+      "pass": "StateLock resolves the state target before deriving its sidecar, so direct and final-symlink spellings of an existing state contend for one OS-backed lock; distinct output paths and normal nested output creation still work."
+    },
+    {
+      "id": "PATH-06",
+      "pass": "An independent Python oracle derives expected path aliases using realpath and stat, rejects known-answer fake reports, and validates old/new process outcomes without importing Rust results as expectations."
+    },
+    {
+      "id": "PATH-07",
+      "pass": "The complete existing gate, fixed wave/execution/replay anchors and all previous independent verifiers remain unchanged, and a no-.git archive with an initially absent CARGO_TARGET_DIR rebuilds and repeats the differential."
+    }
+  ],
+  "not_proven": [
+    "This is a CLI preflight and cooperating-writer control, not race-free confinement against an adversary who can mutate pathnames after validation, not a sandbox, and not protection from non-cooperating writers.",
+    "Cross-process hard-link aliases do not acquire a universal persistent inode lock; this round does not claim distributed locking or isolation of hostile OS/filesystem behavior.",
+    "No claim of crash-power-loss durability, fsync/WAL semantics, publisher authentication, remote synchronization, QF-OS/QIOS canonical compatibility, zero-knowledge proof or distributed exactly-once execution."
+  ]
+}

@@ -8,6 +8,7 @@ pub mod execution;
 pub mod ingest;
 pub mod ledger;
 pub mod model;
+pub mod output_paths;
 pub mod poller;
 pub mod state_lock;
 pub mod strict_json;
@@ -26,6 +27,7 @@ pub use ledger::{
     ExecutionCommitError, IngestOutcome, LedgerSnapshot, ResourceLimits, RestoreError,
 };
 pub use model::*;
+pub use output_paths::{ensure_distinct, OutputPath, OutputPathError};
 pub use poller::{PollDeadlineError, Poller};
 pub use state_lock::StateLock;
 pub use wave::{

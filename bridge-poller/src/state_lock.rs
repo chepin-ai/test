@@ -6,8 +6,9 @@ use std::io;
 use std::path::{Path, PathBuf};
 
 /// A sidecar lock remains on a stable inode when the state snapshot is atomically
-/// renamed. It excludes cooperating processes using the same lexical state path;
-/// it is not a distributed lock and does not constrain non-cooperating writers.
+/// renamed. It excludes cooperating processes using the same resolved state target,
+/// including final symbolic-link aliases; it is not a distributed lock and does not
+/// constrain non-cooperating writers or every cross-process hard-link spelling.
 pub struct StateLock {
     _file: File,
     lock_path: PathBuf,
@@ -15,6 +16,8 @@ pub struct StateLock {
 
 impl StateLock {
     pub fn acquire(state_path: &Path) -> io::Result<Self> {
+        let resolved_state = crate::output_paths::resolve_path(state_path)?;
+        let state_path = resolved_state.as_path();
         if let Some(parent) = state_path.parent() {
             std::fs::create_dir_all(parent)?;
         }
@@ -68,5 +71,26 @@ mod tests {
         let second = StateLock::acquire(&state).unwrap();
         drop(second);
         let _ = std::fs::remove_file(format!("{}.lock", state.display()));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn final_symlink_alias_contends_for_the_target_lock() {
+        let root =
+            std::env::temp_dir().join(format!("asfa-state-lock-symlink-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir(&root).unwrap();
+        let state = root.join("state.json");
+        let alias = root.join("alias.json");
+        std::fs::write(&state, "state").unwrap();
+        std::os::unix::fs::symlink(&state, &alias).unwrap();
+        let first = StateLock::acquire(&state).unwrap();
+        let error = StateLock::acquire(&alias).err().unwrap();
+        assert_eq!(error.kind(), io::ErrorKind::WouldBlock);
+        assert_eq!(first.lock_path(), root.join("state.json.lock"));
+        drop(first);
+        let second = StateLock::acquire(&alias).unwrap();
+        drop(second);
+        std::fs::remove_dir_all(root).unwrap();
     }
 }
