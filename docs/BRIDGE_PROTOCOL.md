@@ -81,7 +81,7 @@ policy_hash = SHA256(
 
 `policy_projection` 包含 Registry `schema_version`、`network_name`、`trust_model`，以及每个 session 的读取 URL、解析后的正典 URL、trust、`allow_insecure_http` 和 `allow_file`。`role`／`note` 被明确排除。省略 `canonical_url` 与显式填写相同读取 URL 具有相同投影。该摘要是版本化、确定性的 SHA-256 投影，不是完整 JCS，也不是签名；能同时篡改 Registry 与 state 的本机攻击者仍可重算它。
 
-`save_atomic` 使用同目录临时文件原子替换，并拒绝生成超过 16 MiB 的快照；恢复时校验 schema、重复／未知 JSON 成员、重复结构化键、非法指令、非法／重复检查点、“已消费但仍待办”矛盾、回执／死信自身摘要、输出摘要、结果对应 consumed 及同键成功／失败冲突，并执行本地基数上限。恢复后重放仍返回 `Consumed`，历史分叉仍被拒绝。该原子替换尚未增加 fsync，不声称覆盖掉电持久性。
+`save_atomic` 先序列化并拒绝生成超过 16 MiB 的快照，再使用同目录临时文件原子替换。每个候选项都以 `OpenOptions::write(true).create_new(true)` 独占创建：预置 symlink、hardlink、普通文件或 dangling link 均只产生 `AlreadyExists` 冲突，不跟随、不截断、不改名；最多尝试 128 个候选，其他 I/O 错误立即返回，写入与清理错误显式上报。恢复时校验 schema、重复／未知 JSON 成员、重复结构化键、非法指令、非法／重复检查点、“已消费但仍待办”矛盾、回执／死信自身摘要、输出摘要、结果对应 consumed 及同键成功／失败冲突，并执行本地基数上限。恢复后重放仍返回 `Consumed`，历史分叉仍被拒绝。`create_new` 只关闭预置临时项攻击，不防止临时项成功创建后、rename 前遭恶意替换；该原子替换尚未增加 fsync，不声称覆盖掉电持久性。
 
 检查点规则：新高度低于旧高度为 `Rollback`；同高不同 latest 为 `Fork`；更高高度在旧高度处的块哈希必须等于旧 latest，否则为 `Fork`。合法重读和保留旧前缀的延长放行。该检查是 O(n) 全链前缀对拍，不是 Merkle consistency proof；整份状态文件被替换仍需外部单调锚或独立 witness。持久化不是隐式副作用：调用方必须在状态变更后保存，否则重启只恢复到最后一次快照。CLI 在加载前把状态路径解析为实际目标，取得其 `<resolved-state>.lock` sidecar OS 排他锁并持有到输出结束，锁竞争返回非零；最终符号链接别名因此与同一路径竞争同一把锁，sidecar 不随状态原子 rename 换 inode。所有 `--state`、`--out`、`--wave-out`、`--execution-out` 在取锁前统一做目标预检：已存在路径完整 canonicalize；尚未创建的输出解析最深已存在祖先并跟随各层 dangling symlink；解析后同路径即拒绝。既有输出还以 Unix device/inode 或 Windows volume/file index 判重，因而硬链接不能用不同名称绕过。该机制只约束协作 CLI，不能消除验证后恶意改名的 TOCTOU，也不提供跨进程硬链接通用锁、非协作写者防护或跨主机锁。
 
@@ -98,7 +98,7 @@ StateLock.acquire(<state>.lock)
   → 可选 plan_wave（只读）
   → 执行模式：先保存已复核的原计划，再于克隆账本暂存 execute_wave
   → deadline 复核
-  → save_atomic(--state, v4：pending 删除＋consumed＋receipt／dead letter)
+  → save_atomic(--state, v4：create_new 独占临时项，≤128 冲突重试；pending 删除＋consumed＋receipt／dead letter)
   → 输出 BridgeReport.ingestion / qfos-wave-plan/v1 / qfos-wave-execution/v1
 ```
 

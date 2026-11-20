@@ -1,6 +1,16 @@
 # 实现状态（本轮实测证据：2026-11-16—21）
 
-## 最新续拍：输出路径身份与状态锁别名闭环
+## 最新续拍：账本临时项独占分配与原子写攻击闭环
+
+- 实现提交为 `46cf446b85d27e380b1771161c3c7adce70aa245`（`fix(ledger): allocate snapshot temporaries exclusively`），基线为 `2a40df076c0d4f63a1f5dd25f368f2916a8d0d50`。基线真实进程实测：在 exec 前预置 `state.tmp-<pid>-1` symlink，旧端 exit 0，sentinel victim 被覆盖为 v4 账本，最终 state 成为指向 victim 的 symlink；hardlink 与普通文件冲突也可被旧端覆盖或改名。
+- 新实现以 `OpenOptions::write(true).create_new(true)` 独占分配每个临时候选，预置链接或文件只计为 `AlreadyExists`；最多尝试 128 个候选，其他 I/O 错误立即返回，写入、rename 与清理错误显式上报。可绕过冲突时安全成功，128 项全部占用时 exit 2、无 state 且全部 sentinel 保留。
+- 从实现提交的 Git 归档在无 `.git`、空 target 环境完整重建，106 个 Rust 测试通过：bridge 单元 44、bridge 集成 48、kernel 11、userspace 3，失败为 0；rustfmt、Clippy、凭据扫描、八类独立判读、固定夹具、执行重放、认知示例和 CLI 烟测全部通过。
+- 干净 tar 归档 SHA-256 为 `b51dd3bf9c5ce77f5009a1ac29def11dd4aa16cc7ec0d05c7cd98a1f11a79209`，干净 debug 新二进制 SHA-256 为 `7ee25459f0eaf1825dbfc11a537783b1147137bc606065258ee391ce3ce26228`，旧基线二进制 SHA-256 为 `7d17536d82cadd784ae6f9d9def2d53708d44eb906449522ca1067ad7c0cef5d`。最终五组差分使用该干净新二进制：symlink／hardlink／regular／control 新端 exit 0，exhaustion 新端 exit 2；原始报告 SHA-256 为 `04cfcf8b15494322bb528f0b4894509d9d41edf1a4fd4e140017dfd2cbff6a1d`。
+- 独立 `verify-atomic-write-python.py` 从记录的子进程 PID 重建精确临时名，使用 path state／stat／SHA-256／JSON schema／链接目标／文件身份重算每个 after-state；四项文件系统已知答案与五类假报告拒绝先于真实报告验收。综合证据为 `evidence/atomic-write-consistency-2026-11-21.json`，SHA-256 为 `502f2e2e8539aea1268d77e116d9b3f2d6df546debd1587748b08ce4d4030d2e`，ATOMIC-01–07 全部 PASS，七项 artifact 已复算。
+- 首次 PoC 的 Python `with_extension` 夹具错误未执行目标进程，修正为 `with_suffix` 后才确认漏洞；state-lock sidecar 候选经审计不构成锁 inode 替换，未包装成突破。两项均保留在 `development_corrections`。
+- 本轮只关闭预置临时项攻击。临时项成功创建后至 rename 前的恶意替换、hostile OS、非协作写者、WAL／fsync、掉电持久性、CAS、分布式协调、外部 QF-OS／QIOS、签名 witness 与 ZK 证明仍未获得；该实现及后续证据提交未被上一轮推送或外部 CI 覆盖。
+
+## 2026-11-21 输出路径身份与状态锁别名闭环（历史证据）
 
 - 实现提交为 `111f98a9e3d8d5f63c29d1a18228c6a2ac13cfa9`（`fix(bridge): reject aliased output paths before writes`），基线为 `4ae57d5106b2f46dc0579e58520766abe4a9df46`。基线实测确认：`existing-subdirectory/../state`、dangling symlink、符号链接父目录和硬链接绕过旧词法检查；旧端在轮询、wave 和 execution 三条链上均以 exit=0 覆盖目标。单纯 `./` 已被旧端拒绝，不作为漏洞成果。
 - 新实现把 `--state`、`--out`、`--wave-out`、`--execution-out` 统一在任何锁、轮询、执行和写入前解析并判重。已存在输出还比较 Unix device/inode 或 Windows volume/file index；状态锁从解析后的状态目标派生，最终 symlink 与直接路径竞争同一 sidecar。
@@ -97,6 +107,7 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 - `verify-policy-python.py`：Registry 安全投影、策略摘要、三项自证和 live snapshot 对拍；fixture 摘要仍为 `d5805bd450f0778f996fd6094d3a1723114da35be1adee5ca8bd0f361a3c7a21`。
 - `verify-egress-python.py`：独立 `ipaddress`／CIDR 地址分类、48 条已知答案与 blocked 报告复核；四类假报告自证通过，不证明外层网络隔离。
 - `verify-path-python.py`：独立 realpath／samefile／stat、八组旧新结果与文件系统 after-state 复核；五项路径已知答案和五类假报告自证通过，不证明预检后路径名不可被敌对修改。
+- `verify-atomic-write-python.py`：从真实 PID 独立重建临时名，复核五组旧新结果及当前文件系统的类型、链接目标、身份和 SHA-256；四项已知答案和五类假报告自证通过，不证明临时项创建后至 rename 前无竞态。
 - `verify-wave-python.py`：从原始 snapshot 重建完整波次计划；两个篡改自证通过，范围为无浮点 qfos-wave-v1 子集，不是签名、执行或 QIOS 证明。当前 v4 静态计划哈希为 `5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34`。
 - `verify-execution-python.py`：独立推导执行输出与五类失败、重算全部摘要并勾稽计划／报告／最终状态；五项自证含 rehashed 假语义，固定执行夹具为 2 回执＋5 死信。
 
@@ -114,19 +125,21 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 
 本轮 egress 证据候选为 `713a3608bee51b9ac44aa1728e06fdecc9b5a71c`。2026-11-17 无凭证 `ls-remote` 第一次即成功，远端仍为同一 `c573dc4…`；候选相对远端为 `ahead_by=15, behind_by=0`。当前无可用 PAT／CMD，未发起认证推送，结论为 `NOT_PUSHED`、`remote≠local`，没有新外部 CI；未恢复或输出任何历史凭证。证据提交仅 amend 发布记录与对应文档，分叉计数不变。原始记录见 `evidence/egress-publication-2026-11-17.json`。
 
-本轮输出路径证据候选为 `759daf69ea1981753f17f23511efedce88fe1888`。2026-11-21T00:17:45+08:00 无凭证 `ls-remote` 成功，远端 `main` 仍为 `c573dc496dc3caeab1f0f143373c80859ccd93d4`；候选相对远端为 `ahead_by=17, behind_by=0`。当前无可用 PAT／CMD，未发起认证推送，结论为 `NOT_PUSHED`、`remote≠local`，没有新外部 CI、cisvr ACK、KEY-SYNC-01 relay 或 active 声称；未恢复或输出任何历史凭证。证据提交仅 amend 发布记录与对应文档，分叉计数不变。原始记录见 `evidence/path-publication-2026-11-21.json`。
+本轮输出路径证据候选为 `759daf69ea1981753f17f23511efedce88fe1888`。2026-11-21T00:17:45+08:00 无凭证 `ls-remote` 成功，远端 `main` 仍为 `c573dc496dc3caeab1f0f143373c80859ccd93d4`；候选相对远端为 `ahead_by=17, behind_by=0`。当时无可用 PAT／CMD，未发起认证推送，结论为 `NOT_PUSHED`、`remote≠local`。该记录保留为历史时点快照，原始记录见 `evidence/path-publication-2026-11-21.json`。
+
+后续真实推送已改变当前事实，但不回改上述快照：第一枚现场凭证认证失败、push exit 128 且无 ref 更新；第二枚现场凭证仅执行一次 push，exit 0，将唯一允许的远端 `main` 从 `c573dc496dc3caeab1f0f143373c80859ccd93d4` 更新到 `2a40df076c0d4f63a1f5dd25f368f2916a8d0d50`。首次读后遇 HTTP/2 framing error，HTTP/1.1 重读后确认该 pushed commit 当时 remote=local、ahead／behind=0。公共 Actions workflow-runs 列表 API 实测 run `44784042393`（`build-test-smoke`、event=`push`）的 `head_sha=2a40df0…`、status=`completed`、conclusion=`success`；单 run／jobs API 返回 403，不作 job 级声称。完整回执见 `evidence/path-push-2026-11-21.json`。该推送与 CI 不覆盖原子写实现 `46cf446…` 或后续证据提交；已消费凭证不复用，本轮仍无 cisvr ACK、KEY-SYNC-01 relay、正典 active 或旧 PAT 撤销证据。
 
 ## 明确未实现与后续债
 
 1. 本 HTTP client 之外的出口流量、network namespace、外层 egress proxy、hostile OS 与通用 SSRF 防护；
 2. 底层 DNS 强制取消、阻塞 resolver 线程回收与资源隔离；应用层单次解析、全答案验证和连接固定已实现；
 3. 进程级内存、CPU、文件描述符硬隔离与 CLI 轮询阶段外的整体执行预算；全轮询 deadline、解析等待与逐请求剩余时间、JSON 深度／节点预算已实现；
-4. 输出预检后的恶意路径改名、跨进程硬链接通用锁、非协作写者、跨主机锁语义、CAS、WAL 和原子 check-and-persist；CLI 同路径／symlink／既有硬链接判重与最终 symlink 锁汇聚已实现；
+4. 输出预检后的恶意路径改名、账本临时项创建后至 rename 前的恶意替换、跨进程硬链接通用锁、非协作写者、跨主机锁语义、CAS、WAL 和原子 check-and-persist；CLI 同路径／symlink／既有硬链接判重、最终 symlink 锁汇聚与临时项 `create_new` 独占分配已实现；
 5. 整份快照回滚、分裂视图、签名 checkpoint、独立 witness／quorum；
 6. 发布者与指令授权、可信时间；
 7. 完整 JCS V2、Merkle consistency proof、后量子 witness；
 8. 仓内 `qfos-exec-v1` 之外的通用动作与 Skill 沙箱、引擎租约、失败重试策略、结果签名／形式化证明、跨进程分布式 exactly-once、外部 QF-OS 正典与 QIOS 定义／适配器；
-9. 联盟 active、cisvr ACK、KEY-SYNC-01、旧 PAT 撤销、本轮远端同步和外部 CI 回执；
+9. 联盟 active、cisvr ACK、KEY-SYNC-01、旧 PAT 撤销，以及原子写实现／后续证据提交的远端同步和外部 CI 回执；`2a40df0…` 的推送与 run `44784042393` 不回写成这些新提交的发布证据；
 10. Boot／裸机内核、WASM、TEE、ZK-SNARK／STARK、HoTT-ZK、涌现类型系统、量子调度、神经网络推理、Holo-Lang 与完整形式化安全证明。
 
 ## 形式化内容边界

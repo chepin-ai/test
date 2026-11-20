@@ -207,6 +207,18 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 预注册、原始差分、综合证据与干净重建日志分别为 `evidence/path-preregister-2026-11-21.json`、`evidence/path-differential-2026-11-21.json`、`evidence/path-consistency-2026-11-21.json`、`evidence/path-clean-rebuild-2026-11-21.log`。首轮 dangling symlink 实现 FAIL 和判读器 hardlink 标签 FAIL 均公开保留。PASS 不覆盖验证后恶意改名、跨进程硬链接通用锁、非协作写者、分布式协调或掉电持久性。
 
+### 3.8 2026-11-21 账本临时项独占分配与有界耗尽门禁
+
+| 攻击／碰撞 | 预注册拒绝条件 | 自动化与实测对应 |
+|---|---|---|
+| 预置可预测临时 symlink／hardlink 指向 victim | 不得跟随、截断或把 victim 身份改名成 state | ATOMIC-01／02：旧端 exit=0、victim 被覆盖且 state 成为链接或共享 inode；新端经其他候选 exit=0，victim 与首项链接不变，state 为独立常规文件 |
+| 预置普通临时文件 | 不得覆盖或改名既有文件 | ATOMIC-03：旧端覆盖并改名首项；新端保留 sentinel 原名与字节，state 与正常控制相等 |
+| 128 个连续候选均被占用 | 必须有界失败且保留全部冲突项 | ATOMIC-04：新端 exit=2、无 state、128 个 sentinel 全部保留并给出耗尽诊断；旧端仍覆盖并改名首项 |
+| 判读器照抄退出码或伪造 after-state | 从真实 PID 重建临时名并重读当前文件系统 | ATOMIC-05：四项文件系统已知答案和五类假报告拒绝先于五组真实报告验收 |
+| 正常保存、固定锚点或干净重建漂移 | 正常控制字节相等，完整门禁不漂移 | ATOMIC-06／07：旧新控制 state 字节相等；106 项测试、八类独立判读及 wave／execution／replay／path 锚点通过；最终差分使用无 `.git`、空 target 的干净归档二进制 |
+
+预注册、原始差分、综合证据与干净重建日志分别为 `evidence/atomic-write-preregister-2026-11-21.json`、`evidence/atomic-write-differential-2026-11-21.json`、`evidence/atomic-write-consistency-2026-11-21.json`、`evidence/atomic-write-clean-rebuild-2026-11-21.log`。首次 PoC 的 Python `with_extension` 夹具错误没有执行目标进程，修正为 `with_suffix` 后才确认旧端漏洞；state-lock sidecar 候选未包装成锁互斥突破。PASS 只关闭预置临时项攻击，不覆盖创建后至 rename 前的恶意替换、hostile OS、非协作写者、WAL／fsync、掉电持久性或分布式事务。
+
 ## 4. JCS 候选包评估与不采用结论
 
 检索到 `serde_jcs 0.2.0`、`jcs-canonicalize 0.2.1`、`serde_json_canonicalizer 0.4.1`。目前只评估，没有把任何候选加入本仓依赖。
@@ -225,7 +237,7 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 1. **出口策略的进程外边界**：本 HTTP client 已有 public-only 分类、完整答案验证、单次策略解析和连接固定；其他进程、其他协议与非协作代码仍可自行拨号。network namespace、外层 egress proxy、hostile OS 与通用 SSRF 防护仍需独立机制。
 2. **DNS 取消与线程生命周期**：解析等待超时只释放调用方，worker 不持有 HTTP agent；底层系统 resolver 是否取消、阻塞线程何时退出及其资源消耗没有被强制隔离。地址表也是显式保守策略，不声称替代完整 IANA 注册表或外部威胁情报。
 3. **进程级资源隔离**：64 会话、全轮询 deadline、逐请求剩余时间、JSON 深度／节点与账本基数已限；进程级内存、CPU、文件描述符硬隔离和动态费率策略未实现，DNS 阻塞 worker 也未获得独立资源域。
-4. **多写者协调**：输出路径解析／文件身份预检与最终 symlink 锁汇聚已实测；验证后恶意改名、跨进程硬链接通用锁、非协作写者、跨主机语义、CAS、WAL 和原子 check-and-persist 未实现，不能称为分布式单写者。
+4. **多写者协调与原子写剩余竞态**：输出路径解析／文件身份预检、最终 symlink 锁汇聚和账本临时项 `create_new` 独占分配已实测；验证后恶意改名、临时项创建后至 rename 前的恶意替换、跨进程硬链接通用锁、非协作写者、跨主机语义、CAS、WAL 和原子 check-and-persist 未实现，不能称为分布式单写者。
 5. **整份快照回滚与分裂视图**：攻击者若能同时替换 state 和旧链，本地检查点与策略摘要也会回到旧值。需要外部单调计数器、签名 checkpoint、独立 witness／quorum 及并发原子更新。
 6. **发布者与指令授权**：无签名链不认证发布者；后续可映射 A2A/JWS 或 SCITT Signed Statement，但签名对象必须覆盖指令及授权范围，而非只签 Agent Card。
 7. **可信时间**：`--now` 是可测试的本地输入，不是可信时间源；过期检查不能替代 TUF 式签名根和时间策略。
@@ -245,6 +257,8 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 `scripts/verify-path-python.py` 独立使用 `realpath`、`samefile` 与 `stat` 判定路径／硬链接身份，重读每个差分 after-state，并核对旧端实际覆盖、新端零写入、锁未创建和正常控制产物相等。五项路径已知答案与五类假报告自证先于真实报告判读；它不证明预检后的路径名不会被敌对并发修改。
 
+`scripts/verify-atomic-write-python.py` 从记录的真实子进程 PID 独立重建临时路径，以 `lstat` 等价状态、`stat`、SHA-256、严格 JSON schema、链接目标和文件身份复核五组旧新报告及当前磁盘。四项 regular／symlink／hardlink／absent 已知答案与 old failure、old without damage、new victim changed、new state symlink、new collision removed 五类假报告拒绝先于真实报告验收；它不证明临时项创建后至 rename 前的路径名不会被替换。
+
 `scripts/verify-json-budget-python.py` 使用独立严格重复键解析与显式栈迭代遍历，复算根深度、最大深度和全文档值节点；对象键不另计。它对 64 层接受、65 层拒绝、16384 节点接受、16385 节点拒绝、跨分支计数和转义重复键进行已知答案自证，不读取 Rust 中间结果，也不证明进程内存上限。
 
 `scripts/verify-wave-python.py` 从 Registry 和原始 snapshot 独立重建分组、过期过滤、来源轮转、双配额、deferred 计数、ledger hash 与 plan hash，并拒绝 Job 篡改和账本绑定篡改。其范围为 qfos-wave-v1 无浮点子集，不是 JCS、发布者认证、执行证明或 QIOS 判读器。
@@ -253,6 +267,10 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 ## 7. 可复算证据入口
 
+- `evidence/atomic-write-consistency-2026-11-21.json`：实现提交、ATOMIC-01–07、106 项测试、干净归档、五组旧新差分、独立原子写判读与开发纠偏的综合证据。
+- `evidence/atomic-write-differential-2026-11-21.json`：预置 symlink、hardlink、regular、128 冲突耗尽与正常控制的原始进程结果；新端为干净归档二进制。
+- `evidence/atomic-write-preregister-2026-11-21.json`：实现前登记的七项原子写判据、基线 victim 破坏哈希和未覆盖边界。
+- `evidence/atomic-write-clean-rebuild-2026-11-21.log`：无 `.git`、空 target 的实现提交完整重建输出。
 - `evidence/path-consistency-2026-11-21.json`：实现提交、PATH-01–07、104 项测试、干净归档、八组旧新差分、独立路径判读与开发纠偏的综合证据。
 - `evidence/path-differential-2026-11-21.json`：六类输出覆盖攻击、dot 负控制与 distinct 正常控制的原始进程结果；新端为干净归档二进制。
 - `evidence/path-preregister-2026-11-21.json`：实现前登记的七项路径判据、基线破坏哈希和未覆盖边界。
@@ -286,9 +304,11 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 - `../scripts/egress-differential.py`：真实 loopback target／proxy、旧新 CLI、socket hits 和独立 blocked 报告判读的差分入口。
 - `../scripts/verify-path-python.py`：独立路径身份、文件系统重读、旧新差分与假报告反证入口。
 - `../scripts/path-differential.py`：六类真实输出别名攻击与两个控制组的旧新进程执行入口。
+- `../scripts/verify-atomic-write-python.py`：独立临时名重建、文件系统重读、四项已知答案与五类假报告反证入口。
+- `../scripts/atomic-write-differential.py`：symlink／hardlink／regular／exhaustion／control 五组真实旧新进程执行入口。
 - `../scripts/verify-json-budget-python.py`：独立迭代 JSON 深度／节点判读与已知答案入口。
 - `../scripts/verify-wave-python.py`：独立 Python 波次重建、静态已知答案与篡改负例入口。
 - `../scripts/verify-execution-python.py`：独立执行语义、状态／报告勾稽、固定夹具与 rehashed 假语义负例入口。
-- `../scripts/build-all.sh`：格式、Clippy、全部测试、凭据扫描、七类 Python 判读、认知示例、波次与执行固定夹具字节对拍、执行重放和 CLI 烟测的统一重建门禁。
+- `../scripts/build-all.sh`：格式、Clippy、全部测试、凭据扫描、八类 Python 判读、认知示例、波次与执行固定夹具字节对拍、执行重放和 CLI 烟测的统一重建门禁。
 
 本轮公网正典已明确迁移到实际发布的 `.../main/...` 形式；当前字节一致只适用于本轮采集时点，不能回改 2026-11-10 的历史差异。镜像 `verified` 也不等于发布者认证。所有外部状态（推送、CI、ACK、正典 active、KEY-SYNC-01）均需要独立回执。

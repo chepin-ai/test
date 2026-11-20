@@ -24,6 +24,7 @@
   - v4 账本绑定 `network_name` 与完整安全策略 `policy_hash`，跨网络或同网络策略混配直接失败且不覆盖原状态；
   - 每会话持久化 `(height,latest)` 检查点，拒绝降高、同高分叉及长链改写旧前缀；
   - 确定性账本快照、原子保存、恢复矛盾检查，重载后仍拒绝已消费指令与历史分叉；
+  - 账本临时项以 `create_new` 独占分配；预置 symlink／hardlink／普通文件不会被跟随、截断或改名，最多尝试 128 个候选后显式失败；
   - CLI 可直接执行“轮询→完整链复验→入库→显式消费→原子保存”，并输出逐指令 ingestion 事件；
   - 任一后续区块伪造时整份 Outbox 不入库，不用前面的合法块制造部分应用；
   - 注册表／会话／文档 trust 交叉核对，HMAC 和完整签名明确返回“未支持”；
@@ -49,6 +50,7 @@ python3 scripts/verify-policy-python.py --fixture fixtures/policy-oracle.json
 python3 scripts/verify-egress-python.py --self-test
 python3 scripts/verify-json-budget-python.py
 python3 scripts/verify-path-python.py --self-test
+python3 scripts/verify-atomic-write-python.py --self-test
 python3 scripts/verify-wave-python.py \
   --expect-plan-hash 5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34
 python3 scripts/verify-execution-python.py --closed-world --self-test \
@@ -96,7 +98,7 @@ cargo run -p asfa-bridge-poller -- \
   --execute-wave --execution-out /tmp/asfa-exec-report.json --now 100
 ```
 
-`--fail-on-error` 会把轮询失败、入库冲突／非法指令、消费目标不存在以及新产生或恢复的执行死信变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v4 状态同时绑定 `network_name` 与 Registry 安全策略摘要 `policy_hash`；旧 v1／v2／v3、跨网络及同网络策略变化均不做隐式迁移，说明性 `role`／`note` 变化不影响兼容性。执行模式先保存原计划，再暂存执行并原子保存 v4 状态，最后写执行报告；报告写坏后可从计划与持久回执恢复。CLI 容量参数只能把硬上限调低，不能调高；所有声明输出先解析实际目标并判重，sidecar 锁也使用解析后的状态目标。该预检不能消除验证后遭恶意改名的 TOCTOU，也不提供跨进程硬链接通用锁、分布式锁或非协作写者隔离。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、底层 DNS 强制取消／线程回收与进程级内存／CPU／文件描述符隔离仍不在保障范围内。
+`--fail-on-error` 会把轮询失败、入库冲突／非法指令、消费目标不存在以及新产生或恢复的执行死信变成非零退出；重复、已消费重放拦截和过期指令仍保留在报告中。只有传入 `--state` 才保存账本，库 API 调用同样需要显式 `save_atomic`，当前没有自动 WAL。v4 状态同时绑定 `network_name` 与 Registry 安全策略摘要 `policy_hash`；旧 v1／v2／v3、跨网络及同网络策略变化均不做隐式迁移，说明性 `role`／`note` 变化不影响兼容性。执行模式先保存原计划，再暂存执行并原子保存 v4 状态，最后写执行报告；报告写坏后可从计划与持久回执恢复。CLI 容量参数只能把硬上限调低，不能调高；所有声明输出先解析实际目标并判重，sidecar 锁也使用解析后的状态目标。账本保存只使用本进程以 `create_new` 成功创建的临时项，冲突有界重试；但创建成功后至 rename 前的恶意路径替换仍未关闭。该预检不能消除验证后遭恶意改名的 TOCTOU，也不提供跨进程硬链接通用锁、分布式锁或非协作写者隔离。检查点只提供本地历史一致性；整份快照被旧文件替换、独立 witness、底层 DNS 强制取消／线程回收与进程级内存／CPU／文件描述符隔离仍不在保障范围内。
 
 一键全部门禁（`/mnt` 等禁止执行位挂载下也能构建）：
 
@@ -104,7 +106,7 @@ cargo run -p asfa-bridge-poller -- \
 bash scripts/build-all.sh
 ```
 
-预期：104 项 Rust 测试通过；烟测汇总为 `total=3, verified=1, failed=2`，两个失败分别是故意设置的非法 JSON 和缺失文件。egress 预注册 48 个 IPv4／IPv6 已知答案由 Rust 与独立 Python 同时复核；旧新真实进程差分证明旧端访问 loopback 并 verified，新默认端在零 TCP accept 下返回 `blocked_egress`，显式本地放权仍可达目标且六类恶意代理环境变量零命中。输出路径八组旧新差分覆盖轮询、wave、execution、父路径、dangling symlink、符号链接父目录和硬链接：六个攻击用例旧端退出 0 并发生覆盖，干净新端均在锁和写入前退出 2；独立 Python 以 realpath／samefile／stat 复判并拒绝五类假报告。QF-OS 静态向量准入 `a1 → b1 → a2`，两个延后项分别由来源配额和全局配额解释。执行夹具包含 7 项作业，实测 2 个真实成功回执与 5 个显式死信，重放为 7 项 skipped 且账本字节不变；Python 独立重建输出与失败类别，并以 5 个篡改样本自证，其中包含篡改后重算哈希的假输出与假失败类别。独立 JSON 判读以迭代遍历复核深度、全文档节点数、转义重复键及五个已知答案负例。
+预期：106 项 Rust 测试通过；烟测汇总为 `total=3, verified=1, failed=2`，两个失败分别是故意设置的非法 JSON 和缺失文件。egress 预注册 48 个 IPv4／IPv6 已知答案由 Rust 与独立 Python 同时复核；旧新真实进程差分证明旧端访问 loopback 并 verified，新默认端在零 TCP accept 下返回 `blocked_egress`，显式本地放权仍可达目标且六类恶意代理环境变量零命中。输出路径八组旧新差分覆盖轮询、wave、execution、父路径、dangling symlink、符号链接父目录和硬链接：六个攻击用例旧端退出 0 并发生覆盖，干净新端均在锁和写入前退出 2；独立 Python 以 realpath／samefile／stat 复判并拒绝五类假报告。原子写五组差分覆盖预置 symlink、hardlink、普通文件、128 项冲突耗尽与正常控制：旧端在前三类攻击中均 exit 0 并覆盖或改名既有项；干净新端对可绕过冲突安全重试，对耗尽显式 exit 2，且全部 sentinel 保留。独立 Python 重读文件类型、链接目标、文件身份与 SHA-256，并以四项文件系统已知答案和五类假报告先行自证。QF-OS 静态向量准入 `a1 → b1 → a2`，两个延后项分别由来源配额和全局配额解释。执行夹具包含 7 项作业，实测 2 个真实成功回执与 5 个显式死信，重放为 7 项 skipped 且账本字节不变；Python 独立重建输出与失败类别，并以 5 个篡改样本自证，其中包含篡改后重算哈希的假输出与假失败类别。独立 JSON 判读以迭代遍历复核深度、全文档节点数、转义重复键及五个已知答案负例。
 
 ## 证据与协议
 

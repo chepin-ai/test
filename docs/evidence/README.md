@@ -81,6 +81,16 @@
 - `path-differential-2026-11-21.json`：八组真实旧新进程结果。poll／wave／execution 的 `sub/../state`、dangling symlink、符号链接父目录和硬链接六类攻击均为旧 exit=0、新 exit=2；新端所有声明路径 before=after 且不创建锁。dot 控制两端拒绝，distinct 控制产物字节相等。SHA-256 为 `ab87ebe30c21e84662c490466d2306f1be87cb593b3b582518157e5ed53a86ee`。
 - `path-consistency-2026-11-21.json`：实现提交 `111f98a9e3d8d5f63c29d1a18228c6a2ac13cfa9` 的综合证据。104／104 测试分解为 bridge 单元 42、bridge 集成 48、kernel 11、userspace 3；干净归档 SHA-256 为 `9cf890286cdbc3b03c8d17105cc3f5dd51b865cdb5451c5b8b4c720d01d14ddd`，干净新二进制 SHA-256 为 `c8c425e8ba0dbec50ead50a0167a647d79d4967afde5510ad4d8c7c3dfde9a42`。综合证据 SHA-256 为 `82461aac0486df8ee1add33f33147a5a3f09e70fbd1762af9e260b8055e200a5`。
 - `path-clean-rebuild-2026-11-21.log`：无 `.git`、空 target 的完整门禁输出；最终差分使用这次重建的新二进制，不与工作树 debug 哈希混用。
-- `path-publication-2026-11-21.json`：证据候选 `759daf69ea1981753f17f23511efedce88fe1888` 的真实发布边界。2026-11-21T00:17:45+08:00 无凭证读回成功，远端 `main` 仍为 `c573dc496dc3caeab1f0f143373c80859ccd93d4`，候选 `ahead_by=17, behind_by=0`；无当前凭证，未发起认证推送，`NOT_PUSHED`，无新外部 CI、cisvr ACK、KEY-SYNC-01 relay 或 active 声称。证据提交仅 amend 本记录与对应文档，分叉计数不变。
+- `path-publication-2026-11-21.json`：证据候选 `759daf69ea1981753f17f23511efedce88fe1888` 的历史时点发布边界。2026-11-21T00:17:45+08:00 无凭证读回成功，远端 `main` 仍为 `c573dc496dc3caeab1f0f143373c80859ccd93d4`，候选 `ahead_by=17, behind_by=0`；当时未发起认证推送，`NOT_PUSHED`。该快照不回改，后续事实由 `path-push-2026-11-21.json` 追加。
+- `path-push-2026-11-21.json`：后续真实推送与外部 CI 回执，只覆盖 `2a40df076c0d4f63a1f5dd25f368f2916a8d0d50`。第一枚现场凭证认证失败且无 ref 更新；第二枚单次 push exit 0，远端从 `c573dc4…` 更新到 `2a40df0…`。首次读后遇 HTTP/2 framing error，HTTP/1.1 重读后确认该提交 remote=local、ahead／behind=0。公共 Actions 列表 API 显示 run `44784042393` 的 `head_sha=2a40df0…`、`completed/success`；单 run／jobs API 后续返回 403，因此无 job 级声称。原子写实现 `46cf446…` 不属于该推送或 CI。
 - `../scripts/verify-path-python.py`：独立 realpath／samefile／stat、文件系统 after-state 重读、五项已知答案和五类假报告自证；`../scripts/path-differential.py` 负责真实旧新进程执行。
 - 首轮 dangling symlink 实现 FAIL 与独立判读器 hardlink 标签 FAIL 均保留在综合证据。PASS 不覆盖预检后恶意改名、跨进程硬链接通用锁、非协作写者、分布式协调、WAL／fsync 或远端发布状态。
+
+## 2026-11-21 账本临时项独占分配与原子写攻击
+
+- `atomic-write-preregister-2026-11-21.json`：ATOMIC-01–07 的实现前判据、基线提交与二进制锚点，以及预置 symlink 覆盖 victim 的实测；SHA-256 为 `44cd793f4898be09a0d2e8cd277955c2bef6fa3dfe9819af8e47027162244beb`。
+- `atomic-write-differential-2026-11-21.json`：symlink、hardlink、regular、exhaustion、control 五组真实旧新进程结果。旧端在前三类攻击中均 exit 0 并覆盖或改名既有项；干净新端对可绕过冲突 exit 0 并保留所有 sentinel，对 128 项耗尽 exit 2、无 state 且保留全部冲突项；正常控制 state 字节相等。SHA-256 为 `04cfcf8b15494322bb528f0b4894509d9d41edf1a4fd4e140017dfd2cbff6a1d`。
+- `atomic-write-consistency-2026-11-21.json`：实现提交 `46cf446b85d27e380b1771161c3c7adce70aa245` 的综合证据。106／106 测试分解为 bridge 单元 44、bridge 集成 48、kernel 11、userspace 3；干净归档 SHA-256 为 `b51dd3bf9c5ce77f5009a1ac29def11dd4aa16cc7ec0d05c7cd98a1f11a79209`，干净新二进制 SHA-256 为 `7ee25459f0eaf1825dbfc11a537783b1147137bc606065258ee391ce3ce26228`。综合证据 SHA-256 为 `502f2e2e8539aea1268d77e116d9b3f2d6df546debd1587748b08ce4d4030d2e`，七项 artifact 已复算。
+- `atomic-write-clean-rebuild-2026-11-21.log`：无 `.git`、空 target 的完整门禁输出，SHA-256 为 `e4cc3aa365c6092d93999b5c7fd55e8f1ba4ae0df6da7b3f73795bf6a41a0266`；最终差分使用这次重建的新二进制。
+- `../scripts/verify-atomic-write-python.py`：独立重读 path state、stat、SHA-256、schema、链接目标与文件身份，四项文件系统已知答案和五类假报告自证先于真实报告验收；`../scripts/atomic-write-differential.py` 在子进程 exec 前按真实 PID 布置精确冲突并执行五组旧新进程。
+- 首次 PoC 的 `with_extension` 夹具错误没有执行目标进程，修正为 `with_suffix` 后才确认漏洞；sidecar 候选未包装成锁互斥突破。PASS 不覆盖临时项创建后至 rename 前的恶意替换、hostile OS、非协作写者、WAL／fsync、掉电持久性、分布式事务、发布者认证或 ZK 证明。

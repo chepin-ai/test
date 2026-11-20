@@ -1,0 +1,159 @@
+{
+  "schema_version": "asfa-atomic-write-consistency/v1",
+  "recorded_at": "2026-11-21T01:47:41+08:00",
+  "baseline_commit": "2a40df076c0d4f63a1f5dd25f368f2916a8d0d50",
+  "implementation_commit": "46cf446b85d27e380b1771161c3c7adce70aa245",
+  "implementation_subject": "fix(ledger): allocate snapshot temporaries exclusively",
+  "verdict": "PASS",
+  "evidence_status": "Local, reproducible implementation evidence for pre-existing temporary-entry attacks; not a publisher signature, zero-knowledge proof, post-creation race defense or crash-durability proof.",
+  "criteria": [
+    {
+      "id": "ATOMIC-01",
+      "verdict": "PASS",
+      "evidence": "save_atomic now allocates every candidate with OpenOptions write plus create_new. Existing entries produce AlreadyExists and are skipped; other I/O errors return immediately. Oversize serialization no longer removes a never-created predictable path."
+    },
+    {
+      "id": "ATOMIC-02",
+      "verdict": "PASS",
+      "evidence": "Old symlink and hard-link processes exit 0, overwrite the sentinel victim with v4 ledger bytes and leave state sharing the victim identity. New processes exit 0 through another candidate, preserve sentinel and pre-existing link, and leave a regular state with a distinct identity."
+    },
+    {
+      "id": "ATOMIC-03",
+      "verdict": "PASS",
+      "evidence": "The new regular-collision process preserves the first candidate as sentinel at its original name and exits 0; its state SHA-256 equals the no-collision new control."
+    },
+    {
+      "id": "ATOMIC-04",
+      "verdict": "PASS",
+      "evidence": "With 128 pre-existing entries the new binary exits 2 with cannot allocate unique temporary state file and after 128 attempts. No state is created and all 128 sentinel files remain present and byte-identical."
+    },
+    {
+      "id": "ATOMIC-05",
+      "verdict": "PASS",
+      "evidence": "verify-atomic-write-python.py derives temporary paths from recorded child PIDs, recomputes every recorded after-state from the live filesystem, passes four filesystem known answers and rejects five synthetic fake-report classes before accepting the real five-case report."
+    },
+    {
+      "id": "ATOMIC-06",
+      "verdict": "PASS",
+      "evidence": "The old and new no-collision controls both exit 0 with byte-identical v4 snapshots and no temporary remainder. Wave, execution, replay, output-path and smoke anchors all pass without drift."
+    },
+    {
+      "id": "ATOMIC-07",
+      "verdict": "PASS",
+      "evidence": "The implementation commit archive has no .git and was built with an initially absent CARGO_TARGET_DIR. build-all exited 0 with 106 Rust tests; its clean binary generated the final five-case differential and the independent verifier passed."
+    }
+  ],
+  "test_totals": {
+    "rust_total": 106,
+    "bridge_unit": 44,
+    "bridge_integration": 48,
+    "kernel": 11,
+    "userspace": 3,
+    "rust_failed": 0,
+    "differential_cases": 5,
+    "filesystem_known_answers": 4,
+    "fake_reports_rejected": 5
+  },
+  "clean_rebuild": {
+    "source": "git archive of implementation_commit",
+    "no_git_directory": true,
+    "target_initially_absent": true,
+    "build_all_exit": 0,
+    "archive_sha256": "b51dd3bf9c5ce77f5009a1ac29def11dd4aa16cc7ec0d05c7cd98a1f11a79209",
+    "archive_bytes": 1003520,
+    "new_binary_sha256": "7ee25459f0eaf1825dbfc11a537783b1147137bc606065258ee391ce3ce26228",
+    "new_binary_bytes": 43207040,
+    "old_binary_sha256": "7d17536d82cadd784ae6f9d9def2d53708d44eb906449522ca1067ad7c0cef5d",
+    "differential_uses_clean_new_binary": true
+  },
+  "fixed_anchors": {
+    "wave_plan_hash": "5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34",
+    "execution_plan_hash": "f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a",
+    "execution_report_hash": "4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c",
+    "replay_report_hash": "9dce14b4b357f72851dff2d67af085bd8c10e560aca51c414fd07ffe416be36f",
+    "execution_consistency_sha256": "6703407ff64ee27226cc197c32baf3df8d3aee3107776db866368931090401b9",
+    "egress_consistency_sha256": "39f0ed02005e8416e74e48c2d2b2e28343a57f942f7b394890ef04ebb3186f66",
+    "path_consistency_sha256": "82461aac0486df8ee1add33f33147a5a3f09e70fbd1762af9e260b8055e200a5"
+  },
+  "differential_summary": [
+    {
+      "case": "symlink",
+      "old": "exit=0; victim becomes v4 ledger and state becomes a symlink to victim",
+      "new": "exit=0; victim and first symlink remain sentinel/unchanged; regular independent state"
+    },
+    {
+      "case": "hardlink",
+      "old": "exit=0; victim becomes v4 ledger and state shares its identity",
+      "new": "exit=0; victim and first hardlink remain sentinel/shared; regular independent state"
+    },
+    {
+      "case": "regular",
+      "old": "exit=0; first predictable temporary is overwritten and renamed",
+      "new": "exit=0; first regular file remains sentinel at its original name; state equals control"
+    },
+    {
+      "case": "exhaustion",
+      "old": "exit=0; first of 128 entries is overwritten and renamed",
+      "new": "exit=2; no state; all 128 sentinel entries preserved; explicit bounded diagnostic"
+    },
+    {
+      "case": "control",
+      "old": "exit=0; normal v4 state",
+      "new": "exit=0; byte-identical v4 state and no temporary remainder"
+    }
+  ],
+  "development_corrections": [
+    {
+      "id": "ATOMIC-DEV-01",
+      "type": "harness_error_no_process_execution",
+      "record": "The first pre-exec fixture mistakenly called Python Path.with_extension and raised AttributeError before executing the target. It was corrected to with_suffix; the baseline process then ran and confirmed the overwrite. The failed fixture was not counted as a security result."
+    },
+    {
+      "id": "ATOMIC-DEV-02",
+      "type": "negative_audit_candidate",
+      "record": "A state-lock sidecar collision was inspected but not promoted to the breakthrough: report fs::write changes sidecar contents without replacing its inode, so the stronger predictable ledger-temporary symlink chain was selected and tested instead."
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "docs/evidence/atomic-write-preregister-2026-11-21.json",
+      "bytes": 3538,
+      "sha256": "44cd793f4898be09a0d2e8cd277955c2bef6fa3dfe9819af8e47027162244beb"
+    },
+    {
+      "path": "docs/evidence/atomic-write-differential-2026-11-21.json",
+      "bytes": 139721,
+      "sha256": "04cfcf8b15494322bb528f0b4894509d9d41edf1a4fd4e140017dfd2cbff6a1d"
+    },
+    {
+      "path": "docs/evidence/atomic-write-clean-rebuild-2026-11-21.log",
+      "bytes": 19988,
+      "sha256": "e4cc3aa365c6092d93999b5c7fd55e8f1ba4ae0df6da7b3f73795bf6a41a0266"
+    },
+    {
+      "path": "bridge-poller/src/ledger.rs",
+      "bytes": 43077,
+      "sha256": "122b857daf63499bd2277bd71bb7d1ad72d4bcd24818f8b246681158c6874daf"
+    },
+    {
+      "path": "scripts/atomic-write-differential.py",
+      "bytes": 5128,
+      "sha256": "cdb1583627fdbe79369f67234e2f2fe1bbec94aa0114b3607e84982aba4ee55e"
+    },
+    {
+      "path": "scripts/verify-atomic-write-python.py",
+      "bytes": 11530,
+      "sha256": "9d0893528f32676617ca94ea140d3fddd79b265b46b543ace693c38e36a91724"
+    },
+    {
+      "path": "scripts/build-all.sh",
+      "bytes": 5579,
+      "sha256": "0540a1bf2cf6430f1c03d4085be896b2570cc9dcf34fd7efb02b2c5784337655"
+    }
+  ],
+  "not_proven": [
+    "Create-new allocation closes pre-existing temporary-entry attacks, not an adversary who can replace the temporary pathname after successful creation and before rename.",
+    "No fsync, crash-power-loss durability, WAL, hostile-OS confinement, non-cooperating-writer isolation or distributed transaction semantics are added.",
+    "The atomic-write implementation commit is not covered by the earlier push and external CI receipt for 2a40df0; no cisvr ACK, KEY-SYNC-01, federation activation, QF-OS/QIOS canonical compatibility, zero-knowledge proof or distributed exactly-once claim follows."
+  ]
+}

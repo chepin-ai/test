@@ -1,0 +1,3814 @@
+{
+  "baseline_commit": "2a40df076c0d4f63a1f5dd25f368f2916a8d0d50",
+  "cases": [
+    {
+      "id": "symlink",
+      "new": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769813
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769814
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "3c7bf0f8b8248a5f6f6647bfc4921aa8ffb54ca3ca2edd4f6c65938beaeef4ad"
+          },
+          "temporary_1": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769811
+            ],
+            "is_symlink": true,
+            "json_schema": null,
+            "lexists": true,
+            "link_target": "/tmp/asfa-atomic-write-differential/symlink/new/victim.json",
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "victim": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769811
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "victim": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769811
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          }
+        },
+        "child_pid": 14249,
+        "collision_count": 1,
+        "collision_kind": "symlink",
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-atomic-write-differential/symlink/new/state.json.lock",
+          "state": "/tmp/asfa-atomic-write-differential/symlink/new/state.json",
+          "temporary_1": "/tmp/asfa-atomic-write-differential/symlink/new/state.tmp-14249-1",
+          "victim": "/tmp/asfa-atomic-write-differential/symlink/new/victim.json"
+        },
+        "sentinel_sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51",
+        "stderr": "polled=0 verified=0 failed=0\n",
+        "stdout": "{\n  \"schema_version\": \"asfa-bridge-report/v1\",\n  \"network_name\": \"atomic-differential\",\n  \"generated_at_epoch\": 100,\n  \"summary\": {\n    \"total\": 0,\n    \"verified\": 0,\n    \"failed\": 0\n  },\n  \"records\": [],\n  \"ingestion\": {\n    \"inserted\": 0,\n    \"duplicate\": 0,\n    \"replayed_consumed\": 0,\n    \"conflict\": 0,\n    \"expired\": 0,\n    \"invalid\": 0,\n    \"chain_checkpoints\": 0,\n    \"pending\": 0,\n    \"tombstones\": 0,\n    \"state_saved\": true,\n    \"events\": []\n  }\n}\n"
+      },
+      "old": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769809
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769807
+            ],
+            "is_symlink": true,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "link_target": "/tmp/asfa-atomic-write-differential/symlink/old/victim.json",
+            "sha256": "3c7bf0f8b8248a5f6f6647bfc4921aa8ffb54ca3ca2edd4f6c65938beaeef4ad"
+          },
+          "temporary_1": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "victim": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769807
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "3c7bf0f8b8248a5f6f6647bfc4921aa8ffb54ca3ca2edd4f6c65938beaeef4ad"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "victim": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769807
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          }
+        },
+        "child_pid": 14248,
+        "collision_count": 1,
+        "collision_kind": "symlink",
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-atomic-write-differential/symlink/old/state.json.lock",
+          "state": "/tmp/asfa-atomic-write-differential/symlink/old/state.json",
+          "temporary_1": "/tmp/asfa-atomic-write-differential/symlink/old/state.tmp-14248-1",
+          "victim": "/tmp/asfa-atomic-write-differential/symlink/old/victim.json"
+        },
+        "sentinel_sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51",
+        "stderr": "polled=0 verified=0 failed=0\n",
+        "stdout": "{\n  \"schema_version\": \"asfa-bridge-report/v1\",\n  \"network_name\": \"atomic-differential\",\n  \"generated_at_epoch\": 100,\n  \"summary\": {\n    \"total\": 0,\n    \"verified\": 0,\n    \"failed\": 0\n  },\n  \"records\": [],\n  \"ingestion\": {\n    \"inserted\": 0,\n    \"duplicate\": 0,\n    \"replayed_consumed\": 0,\n    \"conflict\": 0,\n    \"expired\": 0,\n    \"invalid\": 0,\n    \"chain_checkpoints\": 0,\n    \"pending\": 0,\n    \"tombstones\": 0,\n    \"state_saved\": true,\n    \"events\": []\n  }\n}\n"
+      }
+    },
+    {
+      "id": "hardlink",
+      "new": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769821
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769822
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "3c7bf0f8b8248a5f6f6647bfc4921aa8ffb54ca3ca2edd4f6c65938beaeef4ad"
+          },
+          "temporary_1": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769820
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "victim": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769820
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "victim": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769820
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          }
+        },
+        "child_pid": 14251,
+        "collision_count": 1,
+        "collision_kind": "hardlink",
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-atomic-write-differential/hardlink/new/state.json.lock",
+          "state": "/tmp/asfa-atomic-write-differential/hardlink/new/state.json",
+          "temporary_1": "/tmp/asfa-atomic-write-differential/hardlink/new/state.tmp-14251-1",
+          "victim": "/tmp/asfa-atomic-write-differential/hardlink/new/victim.json"
+        },
+        "sentinel_sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51",
+        "stderr": "polled=0 verified=0 failed=0\n",
+        "stdout": "{\n  \"schema_version\": \"asfa-bridge-report/v1\",\n  \"network_name\": \"atomic-differential\",\n  \"generated_at_epoch\": 100,\n  \"summary\": {\n    \"total\": 0,\n    \"verified\": 0,\n    \"failed\": 0\n  },\n  \"records\": [],\n  \"ingestion\": {\n    \"inserted\": 0,\n    \"duplicate\": 0,\n    \"replayed_consumed\": 0,\n    \"conflict\": 0,\n    \"expired\": 0,\n    \"invalid\": 0,\n    \"chain_checkpoints\": 0,\n    \"pending\": 0,\n    \"tombstones\": 0,\n    \"state_saved\": true,\n    \"events\": []\n  }\n}\n"
+      },
+      "old": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769818
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769817
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "3c7bf0f8b8248a5f6f6647bfc4921aa8ffb54ca3ca2edd4f6c65938beaeef4ad"
+          },
+          "temporary_1": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "victim": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769817
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "3c7bf0f8b8248a5f6f6647bfc4921aa8ffb54ca3ca2edd4f6c65938beaeef4ad"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "victim": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769817
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          }
+        },
+        "child_pid": 14250,
+        "collision_count": 1,
+        "collision_kind": "hardlink",
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-atomic-write-differential/hardlink/old/state.json.lock",
+          "state": "/tmp/asfa-atomic-write-differential/hardlink/old/state.json",
+          "temporary_1": "/tmp/asfa-atomic-write-differential/hardlink/old/state.tmp-14250-1",
+          "victim": "/tmp/asfa-atomic-write-differential/hardlink/old/victim.json"
+        },
+        "sentinel_sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51",
+        "stderr": "polled=0 verified=0 failed=0\n",
+        "stdout": "{\n  \"schema_version\": \"asfa-bridge-report/v1\",\n  \"network_name\": \"atomic-differential\",\n  \"generated_at_epoch\": 100,\n  \"summary\": {\n    \"total\": 0,\n    \"verified\": 0,\n    \"failed\": 0\n  },\n  \"records\": [],\n  \"ingestion\": {\n    \"inserted\": 0,\n    \"duplicate\": 0,\n    \"replayed_consumed\": 0,\n    \"conflict\": 0,\n    \"expired\": 0,\n    \"invalid\": 0,\n    \"chain_checkpoints\": 0,\n    \"pending\": 0,\n    \"tombstones\": 0,\n    \"state_saved\": true,\n    \"events\": []\n  }\n}\n"
+      }
+    },
+    {
+      "id": "regular",
+      "new": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769829
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769830
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "3c7bf0f8b8248a5f6f6647bfc4921aa8ffb54ca3ca2edd4f6c65938beaeef4ad"
+          },
+          "temporary_1": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769828
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "child_pid": 14253,
+        "collision_count": 1,
+        "collision_kind": "regular",
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-atomic-write-differential/regular/new/state.json.lock",
+          "state": "/tmp/asfa-atomic-write-differential/regular/new/state.json",
+          "temporary_1": "/tmp/asfa-atomic-write-differential/regular/new/state.tmp-14253-1"
+        },
+        "sentinel_sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51",
+        "stderr": "polled=0 verified=0 failed=0\n",
+        "stdout": "{\n  \"schema_version\": \"asfa-bridge-report/v1\",\n  \"network_name\": \"atomic-differential\",\n  \"generated_at_epoch\": 100,\n  \"summary\": {\n    \"total\": 0,\n    \"verified\": 0,\n    \"failed\": 0\n  },\n  \"records\": [],\n  \"ingestion\": {\n    \"inserted\": 0,\n    \"duplicate\": 0,\n    \"replayed_consumed\": 0,\n    \"conflict\": 0,\n    \"expired\": 0,\n    \"invalid\": 0,\n    \"chain_checkpoints\": 0,\n    \"pending\": 0,\n    \"tombstones\": 0,\n    \"state_saved\": true,\n    \"events\": []\n  }\n}\n"
+      },
+      "old": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769826
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769825
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "3c7bf0f8b8248a5f6f6647bfc4921aa8ffb54ca3ca2edd4f6c65938beaeef4ad"
+          },
+          "temporary_1": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "child_pid": 14252,
+        "collision_count": 1,
+        "collision_kind": "regular",
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-atomic-write-differential/regular/old/state.json.lock",
+          "state": "/tmp/asfa-atomic-write-differential/regular/old/state.json",
+          "temporary_1": "/tmp/asfa-atomic-write-differential/regular/old/state.tmp-14252-1"
+        },
+        "sentinel_sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51",
+        "stderr": "polled=0 verified=0 failed=0\n",
+        "stdout": "{\n  \"schema_version\": \"asfa-bridge-report/v1\",\n  \"network_name\": \"atomic-differential\",\n  \"generated_at_epoch\": 100,\n  \"summary\": {\n    \"total\": 0,\n    \"verified\": 0,\n    \"failed\": 0\n  },\n  \"records\": [],\n  \"ingestion\": {\n    \"inserted\": 0,\n    \"duplicate\": 0,\n    \"replayed_consumed\": 0,\n    \"conflict\": 0,\n    \"expired\": 0,\n    \"invalid\": 0,\n    \"chain_checkpoints\": 0,\n    \"pending\": 0,\n    \"tombstones\": 0,\n    \"state_saved\": true,\n    \"events\": []\n  }\n}\n"
+      }
+    },
+    {
+      "id": "exhaustion",
+      "new": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770091
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "temporary_1": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769963
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_10": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769972
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_100": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770062
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_101": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770063
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_102": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770064
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_103": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770065
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_104": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770066
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_105": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770067
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_106": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770068
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_107": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770069
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_108": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770070
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_109": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770071
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_11": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769973
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_110": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770072
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_111": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770073
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_112": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770074
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_113": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770075
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_114": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770076
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_115": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770077
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_116": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770078
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_117": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770079
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_118": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770080
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_119": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770081
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_12": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769974
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_120": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770082
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_121": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770083
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_122": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770084
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_123": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770085
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_124": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770086
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_125": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770087
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_126": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770088
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_127": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770089
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_128": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770090
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_13": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769975
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_14": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769976
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_15": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769977
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_16": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769978
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_17": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769979
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_18": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769980
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_19": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769981
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_2": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769964
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_20": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769982
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_21": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769983
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_22": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769984
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_23": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769985
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_24": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769986
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_25": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769987
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_26": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769988
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_27": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769989
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_28": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769990
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_29": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769991
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_3": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769965
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_30": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769992
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_31": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769993
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_32": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769994
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_33": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769995
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_34": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769996
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_35": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769997
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_36": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769998
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_37": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769999
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_38": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770000
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_39": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770001
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_4": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769966
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_40": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770002
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_41": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770003
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_42": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770004
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_43": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770005
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_44": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770006
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_45": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770007
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_46": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770008
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_47": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770009
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_48": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770010
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_49": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770011
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_5": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769967
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_50": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770012
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_51": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770013
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_52": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770014
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_53": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770015
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_54": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770016
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_55": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770017
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_56": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770018
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_57": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770019
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_58": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770020
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_59": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770021
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_6": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769968
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_60": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770022
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_61": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770023
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_62": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770024
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_63": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770025
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_64": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770026
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_65": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770027
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_66": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770028
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_67": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770029
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_68": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770030
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_69": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770031
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_7": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769969
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_70": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770032
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_71": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770033
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_72": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770034
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_73": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770035
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_74": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770036
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_75": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770037
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_76": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770038
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_77": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770039
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_78": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770040
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_79": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770041
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_8": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769970
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_80": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770042
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_81": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770043
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_82": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770044
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_83": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770045
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_84": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770046
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_85": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770047
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_86": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770048
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_87": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770049
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_88": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770050
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_89": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770051
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_9": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769971
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_90": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770052
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_91": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770053
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_92": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770054
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_93": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770055
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_94": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770056
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_95": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770057
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_96": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770058
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_97": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770059
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_98": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770060
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_99": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770061
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "child_pid": 14255,
+        "collision_count": 128,
+        "collision_kind": "exhaustion",
+        "exit_code": 2,
+        "paths": {
+          "lock": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.json.lock",
+          "state": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.json",
+          "temporary_1": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-1",
+          "temporary_10": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-10",
+          "temporary_100": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-100",
+          "temporary_101": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-101",
+          "temporary_102": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-102",
+          "temporary_103": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-103",
+          "temporary_104": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-104",
+          "temporary_105": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-105",
+          "temporary_106": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-106",
+          "temporary_107": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-107",
+          "temporary_108": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-108",
+          "temporary_109": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-109",
+          "temporary_11": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-11",
+          "temporary_110": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-110",
+          "temporary_111": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-111",
+          "temporary_112": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-112",
+          "temporary_113": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-113",
+          "temporary_114": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-114",
+          "temporary_115": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-115",
+          "temporary_116": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-116",
+          "temporary_117": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-117",
+          "temporary_118": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-118",
+          "temporary_119": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-119",
+          "temporary_12": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-12",
+          "temporary_120": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-120",
+          "temporary_121": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-121",
+          "temporary_122": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-122",
+          "temporary_123": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-123",
+          "temporary_124": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-124",
+          "temporary_125": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-125",
+          "temporary_126": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-126",
+          "temporary_127": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-127",
+          "temporary_128": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-128",
+          "temporary_13": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-13",
+          "temporary_14": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-14",
+          "temporary_15": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-15",
+          "temporary_16": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-16",
+          "temporary_17": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-17",
+          "temporary_18": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-18",
+          "temporary_19": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-19",
+          "temporary_2": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-2",
+          "temporary_20": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-20",
+          "temporary_21": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-21",
+          "temporary_22": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-22",
+          "temporary_23": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-23",
+          "temporary_24": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-24",
+          "temporary_25": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-25",
+          "temporary_26": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-26",
+          "temporary_27": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-27",
+          "temporary_28": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-28",
+          "temporary_29": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-29",
+          "temporary_3": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-3",
+          "temporary_30": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-30",
+          "temporary_31": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-31",
+          "temporary_32": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-32",
+          "temporary_33": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-33",
+          "temporary_34": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-34",
+          "temporary_35": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-35",
+          "temporary_36": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-36",
+          "temporary_37": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-37",
+          "temporary_38": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-38",
+          "temporary_39": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-39",
+          "temporary_4": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-4",
+          "temporary_40": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-40",
+          "temporary_41": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-41",
+          "temporary_42": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-42",
+          "temporary_43": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-43",
+          "temporary_44": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-44",
+          "temporary_45": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-45",
+          "temporary_46": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-46",
+          "temporary_47": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-47",
+          "temporary_48": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-48",
+          "temporary_49": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-49",
+          "temporary_5": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-5",
+          "temporary_50": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-50",
+          "temporary_51": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-51",
+          "temporary_52": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-52",
+          "temporary_53": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-53",
+          "temporary_54": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-54",
+          "temporary_55": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-55",
+          "temporary_56": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-56",
+          "temporary_57": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-57",
+          "temporary_58": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-58",
+          "temporary_59": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-59",
+          "temporary_6": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-6",
+          "temporary_60": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-60",
+          "temporary_61": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-61",
+          "temporary_62": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-62",
+          "temporary_63": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-63",
+          "temporary_64": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-64",
+          "temporary_65": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-65",
+          "temporary_66": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-66",
+          "temporary_67": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-67",
+          "temporary_68": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-68",
+          "temporary_69": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-69",
+          "temporary_7": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-7",
+          "temporary_70": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-70",
+          "temporary_71": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-71",
+          "temporary_72": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-72",
+          "temporary_73": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-73",
+          "temporary_74": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-74",
+          "temporary_75": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-75",
+          "temporary_76": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-76",
+          "temporary_77": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-77",
+          "temporary_78": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-78",
+          "temporary_79": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-79",
+          "temporary_8": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-8",
+          "temporary_80": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-80",
+          "temporary_81": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-81",
+          "temporary_82": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-82",
+          "temporary_83": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-83",
+          "temporary_84": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-84",
+          "temporary_85": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-85",
+          "temporary_86": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-86",
+          "temporary_87": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-87",
+          "temporary_88": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-88",
+          "temporary_89": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-89",
+          "temporary_9": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-9",
+          "temporary_90": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-90",
+          "temporary_91": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-91",
+          "temporary_92": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-92",
+          "temporary_93": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-93",
+          "temporary_94": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-94",
+          "temporary_95": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-95",
+          "temporary_96": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-96",
+          "temporary_97": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-97",
+          "temporary_98": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-98",
+          "temporary_99": "/tmp/asfa-atomic-write-differential/exhaustion/new/state.tmp-14255-99"
+        },
+        "sentinel_sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51",
+        "stderr": "bridge-poller: cannot allocate unique temporary state file for /tmp/asfa-atomic-write-differential/exhaustion/new/state.json after 128 attempts\n",
+        "stdout": ""
+      },
+      "old": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769961
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769833
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "3c7bf0f8b8248a5f6f6647bfc4921aa8ffb54ca3ca2edd4f6c65938beaeef4ad"
+          },
+          "temporary_1": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "temporary_10": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769842
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_100": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769932
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_101": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769933
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_102": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769934
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_103": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769935
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_104": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769936
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_105": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769937
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_106": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769938
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_107": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769939
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_108": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769940
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_109": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769941
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_11": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769843
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_110": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769942
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_111": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769943
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_112": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769944
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_113": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769945
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_114": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769946
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_115": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769947
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_116": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769948
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_117": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769949
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_118": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769950
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_119": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769951
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_12": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769844
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_120": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769952
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_121": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769953
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_122": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769954
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_123": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769955
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_124": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769956
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_125": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769957
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_126": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769958
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_127": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769959
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_128": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769960
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_13": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769845
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_14": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769846
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_15": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769847
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_16": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769848
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_17": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769849
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_18": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769850
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_19": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769851
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_2": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769834
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_20": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769852
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_21": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769853
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_22": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769854
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_23": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769855
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_24": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769856
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_25": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769857
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_26": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769858
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_27": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769859
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_28": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769860
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_29": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769861
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_3": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769835
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_30": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769862
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_31": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769863
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_32": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769864
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_33": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769865
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_34": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769866
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_35": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769867
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_36": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769868
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_37": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769869
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_38": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769870
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_39": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769871
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_4": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769836
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_40": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769872
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_41": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769873
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_42": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769874
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_43": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769875
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_44": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769876
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_45": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769877
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_46": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769878
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_47": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769879
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_48": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769880
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_49": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769881
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_5": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769837
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_50": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769882
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_51": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769883
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_52": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769884
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_53": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769885
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_54": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769886
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_55": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769887
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_56": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769888
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_57": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769889
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_58": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769890
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_59": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769891
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_6": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769838
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_60": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769892
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_61": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769893
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_62": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769894
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_63": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769895
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_64": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769896
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_65": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769897
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_66": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769898
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_67": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769899
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_68": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769900
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_69": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769901
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_7": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769839
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_70": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769902
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_71": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769903
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_72": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769904
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_73": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769905
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_74": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769906
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_75": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769907
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_76": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769908
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_77": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769909
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_78": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769910
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_79": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769911
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_8": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769840
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_80": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769912
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_81": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769913
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_82": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769914
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_83": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769915
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_84": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769916
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_85": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769917
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_86": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769918
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_87": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769919
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_88": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769920
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_89": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769921
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_9": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769841
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_90": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769922
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_91": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769923
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_92": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769924
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_93": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769925
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_94": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769926
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_95": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769927
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_96": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769928
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_97": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769929
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_98": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769930
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          },
+          "temporary_99": {
+            "exists": true,
+            "identity": [
+              65040,
+              1769931
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51"
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "child_pid": 14254,
+        "collision_count": 128,
+        "collision_kind": "exhaustion",
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.json.lock",
+          "state": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.json",
+          "temporary_1": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-1",
+          "temporary_10": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-10",
+          "temporary_100": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-100",
+          "temporary_101": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-101",
+          "temporary_102": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-102",
+          "temporary_103": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-103",
+          "temporary_104": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-104",
+          "temporary_105": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-105",
+          "temporary_106": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-106",
+          "temporary_107": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-107",
+          "temporary_108": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-108",
+          "temporary_109": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-109",
+          "temporary_11": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-11",
+          "temporary_110": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-110",
+          "temporary_111": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-111",
+          "temporary_112": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-112",
+          "temporary_113": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-113",
+          "temporary_114": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-114",
+          "temporary_115": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-115",
+          "temporary_116": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-116",
+          "temporary_117": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-117",
+          "temporary_118": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-118",
+          "temporary_119": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-119",
+          "temporary_12": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-12",
+          "temporary_120": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-120",
+          "temporary_121": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-121",
+          "temporary_122": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-122",
+          "temporary_123": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-123",
+          "temporary_124": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-124",
+          "temporary_125": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-125",
+          "temporary_126": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-126",
+          "temporary_127": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-127",
+          "temporary_128": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-128",
+          "temporary_13": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-13",
+          "temporary_14": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-14",
+          "temporary_15": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-15",
+          "temporary_16": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-16",
+          "temporary_17": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-17",
+          "temporary_18": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-18",
+          "temporary_19": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-19",
+          "temporary_2": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-2",
+          "temporary_20": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-20",
+          "temporary_21": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-21",
+          "temporary_22": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-22",
+          "temporary_23": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-23",
+          "temporary_24": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-24",
+          "temporary_25": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-25",
+          "temporary_26": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-26",
+          "temporary_27": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-27",
+          "temporary_28": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-28",
+          "temporary_29": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-29",
+          "temporary_3": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-3",
+          "temporary_30": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-30",
+          "temporary_31": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-31",
+          "temporary_32": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-32",
+          "temporary_33": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-33",
+          "temporary_34": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-34",
+          "temporary_35": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-35",
+          "temporary_36": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-36",
+          "temporary_37": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-37",
+          "temporary_38": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-38",
+          "temporary_39": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-39",
+          "temporary_4": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-4",
+          "temporary_40": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-40",
+          "temporary_41": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-41",
+          "temporary_42": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-42",
+          "temporary_43": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-43",
+          "temporary_44": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-44",
+          "temporary_45": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-45",
+          "temporary_46": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-46",
+          "temporary_47": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-47",
+          "temporary_48": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-48",
+          "temporary_49": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-49",
+          "temporary_5": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-5",
+          "temporary_50": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-50",
+          "temporary_51": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-51",
+          "temporary_52": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-52",
+          "temporary_53": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-53",
+          "temporary_54": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-54",
+          "temporary_55": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-55",
+          "temporary_56": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-56",
+          "temporary_57": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-57",
+          "temporary_58": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-58",
+          "temporary_59": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-59",
+          "temporary_6": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-6",
+          "temporary_60": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-60",
+          "temporary_61": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-61",
+          "temporary_62": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-62",
+          "temporary_63": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-63",
+          "temporary_64": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-64",
+          "temporary_65": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-65",
+          "temporary_66": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-66",
+          "temporary_67": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-67",
+          "temporary_68": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-68",
+          "temporary_69": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-69",
+          "temporary_7": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-7",
+          "temporary_70": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-70",
+          "temporary_71": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-71",
+          "temporary_72": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-72",
+          "temporary_73": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-73",
+          "temporary_74": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-74",
+          "temporary_75": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-75",
+          "temporary_76": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-76",
+          "temporary_77": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-77",
+          "temporary_78": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-78",
+          "temporary_79": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-79",
+          "temporary_8": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-8",
+          "temporary_80": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-80",
+          "temporary_81": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-81",
+          "temporary_82": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-82",
+          "temporary_83": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-83",
+          "temporary_84": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-84",
+          "temporary_85": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-85",
+          "temporary_86": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-86",
+          "temporary_87": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-87",
+          "temporary_88": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-88",
+          "temporary_89": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-89",
+          "temporary_9": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-9",
+          "temporary_90": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-90",
+          "temporary_91": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-91",
+          "temporary_92": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-92",
+          "temporary_93": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-93",
+          "temporary_94": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-94",
+          "temporary_95": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-95",
+          "temporary_96": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-96",
+          "temporary_97": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-97",
+          "temporary_98": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-98",
+          "temporary_99": "/tmp/asfa-atomic-write-differential/exhaustion/old/state.tmp-14254-99"
+        },
+        "sentinel_sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51",
+        "stderr": "polled=0 verified=0 failed=0\n",
+        "stdout": "{\n  \"schema_version\": \"asfa-bridge-report/v1\",\n  \"network_name\": \"atomic-differential\",\n  \"generated_at_epoch\": 100,\n  \"summary\": {\n    \"total\": 0,\n    \"verified\": 0,\n    \"failed\": 0\n  },\n  \"records\": [],\n  \"ingestion\": {\n    \"inserted\": 0,\n    \"duplicate\": 0,\n    \"replayed_consumed\": 0,\n    \"conflict\": 0,\n    \"expired\": 0,\n    \"invalid\": 0,\n    \"chain_checkpoints\": 0,\n    \"pending\": 0,\n    \"tombstones\": 0,\n    \"state_saved\": true,\n    \"events\": []\n  }\n}\n"
+      }
+    },
+    {
+      "id": "control",
+      "new": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770097
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770098
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "3c7bf0f8b8248a5f6f6647bfc4921aa8ffb54ca3ca2edd4f6c65938beaeef4ad"
+          },
+          "temporary_1": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "child_pid": 14257,
+        "collision_count": 0,
+        "collision_kind": "control",
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-atomic-write-differential/control/new/state.json.lock",
+          "state": "/tmp/asfa-atomic-write-differential/control/new/state.json",
+          "temporary_1": "/tmp/asfa-atomic-write-differential/control/new/state.tmp-14257-1"
+        },
+        "sentinel_sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51",
+        "stderr": "polled=0 verified=0 failed=0\n",
+        "stdout": "{\n  \"schema_version\": \"asfa-bridge-report/v1\",\n  \"network_name\": \"atomic-differential\",\n  \"generated_at_epoch\": 100,\n  \"summary\": {\n    \"total\": 0,\n    \"verified\": 0,\n    \"failed\": 0\n  },\n  \"records\": [],\n  \"ingestion\": {\n    \"inserted\": 0,\n    \"duplicate\": 0,\n    \"replayed_consumed\": 0,\n    \"conflict\": 0,\n    \"expired\": 0,\n    \"invalid\": 0,\n    \"chain_checkpoints\": 0,\n    \"pending\": 0,\n    \"tombstones\": 0,\n    \"state_saved\": true,\n    \"events\": []\n  }\n}\n"
+      },
+      "old": {
+        "after": {
+          "lock": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770094
+            ],
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": true,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "state": {
+            "exists": true,
+            "identity": [
+              65040,
+              1770095
+            ],
+            "is_symlink": false,
+            "json_schema": "asfa-directive-ledger/v4",
+            "lexists": true,
+            "sha256": "3c7bf0f8b8248a5f6f6647bfc4921aa8ffb54ca3ca2edd4f6c65938beaeef4ad"
+          },
+          "temporary_1": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "before": {
+          "lock": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          },
+          "state": {
+            "exists": false,
+            "identity": null,
+            "is_symlink": false,
+            "json_schema": null,
+            "lexists": false,
+            "sha256": null
+          }
+        },
+        "child_pid": 14256,
+        "collision_count": 0,
+        "collision_kind": "control",
+        "exit_code": 0,
+        "paths": {
+          "lock": "/tmp/asfa-atomic-write-differential/control/old/state.json.lock",
+          "state": "/tmp/asfa-atomic-write-differential/control/old/state.json",
+          "temporary_1": "/tmp/asfa-atomic-write-differential/control/old/state.tmp-14256-1"
+        },
+        "sentinel_sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51",
+        "stderr": "polled=0 verified=0 failed=0\n",
+        "stdout": "{\n  \"schema_version\": \"asfa-bridge-report/v1\",\n  \"network_name\": \"atomic-differential\",\n  \"generated_at_epoch\": 100,\n  \"summary\": {\n    \"total\": 0,\n    \"verified\": 0,\n    \"failed\": 0\n  },\n  \"records\": [],\n  \"ingestion\": {\n    \"inserted\": 0,\n    \"duplicate\": 0,\n    \"replayed_consumed\": 0,\n    \"conflict\": 0,\n    \"expired\": 0,\n    \"invalid\": 0,\n    \"chain_checkpoints\": 0,\n    \"pending\": 0,\n    \"tombstones\": 0,\n    \"state_saved\": true,\n    \"events\": []\n  }\n}\n"
+      }
+    }
+  ],
+  "new_binary_sha256": "7ee25459f0eaf1825dbfc11a537783b1147137bc606065258ee391ce3ce26228",
+  "old_binary_sha256": "7d17536d82cadd784ae6f9d9def2d53708d44eb906449522ca1067ad7c0cef5d",
+  "schema_version": "asfa-atomic-write-differential/v1"
+}
