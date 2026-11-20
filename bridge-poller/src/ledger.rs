@@ -3,8 +3,8 @@ use crate::model::{DeadLetterRecord, Directive, ExecutionReceipt, Outbox, Regist
 use crate::strict_json;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-use std::fs;
-use std::io;
+use std::fs::{self, OpenOptions};
+use std::io::{self, Write};
 use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
 use thiserror::Error;
@@ -15,6 +15,7 @@ pub const DEFAULT_MAX_PENDING_DIRECTIVES: usize = 4096;
 pub const DEFAULT_MAX_CONSUMED_TOMBSTONES: usize = 16384;
 pub const DEFAULT_MAX_DIRECTIVES_PER_OUTBOX: usize = 1024;
 static NEXT_TEMP_FILE: AtomicU64 = AtomicU64::new(1);
+const MAX_TEMP_FILE_ATTEMPTS: u64 = 128;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ResourceLimits {
@@ -658,17 +659,16 @@ impl DirectiveLedger {
         Ok(ledger)
     }
 
-    /// Atomically replace the snapshot within the destination filesystem.
+    /// Atomically replace the snapshot within the destination filesystem. Temporary
+    /// entries must be created exclusively by this process; pre-existing links or
+    /// files are preserved and skipped with a bounded number of retries.
     pub fn save_atomic(&self, path: &Path) -> io::Result<()> {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
         }
-        let serial = NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed);
-        let temporary = path.with_extension(format!("tmp-{}-{serial}", std::process::id()));
         let rendered =
             serde_json::to_string_pretty(&self.snapshot()).map_err(io::Error::other)? + "\n";
         if rendered.len() as u64 > MAX_LEDGER_BYTES {
-            let _ = fs::remove_file(&temporary);
             return Err(io::Error::new(
                 io::ErrorKind::InvalidData,
                 CapacityError::SnapshotBytes {
@@ -677,10 +677,58 @@ impl DirectiveLedger {
                 },
             ));
         }
-        fs::write(&temporary, rendered)?;
+
+        let mut allocated = None;
+        for _ in 0..MAX_TEMP_FILE_ATTEMPTS {
+            let serial = NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed);
+            let candidate = path.with_extension(format!("tmp-{}-{serial}", std::process::id()));
+            match OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(&candidate)
+            {
+                Ok(mut file) => {
+                    if let Err(error) = file.write_all(rendered.as_bytes()) {
+                        drop(file);
+                        return match fs::remove_file(&candidate) {
+                            Ok(()) => Err(error),
+                            Err(cleanup) => Err(io::Error::new(
+                                error.kind(),
+                                format!(
+                                    "cannot write temporary state {}: {error}; cleanup also failed: {cleanup}",
+                                    candidate.display()
+                                ),
+                            )),
+                        };
+                    }
+                    drop(file);
+                    allocated = Some(candidate);
+                    break;
+                }
+                Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
+                Err(error) => return Err(error),
+            }
+        }
+        let temporary = allocated.ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::AlreadyExists,
+                format!(
+                    "cannot allocate unique temporary state file for {} after {MAX_TEMP_FILE_ATTEMPTS} attempts",
+                    path.display()
+                ),
+            )
+        })?;
         if let Err(error) = fs::rename(&temporary, path) {
-            let _ = fs::remove_file(&temporary);
-            return Err(error);
+            return match fs::remove_file(&temporary) {
+                Ok(()) => Err(error),
+                Err(cleanup) => Err(io::Error::new(
+                    error.kind(),
+                    format!(
+                        "cannot replace state {}: {error}; temporary cleanup also failed: {cleanup}",
+                        path.display()
+                    ),
+                )),
+            };
         }
         Ok(())
     }
@@ -749,6 +797,9 @@ fn valid_hash(value: &str) -> bool {
 mod tests {
     use super::*;
     use serde_json::json;
+    use std::sync::Mutex;
+
+    static SAVE_TEST_LOCK: Mutex<()> = Mutex::new(());
 
     fn directive(session: &str, id: &str, expires_epoch: Option<u64>) -> Directive {
         Directive {
@@ -880,6 +931,7 @@ mod tests {
 
     #[test]
     fn atomic_save_and_load_preserves_consumed_tombstones() {
+        let _guard = SAVE_TEST_LOCK.lock().unwrap();
         let path =
             std::env::temp_dir().join(format!("asfa-ledger-restart-{}.json", std::process::id()));
         let _ = fs::remove_file(&path);
@@ -892,6 +944,75 @@ mod tests {
         assert_eq!(restored.ingest("a", item, 100), IngestOutcome::Consumed);
         assert!(DirectiveLedger::load_for_registry(&path, &registry("beta")).is_err());
         fs::remove_file(path).unwrap();
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn atomic_save_preserves_preexisting_temporary_symlink() {
+        let _guard = SAVE_TEST_LOCK.lock().unwrap();
+        let root = std::env::temp_dir().join(format!(
+            "asfa-ledger-temporary-symlink-{}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir(&root).unwrap();
+        let state = root.join("state.json");
+        let victim = root.join("victim.json");
+        fs::write(&victim, "sentinel\n").unwrap();
+        let serial = NEXT_TEMP_FILE.load(Ordering::Relaxed);
+        let temporary = state.with_extension(format!("tmp-{}-{serial}", std::process::id()));
+        std::os::unix::fs::symlink(&victim, &temporary).unwrap();
+
+        let ledger = DirectiveLedger::for_registry(&registry("alpha"));
+        ledger.save_atomic(&state).unwrap();
+
+        assert_eq!(fs::read_to_string(&victim).unwrap(), "sentinel\n");
+        assert!(fs::symlink_metadata(&temporary)
+            .unwrap()
+            .file_type()
+            .is_symlink());
+        assert!(!fs::symlink_metadata(&state)
+            .unwrap()
+            .file_type()
+            .is_symlink());
+        DirectiveLedger::load_for_registry(&state, &registry("alpha")).unwrap();
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn atomic_save_exhaustion_preserves_every_collision() {
+        let _guard = SAVE_TEST_LOCK.lock().unwrap();
+        let root = std::env::temp_dir().join(format!(
+            "asfa-ledger-temporary-exhaustion-{}",
+            std::process::id()
+        ));
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir(&root).unwrap();
+        let state = root.join("state.json");
+        let first_serial = NEXT_TEMP_FILE.load(Ordering::Relaxed);
+        for offset in 0..MAX_TEMP_FILE_ATTEMPTS {
+            let temporary = state.with_extension(format!(
+                "tmp-{}-{}",
+                std::process::id(),
+                first_serial + offset
+            ));
+            fs::write(temporary, "sentinel\n").unwrap();
+        }
+
+        let ledger = DirectiveLedger::for_registry(&registry("alpha"));
+        let error = ledger.save_atomic(&state).err().unwrap();
+        assert_eq!(error.kind(), io::ErrorKind::AlreadyExists);
+        assert!(error.to_string().contains("after 128 attempts"));
+        assert!(!state.exists());
+        for offset in 0..MAX_TEMP_FILE_ATTEMPTS {
+            let temporary = state.with_extension(format!(
+                "tmp-{}-{}",
+                std::process::id(),
+                first_serial + offset
+            ));
+            assert_eq!(fs::read_to_string(temporary).unwrap(), "sentinel\n");
+        }
+        fs::remove_dir_all(root).unwrap();
     }
 
     #[test]

@@ -1,0 +1,52 @@
+{
+  "schema_version": "asfa-atomic-write-preregister/v1",
+  "recorded_at": "2026-11-21T01:38:42+08:00",
+  "baseline_commit": "2a40df076c0d4f63a1f5dd25f368f2916a8d0d50",
+  "baseline_binary_sha256": "7d17536d82cadd784ae6f9d9def2d53708d44eb906449522ca1067ad7c0cef5d",
+  "target": "Prevent predictable ledger temporary paths from following, truncating or renaming pre-existing filesystem entries; allocate with create-new exclusivity and bounded collision retries while preserving deterministic successful snapshots.",
+  "baseline_observations": [
+    {
+      "id": "ATOMIC-BASELINE-01",
+      "case": "Pre-create state.tmp-<child-pid>-1 as a symlink to a sentinel victim before exec.",
+      "exit_code": 0,
+      "victim_before_sha256": "b5f7e7d285029324d9b3acae19cc05099271454ac98bfc059a92b0581625cd51",
+      "victim_after_sha256": "ec79a34831b642104187f0d993daca5ffc054bfbe3146aeda9379e7cdab06a29",
+      "result": "The victim became asfa-directive-ledger/v4 and the final state path was a symlink to the victim."
+    }
+  ],
+  "criteria": [
+    {
+      "id": "ATOMIC-01",
+      "pass": "Every ledger temporary file is opened with write plus create-new exclusivity. Existing symlinks, hard links, regular files and dangling links are never followed, truncated or renamed by temporary-file allocation."
+    },
+    {
+      "id": "ATOMIC-02",
+      "pass": "Real old/new symlink and hard-link cases reproduce baseline victim overwrite; the new binary exits 0 through a different temporary name, preserves every sentinel and pre-existing link, and leaves a regular v4 state file rather than a symlink or shared identity."
+    },
+    {
+      "id": "ATOMIC-03",
+      "pass": "A pre-existing regular first temporary path remains byte-identical and at its original name in the new run; the new state succeeds through another name and is byte-identical to the normal control state."
+    },
+    {
+      "id": "ATOMIC-04",
+      "pass": "After 128 pre-existing collision entries, the new binary exits nonzero with an explicit exhausted-allocation diagnostic, creates no state, and preserves all 128 entries byte-for-byte; allocation does not retry unboundedly or silently skip other I/O errors."
+    },
+    {
+      "id": "ATOMIC-05",
+      "pass": "An independent Python oracle derives temporary names from recorded child PIDs, rechecks file types, link targets, identities and SHA-256 from the live filesystem, and rejects known-answer fake reports before accepting the real differential."
+    },
+    {
+      "id": "ATOMIC-06",
+      "pass": "The no-collision old/new control exits 0 on both sides with byte-identical v4 snapshots and no leftover temporary path; existing output-path, wave, execution and replay fixtures remain byte-identical."
+    },
+    {
+      "id": "ATOMIC-07",
+      "pass": "The complete gate passes and a no-.git archive of the implementation commit with an initially absent CARGO_TARGET_DIR rebuilds and repeats the real-process differential using that clean binary."
+    }
+  ],
+  "not_proven": [
+    "Create-new allocation closes pre-existing temporary-entry attacks, not an adversary who can rename or replace the temporary pathname after its successful creation and before rename.",
+    "No fsync, crash-power-loss durability, WAL, hostile-OS confinement, non-cooperating-writer isolation or distributed transaction semantics are added.",
+    "No publisher authentication, zero-knowledge proof, external QF-OS/QIOS canonical compatibility, federation activation or distributed exactly-once execution is claimed."
+  ]
+}
