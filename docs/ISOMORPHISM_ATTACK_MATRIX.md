@@ -233,6 +233,21 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 预注册、原始差分、综合证据与干净重建日志分别为 `evidence/lock-symlink-preregister-2026-11-21.json`、`evidence/lock-symlink-differential-2026-11-21.json`、`evidence/lock-symlink-consistency-2026-11-21.json`、`evidence/lock-symlink-clean-rebuild-2026-11-21.log`。夹具和判读器纠偏均公开保留。PASS 不覆盖取得锁后的常规 lock pathname 替换、非 Unix check/open 竞态、非协作写者、hostile OS、跨主机锁、WAL／fsync 或分布式协调。
 
+### 3.10 2026-11-21 一次性任务票与恢复门禁
+
+| 攻击／碰撞 | 预注册拒绝条件 | 自动化与实测对应 |
+|---|---|---|
+| 无票、他人票、旧票或部分转移后执行 | 只接受全部当前工作票链尖同属执行 agent 的整波 | `missing_ticket`、`transfer_lineage`：真实 CLI 失败关闭；只转移七票之一不授权整波，当前无拆波接口 |
+| 跨作业父链、双基票、重复 ID、序列断裂或双花 | 每作业恰一基票和唯一当前链，spent／血缘完整重建 | Rust 单元、恢复负例与 `corrupt_snapshot_rejection` 原始快照由独立 Python 亲自拒绝 |
+| 根撤销后伪造 Transfer／Execute 历史 | 派生交易必须严格早于根 Revoke；相同时间也拒绝 | `post_revoke_execution`：Revoke=50、Execute=100 的自洽伪造状态被 Rust exit 2 与 Python 同时拒绝；另有 Rust Transfer 回归 |
+| 根预算耗尽 | 第 21 票不得消费父票或留下交易 | `root_budget_20_21`：真实 CLI 有界失败，状态不变 |
+| 删除回执／死信后重放 | 必须找到同一历史 Execute、完整输入集合及仍存在的结果 | `mint_execute_replay`：合法重放仅 skipped、v5 字节不变；恢复负例拒绝删除结果 |
+| 指令／数据混淆或异计划替换 | 只有指令槽决定 action；票与 Execute 均绑定 plan hash | `instruction_data_isolation`、64 位小写摘要形态与跨计划负例 |
+| 判读器照抄 runner verdict | 独立重建 ID、digest、血缘、spent、结果绑定并先自证 | 3 个已知答案、1 个合成有效、4 个合成拒绝；伪造真实报告在验收前拒绝 |
+| 固定夹具或干净重建漂移 | 无票 v4 字节保持；从实现归档完整重跑 | 118 项 Rust 测试、完整 `build-all`、9 组／48 进程差分与最终 v5 状态 PASS |
+
+预登记、最终差分、独立判读和总索引分别为 `docs/evidence/ticket-utxo-preregister-2026-11-21.json`、`docs/evidence/ticket-utxo-differential-2026-11-21.json`、`docs/evidence/ticket-utxo-consistency-2026-11-21.json`、`docs/evidence/ticket-utxo-evidence-manifest-2026-11-21.json`。原预登记旧二进制因环境重置未参与最终差分；最终旧端从同一基线提交重建，哈希差异已登记。PASS 不覆盖分布式 exactly-once、发布者认证、hostile writer／OS、共识、外部结算、签名 witness 或 ZK 证明。
+
 ## 4. JCS 候选包评估与不采用结论
 
 检索到 `serde_jcs 0.2.0`、`jcs-canonicalize 0.2.1`、`serde_json_canonicalizer 0.4.1`。目前只评估，没有把任何候选加入本仓依赖。
@@ -281,7 +296,16 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 `scripts/verify-execution-python.py` 从 Registry、计划前 snapshot、原计划和执行后 snapshot 独立推导内建动作语义、i64 溢出、输入上限、过期优先级、真实输出及全部输入／输出／回执／死信／报告摘要，并逐项核对报告与最终状态。五项已知答案自证包含重新计算内部及外层哈希后的假 sum、假失败类别和假报告结果，因此不能靠重算摘要绕过。该判读器只覆盖仓内 `qfos-exec-v1` 无浮点子集，不是形式化执行证明、结果签名、外部 QF-OS 正典或 QIOS 判读器。
 
+`scripts/verify-ticket-utxo-python.py` 不调用 Rust 验证器，独立重建版本化票／交易 ID、票账本 digest、控制票／工作票 plan 绑定、唯一作业链、根序列与预算、spent 集合、Execute↔回执／死信绑定和根撤销时间顺序。它先执行 3 个已知答案、1 个合成有效和 4 个合成拒绝，再亲自拒绝报告内每个伪造快照，并验证真实 9 组／48 进程差分；伪造真实报告在验收前被拒绝。该判读不是签名、发布者认证、ZK、分布式 exactly-once 或 hostile writer 防护证明。
+
 ## 7. 可复算证据入口
+
+- `evidence/ticket-utxo-evidence-manifest-2026-11-21.json`：实现／基线提交、干净重建环境、实际新旧二进制、环境重置注记、最终 PASS 与 artifact 哈希总索引。
+- `evidence/ticket-utxo-differential-2026-11-21.json`：九组真实旧新 CLI、48 个进程步骤及原始伪造快照；新端来自无 `.git`、空 target 的实现归档。
+- `evidence/ticket-utxo-consistency-2026-11-21.json`：独立判读 PASS，含自证计数、伪造真实报告拒绝和报告哈希。
+- `evidence/ticket-utxo-state-verdict-2026-11-21.json`：最终 v5 状态独立 PASS 与票账本哈希。
+- `../scripts/ticket-utxo-differential.py`：真实旧新进程、九组攻击／控制与报告生成入口；runner 不自行宣称最终 PASS。
+- `../scripts/verify-ticket-utxo-python.py`：独立票账本／恢复／重放判读、自证与假报告反证入口。
 
 - `evidence/lock-symlink-consistency-2026-11-21.json`：实现提交、LOCK-01–07、109 项测试、干净归档、五组旧新差分、独立锁判读与开发纠偏的综合证据。
 - `evidence/lock-symlink-differential-2026-11-21.json`：lock symlink 跨 rename inode 迁移、dangling、常规／hardlink sidecar 与正常控制的原始进程结果；新端为干净归档二进制。

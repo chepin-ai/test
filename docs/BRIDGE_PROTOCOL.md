@@ -69,7 +69,7 @@ HTTP(S) 默认使用 `EgressPolicy::PublicOnly`。IP 字面量不经过 DNS，�
 
 账本使用 `(session, id)` 结构化键，避免字符串拼接碰撞。完全相同的重复指令返回 `Duplicate`；同键不同内容返回 `Conflict`；过期、空字段和来源不符分别返回负结果。`consume` 删除待办指令并保留 tombstone，再次收到同键指令返回 `Consumed`，不能重新入库。`pending_for_at` 与 `prune_expired` 会按当前时间重新检查过期状态。默认硬上限为 4096 个 pending、16384 个 tombstone、单 Outbox 1024 条已验证指令；CLI 可用 `--max-pending`、`--max-tombstones`、`--max-outbox-directives` 调低但不能调高。容量超限在写入前失败；tombstone 满时消费失败且待办指令不丢失。
 
-`LedgerSnapshot` 使用 `asfa-directive-ledger/v4`，将网络身份、安全策略摘要、待办、tombstone、每会话 `(height,latest)` 检查点、执行回执 `receipts` 与死信 `dead_letters` 以确定性数组表示。CLI 通过 `load_for_registry` 强制快照 `network_name` 与 `policy_hash` 同时等于当前 Registry；旧 v1／v2／v3、无网络或无策略身份、跨网络及同网络安全策略变化均不做隐式迁移，加载失败不覆盖原文件。只修改说明性 `role`／`note` 不改变策略摘要，可以继续加载。
+`LedgerSnapshot` 在无票时使用 `asfa-directive-ledger/v4`，含非空票账本时使用 `asfa-directive-ledger/v5`；两者均将网络身份、安全策略摘要、待办、tombstone、每会话 `(height,latest)` 检查点、执行回执 `receipts` 与死信 `dead_letters` 以确定性数组表示，v5 另携带完整票账本。CLI 通过 `load_for_registry` 强制快照 `network_name` 与 `policy_hash` 同时等于当前 Registry；旧 v1／v2／v3、无网络或无策略身份、跨网络及同网络安全策略变化均不做隐式迁移，加载失败不覆盖原文件。只修改说明性 `role`／`note` 不改变策略摘要，可以继续加载。
 
 策略摘要的域分离定义为：
 
@@ -83,7 +83,7 @@ policy_hash = SHA256(
 
 `save_atomic` 先序列化并拒绝生成超过 16 MiB 的快照，再使用同目录临时文件原子替换。每个候选项都以 `OpenOptions::write(true).create_new(true)` 独占创建：预置 symlink、hardlink、普通文件或 dangling link 均只产生 `AlreadyExists` 冲突，不跟随、不截断、不改名；最多尝试 128 个候选，其他 I/O 错误立即返回，写入与清理错误显式上报。恢复时校验 schema、重复／未知 JSON 成员、重复结构化键、非法指令、非法／重复检查点、“已消费但仍待办”矛盾、回执／死信自身摘要、输出摘要、结果对应 consumed 及同键成功／失败冲突，并执行本地基数上限。恢复后重放仍返回 `Consumed`，历史分叉仍被拒绝。`create_new` 只关闭预置临时项攻击，不防止临时项成功创建后、rename 前遭恶意替换；该原子替换尚未增加 fsync，不声称覆盖掉电持久性。
 
-检查点规则：新高度低于旧高度为 `Rollback`；同高不同 latest 为 `Fork`；更高高度在旧高度处的块哈希必须等于旧 latest，否则为 `Fork`。合法重读和保留旧前缀的延长放行。该检查是 O(n) 全链前缀对拍，不是 Merkle consistency proof；整份状态文件被替换仍需外部单调锚或独立 witness。持久化不是隐式副作用：调用方必须在状态变更后保存，否则重启只恢复到最后一次快照。CLI 在加载前把状态路径解析为实际目标，取得其 `<resolved-state>.lock` sidecar OS 排他锁并持有到输出结束，锁竞争返回非零；最终状态路径符号链接别名因此与同一路径竞争同一把锁。sidecar 自身先经 `symlink_metadata` 检查，预置最终或 dangling lock symlink 均在轮询、消费、状态变化和报告前显式失败；Unix 的实际 open 另加 `O_NOFOLLOW`，避免只依赖 check/open 预检。常规 sidecar 不随状态原子 rename 换 inode；预置 hardlink sidecar 也继续锁住原 inode，而不是迁移到替换后的 state。所有 `--state`、`--out`、`--wave-out`、`--execution-out` 在取锁前统一做目标预检：已存在路径完整 canonicalize；尚未创建的输出解析最深已存在祖先并跟随各层 dangling symlink；解析后同路径即拒绝。既有输出还以 Unix device/inode 或 Windows volume/file index 判重，因而硬链接不能用不同名称绕过。该机制只约束协作 CLI，不能消除验证后恶意改名的 TOCTOU 或取得锁后的 lock pathname 替换，也不提供跨进程硬链接通用锁、非协作写者防护或跨主机锁；非 Unix 的 check/open 竞态不作已关闭声称。
+检查点规则：新高度低于旧高度为 `Rollback`；同高不同 latest 为 `Fork`；更高高度在旧高度处的块哈希必须等于旧 latest，否则为 `Fork`。合法重读和保留旧前缀的延长放行。该检查是 O(n) 全链前缀对拍，不是 Merkle consistency proof；整份状态文件被替换仍需外部单调锚或独立 witness。持久化不是隐式副作用：调用方必须在状态变更后保存，否则重启只恢复到最后一次快照。CLI 在加载前把状态路径解析为实际目标，取得其 `<resolved-state>.lock` sidecar OS 排他锁并持有到输出结束，锁竞争返回非零；最终状态路径符号链接别名因此与同一路径竞争同一把锁。sidecar 自身先经 `symlink_metadata` 检查，预置最终或 dangling lock symlink 均在轮询、消费、状态变化和报告前显式失败；Unix 的实际 open 另加 `O_NOFOLLOW`，避免只依赖 check/open 预检。常规 sidecar 不随状态原子 rename 换 inode；预置 hardlink sidecar 也继续锁住原 inode，而不是迁移到替换后的 state。所有 `--state`、`--out`、`--wave-out`、`--execution-out`、`--ticket-out` 在取锁前统一做目标预检：已存在路径完整 canonicalize；尚未创建的输出解析最深已存在祖先并跟随各层 dangling symlink；解析后同路径即拒绝。既有输出还以 Unix device/inode 或 Windows volume/file index 判重，因而硬链接不能用不同名称绕过。该机制只约束协作 CLI，不能消除验证后恶意改名的 TOCTOU 或取得锁后的 lock pathname 替换，也不提供跨进程硬链接通用锁、非协作写者防护或跨主机锁；非 Unix 的 check/open 竞态不作已关闭声称。
 
 ## 5. CLI 入库与消费闭环
 
@@ -96,10 +96,11 @@ StateLock.acquire(<state>.lock)
   → ingest_outbox（完整复验＋链头对拍＋暂存账本容量门禁）
   → 可选 consume(session, id)
   → 可选 plan_wave（只读）
-  → 执行模式：先保存已复核的原计划，再于克隆账本暂存 execute_wave
+  → 可选 Mint／Transfer／Revoke（控制票与工作票分离；失败零提交）
+  → 执行模式：先保存已复核的原计划，再于克隆账本暂存 execute_wave／execute_ticketed_wave
   → deadline 复核
-  → save_atomic(--state, v4：create_new 独占临时项，≤128 冲突重试；pending 删除＋consumed＋receipt／dead letter)
-  → 输出 BridgeReport.ingestion / qfos-wave-plan/v1 / qfos-wave-execution/v1
+  → save_atomic(--state, 无票 v4／非空票账本 v5；create_new 独占临时项，≤128 冲突重试)
+  → 输出 BridgeReport.ingestion / qfos-wave-plan/v1 / qfos-wave-execution/v1 / asfa-ticket-operation/v1
 ```
 
 `--consume-session` 与 `--consume-id` 必须成对提供，且消费必须同时指定 `--state`；`--state`、`--out`、`--wave-out` 与 `--execution-out` 不得指向同一解析路径或既有文件身份，冲突在锁、轮询、执行和任何输出前以 `output path alias` 非零失败。状态文件不存在时从空账本开始，存在但无法解析或恢复矛盾时直接失败，不覆盖原文件。`state_saved=true` 只表示本次原子保存已返回成功，不表示收到外部 ACK。
@@ -147,6 +148,26 @@ ASFA-OS-XI/QFOS-EXECUTION-REPORT/V1\n
 每个域后接对应无自哈希字段投影的 `serde_json::to_vec` 字节；输入投影始终包含 `expires_epoch`（无值时为 `null`）。执行报告 `qfos-wave-execution/v1` 另绑定 network、policy、plan、执行时间、逐项结果与汇总计数。所有 SHA-256 都是确定性完整性摘要，不是发布者签名或外部 witness。
 
 `execute_wave` 先在克隆账本完成全部校验、执行和结果提交，任何绑定或容量错误都丢弃暂存账本。成功时，调用者内存账本一次性替换；CLI 再以一次 v4 原子快照保存 pending 删除、consumed tombstone、回执和死信。已有匹配回执／死信只生成 `skipped_succeeded`／`skipped_dead_lettered`，不重跑内置动作、不复制结果；已经 consumed 却没有执行结果的键 fail-closed。状态保存后才写执行报告，因此报告输出失败可用原计划与 v4 结果恢复。该性质是本地、单协作写者边界内的恢复幂等，不是分布式 exactly-once，也不是外部 QF-OS 正典或 QIOS 兼容声称。
+
+### 5.3 一次性任务票与 v5 快照
+
+Mint 同时创建一张由 controller 持有的根控制票和每个计划作业各一张工作票。控制票只用于整根 Revoke；工作票用于 Transfer 和 Execute。两种票均绑定 `plan_hash`，避免“根票既被消费派生子票、又须保留用于撤销”的单次消费冲突。
+
+- Transfer 消费当前工作票并创建同作业、同根、同计划、序列号加一且指定新接收人的子票。
+- 每个 `(session,id)` 恰有一个 Mint 基票和一条当前工作票链；链尖是序列号最高者。跨作业父链、多基票、重复 ID、序列断裂和双花均拒绝。
+- Revoke 只消费控制票。运行时由根状态派生后代失效；恢复时还要求所有 Transfer／Execute 严格早于根 Revoke。`revoke.created_at_epoch <= descendant.created_at_epoch` 失败关闭，包括相同时间戳。
+- 每根默认最多 20 张票，硬上限 64；超过预算的创建不消费父票、不留下交易。
+- 多作业整波执行要求全部当前工作票链尖属于同一个 `--ticket-agent`。只转移其中一票不会授权整波执行；当前没有拆波执行接口。
+
+Execute 在同一暂存快照中核对执行计划、当前票链、输入指令和接收人，再写入执行回执／死信、指令 tombstone、工作票消费和 Execute 审计交易。任何错误都不替换调用方账本或磁盘状态。v5 将指令状态、执行结果与票历史放在同一快照；内外 `network_name`／`policy_hash` 必须一致。
+
+无票状态仍序列化为 v4，旧固定夹具字节保持；只有非空票账本启用 v5。v4 携带票字段、v5 缺票、空 v5 票账本均拒绝。恢复还会重建 Execute↔回执／死信绑定，删除执行结果或伪造 tombstone 不能通过。
+
+重放不要求旧工作票仍 live，但必须找到同一历史 Execute 交易，核对 actor、plan 和完整输入集合，并确认原执行回执／死信仍存在且匹配；随后只产生 skipped 结果，不新增票交易，状态字节不变。
+
+票、控制票 plan hash、Execute plan hash 和票账本 policy hash 必须是 64 位小写十六进制 SHA-256。票／交易 ID 使用版本化、域分隔 SHA-256。**这些哈希不是签名、witness、发布者认证或 ZK 证明。**
+
+真实旧新 CLI 差分、独立 Python 判读、自洽伪造拒绝和干净重建证据见 `docs/evidence/ticket-utxo-evidence-manifest-2026-11-21.json`。该证据不声称分布式 exactly-once、hostile writer／OS 防护、跨主机锁、WAL／fsync 掉电持久性、共识或外部结算。文章来源仍为二手技术报告，未获得原始 Kiki 实现。
 
 ## 6. 负结果
 

@@ -1,0 +1,34 @@
+{
+  "schema_version": "asfa-ticket-utxo-publication/v1",
+  "observed_at": "2026-11-22T00:02:21+08:00",
+  "implementation_commit": "36cf105b6685f0516c9b7aaedcecfbb6c36e6380",
+  "evidence_candidate_commit": "5469b52424316521de90c8bd3b730bfbc39590ae",
+  "allowed_remote": "https://github.com/chepin-ai/test.git",
+  "remote_read": {
+    "git_ls_remote": {
+      "attempts": 2,
+      "exit_code": 128,
+      "error_class": "TLS_CONNECTION_TERMINATED"
+    },
+    "fallback": "GitHub public API GET /repos/chepin-ai/test/commits/main",
+    "main": "2a40df076c0d4f63a1f5dd25f368f2916a8d0d50",
+    "ahead_by": 6,
+    "behind_by": 0,
+    "remote_equals_local": false
+  },
+  "push": {
+    "attempted": false,
+    "reason": "No fresh single-use credential was issued for this push; no consumed or historical credential was reused, recovered, or printed.",
+    "status": "NOT_PUSHED"
+  },
+  "external_ci": {
+    "observed": false,
+    "reason": "The implementation and evidence commits were not pushed; no new external CI run is claimed."
+  },
+  "federation": {
+    "cisvr_ack": false,
+    "key_sync_01_relay": false,
+    "active_claim": false
+  },
+  "evidence_commit_note": "The evidence commit amends only this publication record and its documentation references after the remote check; the ahead/behind count remains 6/0. No credential-bearing remote, push success, external CI, publisher authentication, or federation ACK is asserted."
+}

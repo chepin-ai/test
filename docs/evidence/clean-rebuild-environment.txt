@@ -1,0 +1,9 @@
+implementation_commit=36cf105b6685f0516c9b7aaedcecfbb6c36e6380
+baseline_commit=a4365f38ae6e47e0a014077a7c74745c20ca657b
+clean_git_dir_present=false
+clean_target_initially_present=false
+rustc 1.100.0 (0ef1bc386 2026-11-09)
+cargo 1.100.0 (3acc79c0c 2026-11-05)
+rustfmt 1.11.0-stable (0ef1bc3860 2026-11-09)
+clippy 0.1.100 (0ef1bc3860 2026-11-09)
+51c66b20682cc89c138a111ef1b3560369594ffda30d386b2038fd1a0a8cf49c  /tmp/asfa-ticket-final/implementation.tar

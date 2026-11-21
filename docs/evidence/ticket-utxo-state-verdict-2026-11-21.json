@@ -1,0 +1,10 @@
+{
+  "schema_version": "asfa-ticket-state-verdict/v1",
+  "verdict": "PASS",
+  "ticket_ledger_hash": "75e657fb8119056491d1893a9f025c89f0b20bfaff7acef172ea65fae7b7c733",
+  "self_test": {
+    "known_answers": 3,
+    "synthetic_valid": 1,
+    "synthetic_rejections": 4
+  }
+}

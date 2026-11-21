@@ -1,6 +1,15 @@
 # 实现状态（本轮实测证据：2026-11-16—21）
 
-## 最新续拍：state-lock symlink 与跨 rename inode 迁移闭环
+## 最新续拍：一次性任务票与 v5 恢复闭环
+
+- 实现提交为 `36cf105b6685f0516c9b7aaedcecfbb6c36e6380`（`feat(bridge): bind wave execution to single-use capability tickets`），基线为 `a4365f38ae6e47e0a014077a7c74745c20ca657b`。Mint 创建根控制票与逐作业工作票；Transfer、Revoke、Execute、重放和恢复均校验单次消费、唯一作业链、plan 绑定、根预算与执行结果血缘。
+- 从实现提交的 Git 归档在无 `.git`、初始无 target 环境完整重建，118 个 Rust 测试通过：bridge 单元 56、bridge 集成 48、kernel 11、userspace 3；其中 ticket 模块 9 项。完整 `build-all`、rustfmt、Clippy、独立判读、固定夹具、执行重放、认知示例与 CLI 烟测均通过。
+- 最终差分使用干净新二进制 `c24b0c64e8629f6edb845ca4234cd3b0620d71bf0b1f95bb6edbc114dfd4e493` 与同基线提交重建旧二进制 `8b0ca400d0cf656d7e450d02487c4ce380f97f5f69e985256b827259bde75017`。原预注册旧二进制 `409a500eb31b7a1bb88c2cdf14e2da48f253db95408ef07641431062fd2dc152` 因环境重置消失，未参与最终差分；哈希差异不回写预登记。
+- 独立 Python 判读器先通过 3 个已知答案、1 个合成有效、4 个合成拒绝，并在验收前拒绝伪造真实报告；最终 9 组、48 个真实进程步骤 verdict 为 PASS。最终 v5 状态票账本哈希为 `75e657fb8119056491d1893a9f025c89f0b20bfaff7acef172ea65fae7b7c733`。证据总索引为 `evidence/ticket-utxo-evidence-manifest-2026-11-21.json`。
+- 根撤销恢复不变量由 Rust 与独立 Python 同时实现：任一 Transfer／Execute 不得位于根 Revoke 同一时间或之后，相同时间失败关闭。多作业只支持全部当前工作票链尖同属一个接收人的整波执行，当前没有拆波接口。
+- 哈希不是签名／witness／ZK。PASS 不覆盖发布者认证、非协作写者、hostile OS、跨主机锁、分布式 CAS、WAL／fsync、掉电持久性、分布式 exactly-once、共识或外部结算；文章来源仍为二手技术报告，未获得原始 Kiki 实现。证据入仓不等于公开仓推送、外部 CI 或联邦 ACK。
+
+## 2026-11-21 state-lock symlink 与跨 rename inode 迁移闭环（历史证据）
 
 - 实现提交为 `c10d190ad9e96ed162bb46dd2f55cbd4a00ce62d`（`fix(bridge): reject symbolic-link state locks`），基线为 `be95cba53c25cd04e1f1dd25fe437a09f6a9f2bd`。旧端真实双 CLI 实测：预置 `<state>.lock -> state.json` 后，首进程在原子替换 state 后阻断于 FIFO 且仍存活；第二进程却 exit 0 并消费 `exec/sum`，pending/consumed 从 6/0 变为 5/1，lock symlink 已指向替换后的 state inode。
 - 新实现以可移植 `symlink_metadata` 预检显式拒绝预置最终／dangling lock symlink，Unix 实际 open 使用 `O_NOFOLLOW`。新端两个攻击进程均 exit 2，无轮询完成、消费、状态变化或报告输出，初始 state 字节与 inode 不变，dangling target 不创建。
@@ -122,6 +131,7 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 - `verify-lock-symlink-python.py`：独立复核真实双进程 liveness、FIFO 字节、v4 状态迁移、链接目标、inode 和 SHA-256，并检查 Unix `O_NOFOLLOW` 的实际 open 顺序；五项已知答案和六类假报告自证通过，不覆盖取锁后的路径名替换或非 Unix 竞态。
 - `verify-wave-python.py`：从原始 snapshot 重建完整波次计划；两个篡改自证通过，范围为无浮点 qfos-wave-v1 子集，不是签名、执行或 QIOS 证明。当前 v4 静态计划哈希为 `5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34`。
 - `verify-execution-python.py`：独立推导执行输出与五类失败、重算全部摘要并勾稽计划／报告／最终状态；五项自证含 rehashed 假语义，固定执行夹具为 2 回执＋5 死信。
+- `verify-ticket-utxo-python.py`：独立重建票／交易 ID、账本 digest、血缘、根序列与预算、唯一作业链、spent 集合、Execute↔结果绑定和根撤销时间顺序；亲自验收每个伪造快照。3 个已知答案、1 个合成有效、4 个合成拒绝及伪造真实报告拒绝先于真实 9 组／48 进程报告验收。
 
 ## 公网交叉验证
 
@@ -141,6 +151,8 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 
 后续真实推送已改变当前事实，但不回改上述快照：第一枚现场凭证认证失败、push exit 128 且无 ref 更新；第二枚现场凭证仅执行一次 push，exit 0，将唯一允许的远端 `main` 从 `c573dc496dc3caeab1f0f143373c80859ccd93d4` 更新到 `2a40df076c0d4f63a1f5dd25f368f2916a8d0d50`。首次读后遇 HTTP/2 framing error，HTTP/1.1 重读后确认该 pushed commit 当时 remote=local、ahead／behind=0。公共 Actions workflow-runs 列表 API 实测 run `44784042393`（`build-test-smoke`、event=`push`）的 `head_sha=2a40df0…`、status=`completed`、conclusion=`success`；单 run／jobs API 返回 403，不作 job 级声称。完整回执见 `evidence/path-push-2026-11-21.json`。该推送与 CI 不覆盖原子写实现 `46cf446…` 或后续证据提交；已消费凭证不复用，本轮仍无 cisvr ACK、KEY-SYNC-01 relay、正典 active 或旧 PAT 撤销证据。
 
+本轮任务票证据候选为 `5469b52424316521de90c8bd3b730bfbc39590ae`。2026-11-22T00:02:21+08:00 两次无凭证 `ls-remote` 均遇 TLS 终止；改用 GitHub 公共 commits API 读到唯一允许远端 `main=2a40df076c0d4f63a1f5dd25f368f2916a8d0d50`，候选相对远端为 `ahead_by=6, behind_by=0`。未复用已消费凭证或发起认证推送，结论为 `NOT_PUSHED`、`remote≠local`，没有本轮外部 CI。发布记录及索引 amend 后分叉计数不变，最终 HEAD 以 Git 实测为准。原始记录见 `evidence/ticket-utxo-publication-2026-11-21.json`。
+
 ## 明确未实现与后续债
 
 1. 本 HTTP client 之外的出口流量、network namespace、外层 egress proxy、hostile OS 与通用 SSRF 防护；
@@ -150,8 +162,8 @@ plan_hash = fefb2704c277115cf4f88e2215cfb7a10cb508694a43527c300700ed47003302
 5. 整份快照回滚、分裂视图、签名 checkpoint、独立 witness／quorum；
 6. 发布者与指令授权、可信时间；
 7. 完整 JCS V2、Merkle consistency proof、后量子 witness；
-8. 仓内 `qfos-exec-v1` 之外的通用动作与 Skill 沙箱、引擎租约、失败重试策略、结果签名／形式化证明、跨进程分布式 exactly-once、外部 QF-OS 正典与 QIOS 定义／适配器；
-9. 联盟 active、cisvr ACK、KEY-SYNC-01、旧 PAT 撤销，以及原子写／状态锁实现与后续证据提交的远端同步和外部 CI 回执；`2a40df0…` 的推送与 run `44784042393` 不回写成这些新提交的发布证据；
+8. 仓内 `qfos-exec-v1` 之外的通用动作与 Skill 沙箱、引擎租约、失败重试策略、结果签名／形式化证明、跨进程分布式 exactly-once、外部 QF-OS 正典与 QIOS 定义／适配器；任务票当前也无拆波执行、自主开单、规则赛马、动态信用、通用 eUTXO 脚本、Sui 共享对象、Gas 市场、事件总线或外部结算；
+9. 联盟 active、cisvr ACK、KEY-SYNC-01、旧 PAT 撤销，以及原子写／状态锁／任务票实现与后续证据提交的远端同步和外部 CI 回执；`2a40df0…` 的推送与 run `44784042393` 不回写成这些新提交的发布证据；
 10. Boot／裸机内核、WASM、TEE、ZK-SNARK／STARK、HoTT-ZK、涌现类型系统、量子调度、神经网络推理、Holo-Lang 与完整形式化安全证明。
 
 ## 形式化内容边界

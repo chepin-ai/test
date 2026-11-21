@@ -105,3 +105,39 @@
 - `lock-symlink-publication-2026-11-21.json`：证据候选 `9d220eedebc9e4f05e43e03e950fa0b724ed60c3` 的发布边界。2026-11-21T05:28:52+08:00 经 TLS 失败后的 HTTP/1.1 重试读回成功，唯一允许远端 `main` 仍为 `2a40df076c0d4f63a1f5dd25f368f2916a8d0d50`，候选 `ahead_by=4, behind_by=0`；无新鲜一次一钥，未发起认证推送，结论为 `NOT_PUSHED`。旧 run `44784042393` 不覆盖本轮实现或证据候选。记录 SHA-256 为 `68841e31a7f1d88ca6e79dd63cf02dbfef818927cb85c1129c0d11ae0f7892ce`；发布记录及索引 amend 后分叉计数不变，最终 HEAD 以 Git 实测为准。
 - `../scripts/verify-lock-symlink-python.py`：独立重读进程 liveness、FIFO 字节、v4 pending/consumed、链接目标、inode 和 SHA-256，并检查 Unix `O_NOFOLLOW` 位于实际 open 之前；五项已知答案和六类假报告拒绝先于真实报告验收。`../scripts/lock-symlink-differential.py` 执行真实双 CLI 与五组旧新差分。
 - 夹具与判读器开发纠偏均保留在综合证据。PASS 不覆盖取得锁后的常规 lock pathname 替换、非 Unix check/open 竞态、非协作写者、hostile OS、跨主机锁、WAL／fsync、掉电持久性、外部协作投递／ACK、远端同步、发布者认证或 ZK 证明。
+
+## 2026-11-21 一次性任务票最终证据
+
+`ticket-utxo-preregister-2026-11-21.json` 仍是不可改写的预登记，不是结果证据。最终实现提交为 `36cf105b6685f0516c9b7aaedcecfbb6c36e6380`，基线提交为 `a4365f38ae6e47e0a014077a7c74745c20ca657b`。
+
+最终差分使用：
+
+- 干净重建新二进制：`c24b0c64e8629f6edb845ca4234cd3b0620d71bf0b1f95bb6edbc114dfd4e493`；
+- 同基线提交重建旧二进制：`8b0ca400d0cf656d7e450d02487c4ce380f97f5f69e985256b827259bde75017`。
+
+环境重置后，预登记中的原旧二进制 `409a500eb31b7a1bb88c2cdf14e2da48f253db95408ef07641431062fd2dc152` 已消失，**未参与最终差分**。新旧哈希差异如实保留，不回写预登记、不声称复用了原字节。
+
+| 文件 | SHA-256 | 内容 |
+|---|---|---|
+| `ticket-utxo-differential-2026-11-21.json` | `24b9c74ce3186dbe11076f74e801b8440dbfeca2ef1e3d27dfd7a235ad98495e` | 九组真实旧新 CLI 差分，48 个进程步骤，含原始伪造快照 |
+| `ticket-utxo-consistency-2026-11-21.json` | `9d5d8a4731da28e2f32a95bca532458012bb4f76e54e18fa1553629d435fe0c8` | 独立判读 PASS；伪造真实报告在验收前拒绝 |
+| `ticket-utxo-state-verdict-2026-11-21.json` | `b890856c162be306b1a3e9085f3d5f142f1277591257bf545e9fbf6143919218` | 最终 v5 状态独立 PASS |
+| `clean-build-all.log` | `887b5c1d1a2aff5a07fc5e0095c46db3502e6725e5b8a7d1689519379f9349d5` | 无 `.git`、空 target 实现归档的完整构建与门禁 |
+| `old-baseline-build.log` | `3221df40538c8575392a561905dd79b462be680a4f0d4475c4b4cbad6f90d886` | 基线提交旧二进制重建 |
+| `clean-rebuild-environment.txt` | `df9f9608fe0a86a295d0ecc5dea3800c41e1deb761d3c9d226a24c6c66b61b12` | 提交、工具链、干净目录与实现归档哈希 |
+| `artifact-sha256.txt` | `7f1605cf313fa013d7bab33ab283182847d2ab44671750f62388333dcf643175` | 执行时原始哈希清单，保留沙箱绝对路径 |
+
+独立复核：
+
+```bash
+python3 scripts/verify-ticket-utxo-python.py --self-test
+python3 scripts/verify-ticket-utxo-python.py \
+  --report docs/evidence/ticket-utxo-differential-2026-11-21.json \
+  --out /tmp/ticket-consistency-recheck.json
+cmp /tmp/ticket-consistency-recheck.json \
+  docs/evidence/ticket-utxo-consistency-2026-11-21.json
+```
+
+判读器自证为 3 个已知答案、1 个合成有效、4 个合成拒绝；真实报告为 9 组、48 个进程步骤。总索引 `ticket-utxo-evidence-manifest-2026-11-21.json` 另登记实际二进制、实现归档和边界。证据只覆盖本地能力授权、完整性、恢复与重放，不是签名／witness／ZK、发布者认证、分布式 exactly-once 或 hostile writer 防护证明。文章来源仍为二手技术报告，未获得原始 Kiki 实现。
+
+- `ticket-utxo-publication-2026-11-21.json`：证据候选 `5469b52424316521de90c8bd3b730bfbc39590ae` 的发布边界。两次 `ls-remote` TLS 终止后，以 GitHub 公共 API 确认远端 `main=2a40df076c0d4f63a1f5dd25f368f2916a8d0d50`，`ahead_by=6, behind_by=0`；未复用凭证、未推送，结论 `NOT_PUSHED`，无新外部 CI 或联邦 ACK。发布记录与索引 amend 后最终 HEAD 以 Git 实测为准。

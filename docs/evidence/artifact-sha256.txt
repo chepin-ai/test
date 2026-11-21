@@ -1,0 +1,8 @@
+8b0ca400d0cf656d7e450d02487c4ce380f97f5f69e985256b827259bde75017  /tmp/asfa-ticket-final/asfa-bridge-poller-old
+c24b0c64e8629f6edb845ca4234cd3b0620d71bf0b1f95bb6edbc114dfd4e493  /tmp/asfa-ticket-final/asfa-bridge-poller-new
+24b9c74ce3186dbe11076f74e801b8440dbfeca2ef1e3d27dfd7a235ad98495e  /tmp/asfa-ticket-final/ticket-utxo-differential-2026-11-21.json
+9d5d8a4731da28e2f32a95bca532458012bb4f76e54e18fa1553629d435fe0c8  /tmp/asfa-ticket-final/ticket-utxo-consistency-2026-11-21.json
+b890856c162be306b1a3e9085f3d5f142f1277591257bf545e9fbf6143919218  /tmp/asfa-ticket-final/ticket-utxo-state-verdict-2026-11-21.json
+887b5c1d1a2aff5a07fc5e0095c46db3502e6725e5b8a7d1689519379f9349d5  /tmp/asfa-ticket-final/clean-build-all.log
+3221df40538c8575392a561905dd79b462be680a4f0d4475c4b4cbad6f90d886  /tmp/asfa-ticket-final/old-baseline-build.log
+df9f9608fe0a86a295d0ecc5dea3800c41e1deb761d3c9d226a24c6c66b61b12  /tmp/asfa-ticket-final/clean-rebuild-environment.txt

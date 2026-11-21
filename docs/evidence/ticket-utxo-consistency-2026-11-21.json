@@ -1,0 +1,14 @@
+{
+  "schema_version": "asfa-ticket-utxo-consistency/v1",
+  "verdict": "PASS",
+  "self_test": {
+    "known_answers": 3,
+    "synthetic_valid": 1,
+    "synthetic_rejections": 4
+  },
+  "forged_real_report": "REJECTED_BEFORE_ACCEPTANCE",
+  "differential_report_sha256": "24b9c74ce3186dbe11076f74e801b8440dbfeca2ef1e3d27dfd7a235ad98495e",
+  "case_count": 9,
+  "process_steps": 48,
+  "boundary": "Independent integrity and local authorization oracle; not publisher authentication, consensus, ZK, or distributed exactly-once proof."
+}

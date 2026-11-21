@@ -1,0 +1,89 @@
+{
+  "schema_version": "asfa-ticket-utxo-evidence-manifest/v1",
+  "date": "2026-11-21",
+  "implementation_commit": "36cf105b6685f0516c9b7aaedcecfbb6c36e6380",
+  "baseline_commit": "a4365f38ae6e47e0a014077a7c74745c20ca657b",
+  "clean_rebuild": {
+    "implementation_source": "git archive of implementation_commit",
+    "baseline_source": "git archive of baseline_commit",
+    "implementation_git_directory_present": false,
+    "implementation_target_initially_present": false,
+    "implementation_archive_sha256": "51c66b20682cc89c138a111ef1b3560369594ffda30d386b2038fd1a0a8cf49c",
+    "rustc": "1.100.0 (0ef1bc386 2026-11-09)",
+    "cargo": "1.100.0 (3acc79c0c 2026-11-05)",
+    "rustfmt": "1.11.0-stable (0ef1bc3860 2026-11-09)",
+    "clippy": "0.1.100 (0ef1bc3860 2026-11-09)"
+  },
+  "differential_binaries": {
+    "old": {
+      "role": "rebuilt from baseline_commit after execution-environment reset",
+      "sha256": "8b0ca400d0cf656d7e450d02487c4ce380f97f5f69e985256b827259bde75017",
+      "included_in_repository": false
+    },
+    "new": {
+      "role": "clean rebuild from implementation_commit",
+      "sha256": "c24b0c64e8629f6edb845ca4234cd3b0620d71bf0b1f95bb6edbc114dfd4e493",
+      "included_in_repository": false
+    }
+  },
+  "environment_correction": {
+    "preregistered_old_binary_sha256": "409a500eb31b7a1bb88c2cdf14e2da48f253db95408ef07641431062fd2dc152",
+    "used_in_final_differential": false,
+    "reason": "The original binary disappeared with the execution-environment reset. The final differential rebuilt the old binary from the same baseline commit; its different byte hash is reported rather than hidden."
+  },
+  "results": {
+    "clean_build_all": "PASS",
+    "independent_consistency": "PASS",
+    "independent_final_state": "PASS",
+    "cases": 9,
+    "process_steps": 48,
+    "oracle_self_test": {
+      "known_answers": 3,
+      "synthetic_valid": 1,
+      "synthetic_rejections": 4
+    },
+    "forged_real_report": "REJECTED_BEFORE_ACCEPTANCE",
+    "ticket_ledger_hash": "75e657fb8119056491d1893a9f025c89f0b20bfaff7acef172ea65fae7b7c733"
+  },
+  "repository_artifacts": [
+    {
+      "path": "docs/evidence/ticket-utxo-preregister-2026-11-21.json",
+      "role": "immutable preregistration; not result evidence"
+    },
+    {
+      "path": "docs/evidence/ticket-utxo-differential-2026-11-21.json",
+      "sha256": "24b9c74ce3186dbe11076f74e801b8440dbfeca2ef1e3d27dfd7a235ad98495e"
+    },
+    {
+      "path": "docs/evidence/ticket-utxo-consistency-2026-11-21.json",
+      "sha256": "9d5d8a4731da28e2f32a95bca532458012bb4f76e54e18fa1553629d435fe0c8"
+    },
+    {
+      "path": "docs/evidence/ticket-utxo-state-verdict-2026-11-21.json",
+      "sha256": "b890856c162be306b1a3e9085f3d5f142f1277591257bf545e9fbf6143919218"
+    },
+    {
+      "path": "docs/evidence/clean-build-all.log",
+      "sha256": "887b5c1d1a2aff5a07fc5e0095c46db3502e6725e5b8a7d1689519379f9349d5"
+    },
+    {
+      "path": "docs/evidence/old-baseline-build.log",
+      "sha256": "3221df40538c8575392a561905dd79b462be680a4f0d4475c4b4cbad6f90d886"
+    },
+    {
+      "path": "docs/evidence/clean-rebuild-environment.txt",
+      "sha256": "df9f9608fe0a86a295d0ecc5dea3800c41e1deb761d3c9d226a24c6c66b61b12"
+    },
+    {
+      "path": "docs/evidence/artifact-sha256.txt",
+      "sha256": "7f1605cf313fa013d7bab33ab283182847d2ab44671750f62388333dcf643175",
+      "role": "original execution-time hash list with absolute sandbox paths"
+    }
+  ],
+  "boundaries": [
+    "Hashes and ticket identifiers are not signatures, witnesses, ZK proofs, publisher authentication, or remote-attestation evidence.",
+    "The evidence covers local capability authorization, integrity, recovery validation, and replay behavior in the executed fixtures.",
+    "It does not establish distributed exactly-once, hostile-OS or hostile-writer safety, cross-host locking, WAL/fsync durability, consensus, external settlement, or production-scale agent validation.",
+    "The source article remains a secondary technical report; no original Kiki implementation was obtained or audited."
+  ]
+}
