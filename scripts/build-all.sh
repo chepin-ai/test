@@ -19,6 +19,7 @@ python3 scripts/verify-json-budget-python.py
 python3 scripts/verify-path-python.py --self-test
 python3 scripts/verify-atomic-write-python.py --self-test
 python3 scripts/verify-lock-symlink-python.py --self-test
+python3 scripts/verify-ticket-utxo-python.py --self-test
 python3 scripts/verify-wave-python.py \
   --expect-plan-hash 5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34
 rm -f /tmp/asfa-wave-report.json /tmp/asfa-wave-state.json \
@@ -98,6 +99,41 @@ assert report['summary'] == {
 }, report['summary']
 print('execution replay: PASS', report['summary'])
 PY
+rm -rf /tmp/asfa-ticket-v5
+mkdir -p /tmp/asfa-ticket-v5
+cp fixtures/qfos-exec-pre-state.json /tmp/asfa-ticket-v5/state.json
+cargo run --locked -p asfa-bridge-poller -- \
+  --config config/sessions.execution.json \
+  --state /tmp/asfa-ticket-v5/state.json \
+  --out /tmp/asfa-ticket-v5/mint-bridge.json \
+  --wave-out /tmp/asfa-ticket-v5/plan.json \
+  --ticket-mint-root nonce-1 --ticket-controller root --ticket-agent alice \
+  --ticket-out /tmp/asfa-ticket-v5/mint.json \
+  --now 50
+cmp fixtures/qfos-exec-plan.json /tmp/asfa-ticket-v5/plan.json
+cargo run --locked -p asfa-bridge-poller -- \
+  --config config/sessions.execution.json \
+  --state /tmp/asfa-ticket-v5/state.json \
+  --out /tmp/asfa-ticket-v5/execute-bridge.json \
+  --wave-out /tmp/asfa-ticket-v5/plan.json \
+  --execute-wave --ticketed-execution --ticket-agent alice \
+  --execution-out /tmp/asfa-ticket-v5/execution.json \
+  --ticket-out /tmp/asfa-ticket-v5/execute.json \
+  --now 100
+cmp fixtures/qfos-exec-report.json /tmp/asfa-ticket-v5/execution.json
+cp /tmp/asfa-ticket-v5/state.json /tmp/asfa-ticket-v5/committed.json
+cargo run --locked -p asfa-bridge-poller -- \
+  --config config/sessions.execution.json \
+  --state /tmp/asfa-ticket-v5/state.json \
+  --out /tmp/asfa-ticket-v5/replay-bridge.json \
+  --wave-out /tmp/asfa-ticket-v5/plan.json \
+  --execute-wave --ticketed-execution --ticket-agent alice \
+  --execution-out /tmp/asfa-ticket-v5/replay.json \
+  --ticket-out /tmp/asfa-ticket-v5/replay-ticket.json \
+  --now 101
+cmp /tmp/asfa-ticket-v5/committed.json /tmp/asfa-ticket-v5/state.json
+python3 scripts/verify-ticket-utxo-python.py \
+  --state /tmp/asfa-ticket-v5/state.json
 COGNITIVE_OUTPUT="$(cargo run --locked --quiet --example cognitive_demo -p asfa-userspace)"
 COGNITIVE_OUTPUT="$COGNITIVE_OUTPUT" python3 - <<'PY'
 import os

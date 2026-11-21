@@ -12,6 +12,7 @@ pub mod output_paths;
 pub mod poller;
 pub mod state_lock;
 pub mod strict_json;
+pub mod ticket;
 pub mod wave;
 
 pub use chain::{
@@ -25,11 +26,19 @@ pub use ingest::{ingest_outbox, IngestError};
 pub use ledger::{
     CapacityError, ChainCheckpoint, CheckpointEntry, ConsumedKey, DirectiveEntry, DirectiveLedger,
     ExecutionCommitError, IngestOutcome, LedgerSnapshot, ResourceLimits, RestoreError,
+    TICKETED_LEDGER_SCHEMA_VERSION,
 };
 pub use model::*;
 pub use output_paths::{ensure_distinct, OutputPath, OutputPathError};
 pub use poller::{PollDeadlineError, Poller};
 pub use state_lock::StateLock;
+pub use ticket::{
+    execute_ticketed_wave, mint_wave_tickets, ticket_ledger_digest, TaskTicket, TicketBody,
+    TicketError, TicketLedger, TicketLedgerSnapshot, TicketOperationReport, TicketTransaction,
+    TicketTransactionKind, TicketedExecutionError, TicketedExecutionOutcome,
+    DEFAULT_ROOT_TICKET_LIMIT, TICKET_ID_DIGEST_DOMAIN, TICKET_LEDGER_DIGEST_DOMAIN,
+    TICKET_LEDGER_SCHEMA_VERSION, TICKET_TRANSACTION_ID_DIGEST_DOMAIN,
+};
 pub use wave::{
     compute_wave_plan_hash, ledger_digest, plan_wave, verify_wave_plan, WaveError, WaveJob,
     WavePlan, WaveSourceStats,

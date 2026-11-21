@@ -1,0 +1,87 @@
+{
+  "schema_version": "asfa-ticket-utxo-preregister/v1",
+  "registered_at": "2026-11-21T21:42:32+08:00",
+  "baseline_commit": "a4365f38ae6e47e0a014077a7c74745c20ca657b",
+  "source": {
+    "url": "https://mp.weixin.qq.com/s/D26G_jXpAqgZ21btXXgEZA",
+    "title": "拿比特币模型做 RSI，这思路太绝了！",
+    "publisher": "Datawhale",
+    "claimed_author": "@0xmiracle",
+    "source_status": "Secondary technical report. The exact-title and project searches did not locate the original Kiki implementation or its source repository; platform scale and production claims are not independently established.",
+    "transferable_mechanisms": [
+      "single-use task outputs and replay tombstones",
+      "explicit recipient capabilities",
+      "parent and root lineage",
+      "control-ticket revocation with descendant invalidation",
+      "root-level issuance counting and bounded ping-pong",
+      "instruction/data separation",
+      "deterministic acceptance rather than model self-report",
+      "Git and evidence-hash binding without claiming publisher authentication"
+    ]
+  },
+  "design_correction": {
+    "problem": "Spending a root output to create children and also retaining that same root for later revocation would violate single-spend semantics.",
+    "resolution": "Mint creates one independent control ticket retained by the controller and one work ticket per planned job. Work transfers spend exactly one parent work ticket; revocation spends only the control ticket. Descendant liveness is derived from the control ticket.",
+    "scope": "No Bitcoin consensus, accounts, currency, signatures, blockchain, external settlement or autonomous RSI claim is introduced."
+  },
+  "baseline_observation": {
+    "old_binary_sha256": "409a500eb31b7a1bb88c2cdf14e2da48f253db95408ef07641431062fd2dc152",
+    "old_state_sha256": "ceafc719fd670a0b418afefb7230fa040494756b853e5d382eb4f7aebec202a5",
+    "old_execution_report_sha256": "5b394e59c96fcf6762bca8ac4f6322c86ec3cdf8b9f909fcb74acf5693df72de",
+    "schema": "asfa-directive-ledger/v4",
+    "pending_after": 0,
+    "consumed_after": 7,
+    "succeeded": 2,
+    "dead_lettered": 5,
+    "ticket_field_present": false,
+    "interpretation": "The legacy qfos-exec-v1 interface has no agent capability-ticket gate. This is a feature boundary, not by itself a claimed vulnerability."
+  },
+  "criteria": [
+    {
+      "id": "TICKET-01",
+      "pass": "Minting binds the exact current wave plan, ledger hash, network and policy; it creates one control ticket plus one explicitly addressed work ticket per job, with deterministic validated identifiers. Duplicate job minting is rejected without mutation."
+    },
+    {
+      "id": "TICKET-02",
+      "pass": "A missing ticket, wrong recipient, stale plan, forged ticket identifier, double spend or cross-root lineage mismatch fails closed and leaves both state and declared reports byte-for-byte unchanged or absent."
+    },
+    {
+      "id": "TICKET-03",
+      "pass": "Only the current work-ticket recipient can transfer it. Transfer atomically spends the parent and creates one child for the exact same WaveJob and root. Root-wide sequence numbers are unique and contiguous."
+    },
+    {
+      "id": "TICKET-04",
+      "pass": "The default root budget of twenty tickets is enforced across mint and every transfer branch. The attempt to create ticket twenty-one fails without spending its parent or creating a transaction."
+    },
+    {
+      "id": "TICKET-05",
+      "pass": "Only the control-ticket recipient can revoke. Revocation spends the control ticket to no outputs and makes every descendant non-live; subsequent transfer or execution is rejected without mutation."
+    },
+    {
+      "id": "TICKET-06",
+      "pass": "Authorized ticketed execution preserves qfos-exec-v1 outputs and commits execution outcomes, directive tombstones, ticket spends and the audit transaction in one staged LedgerSnapshot v5. Legacy execution and ticketed execution are reported separately."
+    },
+    {
+      "id": "TICKET-07",
+      "pass": "A same-plan same-agent replay produces only skipped outcomes, creates no new ticket transaction and leaves the committed v5 state byte-for-byte unchanged. Spent tickets cannot be transferred or spent again."
+    },
+    {
+      "id": "TICKET-08",
+      "pass": "Prompt-like text inside engine.sha256 payload remains data and produces an independently computable digest; it cannot replace the ticket-bound action or invoke shell/network/process execution."
+    },
+    {
+      "id": "TICKET-09",
+      "pass": "An independent Python implementation reconstructs ticket and transaction identifiers, lineage, liveness, budgets and execution bindings from raw snapshots; known-answer self-tests and synthetic tamper rejection run before accepting the real report."
+    },
+    {
+      "id": "TICKET-10",
+      "pass": "All pre-existing v4 fixtures and legacy execution controls remain byte-identical, the full gate passes from an implementation archive without .git and with an initially absent target, and the final differential uses that clean binary."
+    }
+  ],
+  "environment_corrections_before_implementation": [
+    "An initial placeholder registration timestamp was replaced with the measured system time before implementation; no result claim was attached to the placeholder.",
+    "The Rust toolchain was absent; stable, rustfmt and Clippy were installed through RsProxy before baseline construction. Toolchain installation is not counted as a security result.",
+    "A CARGO_TARGET_DIR under the non-executable /mnt/agents mount caused a build-script permission error before the old target ran. The baseline was rebuilt and executed under /tmp; only the successful run is recorded above."
+  ],
+  "result_status": "PREREGISTERED_ONLY"
+}

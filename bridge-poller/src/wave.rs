@@ -15,7 +15,7 @@ pub const LEDGER_DIGEST_DOMAIN: &str = "ASFA-OS-XI/DIRECTIVE-LEDGER-SNAPSHOT/V1\
 pub const DEFAULT_WAVE_MAX_JOBS: usize = 64;
 pub const DEFAULT_WAVE_MAX_PER_SOURCE: usize = 16;
 
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub struct WaveJob {
     pub session: String,

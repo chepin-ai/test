@@ -1,6 +1,10 @@
 use crate::chain::ChainError;
-use crate::model::{DeadLetterRecord, Directive, ExecutionReceipt, Outbox, Registry, GENESIS_HASH};
+use crate::model::{
+    execution_input_digest, DeadLetterRecord, Directive, ExecutionReceipt, Outbox, Registry,
+    GENESIS_HASH,
+};
 use crate::strict_json;
+use crate::ticket::{TicketError, TicketLedger, TicketLedgerSnapshot, TicketTransactionKind};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs::{self, OpenOptions};
@@ -10,6 +14,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use thiserror::Error;
 
 pub const LEDGER_SCHEMA_VERSION: &str = "asfa-directive-ledger/v4";
+pub const TICKETED_LEDGER_SCHEMA_VERSION: &str = "asfa-directive-ledger/v5";
 pub const MAX_LEDGER_BYTES: u64 = 16 * 1024 * 1024;
 pub const DEFAULT_MAX_PENDING_DIRECTIVES: usize = 4096;
 pub const DEFAULT_MAX_CONSUMED_TOMBSTONES: usize = 16384;
@@ -113,6 +118,8 @@ pub struct LedgerSnapshot {
     pub receipts: Vec<ExecutionReceipt>,
     #[serde(default)]
     pub dead_letters: Vec<DeadLetterRecord>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tickets: Option<TicketLedgerSnapshot>,
 }
 
 #[derive(Debug, Error, PartialEq, Eq)]
@@ -137,6 +144,8 @@ pub enum RestoreError {
     OutcomeConflict { session: String, id: String },
     #[error("ledger resource limit: {0}")]
     ResourceLimit(#[from] CapacityError),
+    #[error("ticket ledger restore failed: {0}")]
+    Ticket(#[from] TicketError),
 }
 
 /// Idempotent directive store with consumption tombstones and per-session chain
@@ -151,6 +160,7 @@ pub struct DirectiveLedger {
     checkpoints: BTreeMap<String, ChainCheckpoint>,
     receipts: BTreeMap<DirectiveKey, ExecutionReceipt>,
     dead_letters: BTreeMap<DirectiveKey, DeadLetterRecord>,
+    tickets: TicketLedger,
     limits: ResourceLimits,
 }
 
@@ -182,6 +192,59 @@ impl DirectiveLedger {
 
     pub fn policy_hash(&self) -> Option<&str> {
         self.policy_hash.as_deref()
+    }
+
+    pub fn tickets(&self) -> &TicketLedger {
+        &self.tickets
+    }
+
+    pub fn tickets_mut(&mut self) -> &mut TicketLedger {
+        &mut self.tickets
+    }
+
+    pub fn verify_ticket_execution_history(&self) -> Result<(), TicketError> {
+        for transaction in self.tickets.transactions() {
+            let TicketTransactionKind::Execute { plan_hash } = &transaction.kind else {
+                continue;
+            };
+            for ticket_id in &transaction.inputs {
+                let ticket = self.tickets.ticket(ticket_id).ok_or_else(|| {
+                    TicketError::ExecutionHistory(format!("missing execute ticket: {ticket_id}"))
+                })?;
+                let job = ticket.job().ok_or_else(|| {
+                    TicketError::ExecutionHistory(format!(
+                        "control ticket in execute history: {ticket_id}"
+                    ))
+                })?;
+                let key = (job.session.clone(), job.id.clone());
+                let input_hash = execution_input_digest(
+                    &job.session,
+                    &job.id,
+                    &job.action,
+                    &job.payload,
+                    job.expires_epoch,
+                );
+                let receipt_matches = self.receipts.get(&key).is_some_and(|receipt| {
+                    receipt.action == job.action
+                        && receipt.plan_hash == *plan_hash
+                        && receipt.input_hash == input_hash
+                        && receipt.executed_at_epoch == transaction.created_at_epoch
+                });
+                let dead_letter_matches = self.dead_letters.get(&key).is_some_and(|dead_letter| {
+                    dead_letter.action == job.action
+                        && dead_letter.plan_hash == *plan_hash
+                        && dead_letter.input_hash == input_hash
+                        && dead_letter.failed_at_epoch == transaction.created_at_epoch
+                });
+                if !self.consumed.contains(&key) || receipt_matches == dead_letter_matches {
+                    return Err(TicketError::ExecutionHistory(format!(
+                        "missing or conflicting outcome for {}/{}",
+                        job.session, job.id
+                    )));
+                }
+            }
+        }
+        Ok(())
     }
 
     pub fn limits(&self) -> ResourceLimits {
@@ -452,8 +515,13 @@ impl DirectiveLedger {
     }
 
     pub fn snapshot(&self) -> LedgerSnapshot {
+        let tickets = (!self.tickets.is_empty()).then(|| self.tickets.snapshot());
         LedgerSnapshot {
-            schema_version: LEDGER_SCHEMA_VERSION.into(),
+            schema_version: if tickets.is_some() {
+                TICKETED_LEDGER_SCHEMA_VERSION.into()
+            } else {
+                LEDGER_SCHEMA_VERSION.into()
+            },
             network_name: self.network_name.clone(),
             policy_hash: self.policy_hash.clone(),
             directives: self
@@ -483,6 +551,7 @@ impl DirectiveLedger {
                 .collect(),
             receipts: self.receipts.values().cloned().collect(),
             dead_letters: self.dead_letters.values().cloned().collect(),
+            tickets,
         }
     }
 
@@ -494,9 +563,33 @@ impl DirectiveLedger {
         snapshot: LedgerSnapshot,
         limits: ResourceLimits,
     ) -> Result<Self, RestoreError> {
-        if snapshot.schema_version != LEDGER_SCHEMA_VERSION {
-            return Err(RestoreError::UnsupportedSchema(snapshot.schema_version));
-        }
+        let ticket_ledger = match (snapshot.schema_version.as_str(), snapshot.tickets.clone()) {
+            (LEDGER_SCHEMA_VERSION, None) => TicketLedger::default(),
+            (TICKETED_LEDGER_SCHEMA_VERSION, Some(ticket_snapshot)) => {
+                if ticket_snapshot.tickets.is_empty()
+                    || Some(ticket_snapshot.network_name.as_str())
+                        != snapshot.network_name.as_deref()
+                    || Some(ticket_snapshot.policy_hash.as_str()) != snapshot.policy_hash.as_deref()
+                {
+                    return Err(RestoreError::InvalidEntry(
+                        "v5 ticket ledger must be nonempty and match the outer registry binding"
+                            .into(),
+                    ));
+                }
+                TicketLedger::from_snapshot(ticket_snapshot)?
+            }
+            (LEDGER_SCHEMA_VERSION, Some(_)) => {
+                return Err(RestoreError::InvalidEntry(
+                    "v4 snapshot must not contain task tickets".into(),
+                ));
+            }
+            (TICKETED_LEDGER_SCHEMA_VERSION, None) => {
+                return Err(RestoreError::InvalidEntry(
+                    "v5 snapshot requires a task-ticket ledger".into(),
+                ));
+            }
+            _ => return Err(RestoreError::UnsupportedSchema(snapshot.schema_version)),
+        };
         if snapshot
             .network_name
             .as_ref()
@@ -530,6 +623,7 @@ impl DirectiveLedger {
         let mut ledger = Self {
             network_name: snapshot.network_name,
             policy_hash: snapshot.policy_hash,
+            tickets: ticket_ledger,
             limits,
             ..Self::default()
         };
@@ -656,6 +750,7 @@ impl DirectiveLedger {
                 });
             }
         }
+        ledger.verify_ticket_execution_history()?;
         Ok(ledger)
     }
 
@@ -752,7 +847,9 @@ impl DirectiveLedger {
         limits: ResourceLimits,
     ) -> io::Result<Self> {
         let snapshot = Self::read_snapshot(path)?;
-        if snapshot.schema_version != LEDGER_SCHEMA_VERSION {
+        if snapshot.schema_version != LEDGER_SCHEMA_VERSION
+            && snapshot.schema_version != TICKETED_LEDGER_SCHEMA_VERSION
+        {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidData,
                 format!(
@@ -1033,6 +1130,7 @@ mod tests {
             checkpoints: vec![],
             receipts: vec![],
             dead_letters: vec![],
+            tickets: None,
         };
         assert!(matches!(
             DirectiveLedger::from_snapshot(snapshot),
@@ -1062,6 +1160,7 @@ mod tests {
             ],
             receipts: vec![],
             dead_letters: vec![],
+            tickets: None,
         };
         assert!(matches!(
             DirectiveLedger::from_snapshot(duplicate),
@@ -1081,6 +1180,7 @@ mod tests {
             }],
             receipts: vec![],
             dead_letters: vec![],
+            tickets: None,
         };
         assert!(matches!(
             DirectiveLedger::from_snapshot(malformed),
@@ -1134,6 +1234,7 @@ mod tests {
             checkpoints: vec![],
             receipts: vec![],
             dead_letters: vec![],
+            tickets: None,
         };
         let limits = ResourceLimits {
             max_pending_directives: 0,
