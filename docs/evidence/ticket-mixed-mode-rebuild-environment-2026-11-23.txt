@@ -1,0 +1,19 @@
+schema=asfa-ticket-mixed-mode-rebuild-environment/v1
+observed_at=2026-11-23T01:03:44+08:00
+implementation_commit=88e01c894b88773fe5a5f89bac54b285c9d02f1c
+baseline_commit=42e040c82ad22b9de34c42c6438641ef09eea9f7
+implementation_source=git archive of implementation_commit
+implementation_git_directory_present=false
+implementation_target_initially_present=false
+initial_launch=direct script execution returned permission denied before target creation; reran with bash scripts/build-all.sh
+rustc 1.100.0 (0ef1bc386 2026-11-09)
+cargo 1.100.0 (3acc79c0c 2026-11-05)
+rustfmt 1.11.0-stable (0ef1bc3860 2026-11-09)
+clippy 0.1.100 (0ef1bc3860 2026-11-09)
+python=Python 3.12.12
+5faf9d54593e66489fa93de486e52e27c386d74ab07c32aabb02f8b792f78229  /tmp/asfa-mixed-final-implementation.tar
+96f0aaf7cb59a92ed31c073a8fe7123df5f20dfe9a7bcf87ff165155a3a0d551  /tmp/asfa-mixed-attack/asfa-bridge-poller-vulnerable
+1a2e3aab328f18ea87163b1765eaf625db0fd039072fe32aa9f845602699aedb  /tmp/asfa-mixed-final-target/debug/asfa-bridge-poller
+8d35b7f4f6ab5ef9b9d1bf82cc34d5da6144653a4569b2c2e8ade534c9042e38  /tmp/asfa-mixed-final-build-all.log
+513e8fa8999dff519c3c57db91aeb4ea051b0e1410b83fa8a881974b45f9a894  /tmp/asfa-mixed-final-run/differential.json
+1a6f7bb1c0c1fc4110c95790941681acbdbe5f89c19d8591b3d5076cb84cdeac  /tmp/asfa-mixed-final-run/consistency.json

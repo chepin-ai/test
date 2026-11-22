@@ -1,0 +1,90 @@
+{
+  "schema_version": "asfa-ticket-mixed-mode-evidence-manifest/v1",
+  "date": "2026-11-23",
+  "implementation_commit": "88e01c894b88773fe5a5f89bac54b285c9d02f1c",
+  "baseline_commit": "42e040c82ad22b9de34c42c6438641ef09eea9f7",
+  "preregistration": {
+    "path": "docs/evidence/ticket-mixed-mode-preregister-2026-11-23.json",
+    "stage": "AFTER_EXPLORATORY_REPRO_BEFORE_FIX",
+    "result_status": "PREREGISTERED_ONLY",
+    "anomaly": "ANOMALY-1 narrows Transfer mixed-state impact: original-timestamp ticketed execution can adopt legacy outcomes; permanent recovery loss is not claimed. Revoke mixed states remain non-live."
+  },
+  "clean_rebuild": {
+    "implementation_source": "git archive of implementation_commit",
+    "implementation_git_directory_present": false,
+    "implementation_target_initially_present": false,
+    "implementation_archive_sha256": "5faf9d54593e66489fa93de486e52e27c386d74ab07c32aabb02f8b792f78229",
+    "launch_note": "Direct execution of the non-executable archived script failed before target creation; the recorded gate run used bash scripts/build-all.sh.",
+    "rustc": "1.100.0 (0ef1bc386 2026-11-09)",
+    "cargo": "1.100.0 (3acc79c0c 2026-11-05)",
+    "rustfmt": "1.11.0-stable (0ef1bc3860 2026-11-09)",
+    "clippy": "0.1.100 (0ef1bc3860 2026-11-09)",
+    "python": "3.12.12"
+  },
+  "differential_binaries": {
+    "old": {
+      "role": "rebuilt from baseline_commit in the current execution environment",
+      "sha256": "96f0aaf7cb59a92ed31c073a8fe7123df5f20dfe9a7bcf87ff165155a3a0d551",
+      "included_in_repository": false
+    },
+    "new": {
+      "role": "clean rebuild from implementation_commit",
+      "sha256": "1a2e3aab328f18ea87163b1765eaf625db0fd039072fe32aa9f845602699aedb",
+      "included_in_repository": false
+    }
+  },
+  "results": {
+    "clean_build_all": "PASS",
+    "rust_tests": 119,
+    "rust_test_suites": {
+      "bridge_unit": 56,
+      "bridge_integration": 49,
+      "kernel": 11,
+      "userspace": 3
+    },
+    "independent_consistency": "PASS",
+    "cases": 5,
+    "process_steps": 17,
+    "old_mixed_histories": 2,
+    "fixed_rejections": 2,
+    "oracle_self_test": {
+      "base_known_answers": 3,
+      "base_synthetic_valid": 1,
+      "base_synthetic_rejections": 4,
+      "mixed_known_answers": 5
+    },
+    "forged_real_report": "REJECTED_BEFORE_ACCEPTANCE",
+    "timestamp_matched_transfer_adoption": "CONFIRMED_ANOMALY_NOT_PERMANENT_LOSS",
+    "legacy_v4_fixture_bytes": "UNCHANGED",
+    "ticketed_execute_and_replay": "PASS"
+  },
+  "repository_artifacts": [
+    {
+      "path": "docs/evidence/ticket-mixed-mode-preregister-2026-11-23.json",
+      "sha256": "1aed192a6fa2cb24b3002e3ab6f0f5fcf6f5ce925850ce5e4cdab63d0b1632ee",
+      "role": "post-exploratory preregistration and anomaly record; not final result evidence"
+    },
+    {
+      "path": "docs/evidence/ticket-mixed-mode-differential-2026-11-23.json",
+      "sha256": "513e8fa8999dff519c3c57db91aeb4ea051b0e1410b83fa8a881974b45f9a894"
+    },
+    {
+      "path": "docs/evidence/ticket-mixed-mode-consistency-2026-11-23.json",
+      "sha256": "1a6f7bb1c0c1fc4110c95790941681acbdbe5f89c19d8591b3d5076cb84cdeac"
+    },
+    {
+      "path": "docs/evidence/ticket-mixed-mode-clean-build-all-2026-11-23.log",
+      "sha256": "8d35b7f4f6ab5ef9b9d1bf82cc34d5da6144653a4569b2c2e8ade534c9042e38"
+    },
+    {
+      "path": "docs/evidence/ticket-mixed-mode-rebuild-environment-2026-11-23.txt",
+      "sha256": "dac954174915599606a96e600c7c56a9a312c3ad8b4986384d541b4f6060781f"
+    }
+  ],
+  "boundaries": [
+    "The fix is CLI composition validation only; ticket IDs, transaction IDs, ledger schema, execution engine, fixtures, wire protocol, and authorization rules were not changed.",
+    "Legacy --execute-wave without a ticket mutation remains supported. The rejected case is its combination with Mint, Transfer, or Revoke in one invocation.",
+    "Hashes and transaction identifiers are not signatures, witnesses, ZK proofs, publisher authentication, or remote-attestation evidence.",
+    "The evidence covers local CLI composition, snapshot history, recovery, and replay behavior in the executed fixtures; it does not establish distributed exactly-once, hostile-OS or hostile-writer safety, cross-host locking, WAL/fsync durability, consensus, external settlement, CI, federation ACK, or production-scale agent validation."
+  ]
+}

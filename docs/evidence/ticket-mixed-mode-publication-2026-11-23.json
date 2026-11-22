@@ -1,0 +1,37 @@
+{
+  "schema_version": "asfa-ticket-mixed-mode-publication/v1",
+  "observed_at": "2026-11-23T01:09:34+08:00",
+  "implementation_commit": "88e01c894b88773fe5a5f89bac54b285c9d02f1c",
+  "evidence_candidate_commit": "00878eca4275fdcb703a34d98f041f6ed827233c",
+  "allowed_remote": "https://github.com/chepin-ai/test.git",
+  "remote_configuration": {
+    "fetch": "https://github.com/chepin-ai/test.git",
+    "push": "https://github.com/chepin-ai/test.git",
+    "credential_embedded": false,
+    "only_remote": true
+  },
+  "remote_read": {
+    "method": "GIT_TERMINAL_PROMPT=0 git ls-remote origin refs/heads/main",
+    "attempts": 1,
+    "exit_code": 0,
+    "main": "2a40df076c0d4f63a1f5dd25f368f2916a8d0d50",
+    "ahead_by": 8,
+    "behind_by": 0,
+    "remote_equals_local": false
+  },
+  "push": {
+    "attempted": false,
+    "reason": "No fresh single-use credential was issued for this push; no consumed or historical credential was reused, recovered, or printed.",
+    "status": "NOT_PUSHED"
+  },
+  "external_ci": {
+    "observed": false,
+    "reason": "The implementation and evidence commits were not pushed; no new external CI run is claimed."
+  },
+  "federation": {
+    "cisvr_ack": false,
+    "key_sync_01_relay": false,
+    "active_claim": false
+  },
+  "evidence_commit_note": "The evidence commit is amended only to add this publication record after the remote check; the ahead/behind count remains 8/0. The final amended HEAD is measured with Git after the amend. No credential-bearing remote, push success, external CI, publisher authentication, or federation ACK is asserted."
+}

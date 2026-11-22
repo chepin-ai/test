@@ -141,3 +141,15 @@ cmp /tmp/ticket-consistency-recheck.json \
 判读器自证为 3 个已知答案、1 个合成有效、4 个合成拒绝；真实报告为 9 组、48 个进程步骤。总索引 `ticket-utxo-evidence-manifest-2026-11-21.json` 另登记实际二进制、实现归档和边界。证据只覆盖本地能力授权、完整性、恢复与重放，不是签名／witness／ZK、发布者认证、分布式 exactly-once 或 hostile writer 防护证明。文章来源仍为二手技术报告，未获得原始 Kiki 实现。
 
 - `ticket-utxo-publication-2026-11-21.json`：证据候选 `5469b52424316521de90c8bd3b730bfbc39590ae` 的发布边界。两次 `ls-remote` TLS 终止后，以 GitHub 公共 API 确认远端 `main=2a40df076c0d4f63a1f5dd25f368f2916a8d0d50`，`ahead_by=6, behind_by=0`；未复用凭证、未推送，结论 `NOT_PUSHED`，无新外部 CI 或联邦 ACK。发布记录与索引 amend 后最终 HEAD 以 Git 实测为准。
+
+## 2026-11-23：旧执行／票变更混合模式
+
+- `ticket-mixed-mode-preregister-2026-11-23.json`：探索性复现之后、修复之前登记的 MIXED-01–05；保持 `AFTER_EXPLORATORY_REPRO_BEFORE_FIX` 与 `PREREGISTERED_ONLY`，并保留 Transfer 原时间戳吸收反例 `ANOMALY-1`。
+- `ticket-mixed-mode-differential-2026-11-23.json`：5 组、17 个真实进程步骤。旧端复现 Transfer／Revoke 两类混合历史；干净重建新端在副作用前拒绝两类组合且零输出，正常 Execute／Replay、独立票变更和 v4 兼容控制通过。
+- `ticket-mixed-mode-consistency-2026-11-23.json`：独立 Python 判读 `PASS`；先通过原票账本自证与 5 个混合历史已知答案，再验收真实报告，伪造真实报告在验收前被拒绝。
+- `ticket-mixed-mode-clean-build-all-2026-11-23.log`：实现提交 `88e01c894b88773fe5a5f89bac54b285c9d02f1c` 的无 `.git`、初始无 target 完整门禁，含 119 项 Rust 测试。
+- `ticket-mixed-mode-rebuild-environment-2026-11-23.txt`：工具链、实现归档、新旧二进制和原始结果哈希；直接执行无执行位脚本的启动失败先于任何构建，正式门禁经 `bash scripts/build-all.sh` 运行。
+- `ticket-mixed-mode-evidence-manifest-2026-11-23.json`：上述证据、实际二进制、结果计数与边界的机器可读总索引。
+- `ticket-mixed-mode-publication-2026-11-23.json`：最终 remote、公开 main、ahead／behind、推送、外部 CI 与联邦状态的独立记录；以文件实测值为准。
+
+本轮只证明本地 CLI 组合门禁与快照历史性质。Transfer 混合态可在原结果时间戳吸收，不是永久丢失；Revoke 混合态不能经任务票接口恢复。旧执行单独使用仍受支持，本地 PASS 不构成认证、共识、ZK、CI、分布式 exactly-once 或联盟 active 声称。

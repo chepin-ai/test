@@ -1,6 +1,14 @@
-# 实现状态（本轮实测证据：2026-11-16—21）
+# 实现状态（本轮实测证据：2026-11-16—23）
 
-## 最新续拍：一次性任务票与 v5 恢复闭环
+## 最新续拍：旧执行／任务票混合模式失败关闭
+
+- 实现提交为 `88e01c894b88773fe5a5f89bac54b285c9d02f1c`，基线为 `42e040c82ad22b9de34c42c6438641ef09eea9f7`。CLI 在参数解析阶段拒绝 `--execute-wave` 与 Mint／Transfer／Revoke 同用，阻断“旧执行结果已写入、票状态也变更、但没有任务票 Execute 交易”的混合历史。单独旧执行、单独票变更和 `--execute-wave --ticketed-execution` 的既有契约不变。
+- 从实现提交归档在无 `.git`、初始无 target 环境完整重建，119 项 Rust 测试通过：bridge 单元 56、bridge 集成 49、kernel 11、userspace 3；格式、Clippy、秘密扫描、独立 Python 自证、固定 v4／v5、执行重放、认知示例和 smoke 均通过。
+- 最终差分为 5 组、17 个真实进程步骤：旧端复现 Transfer／Revoke 两类混合历史，干净重建新端在副作用前拒绝且零输出；独立判读 `PASS`，伪造真实报告在验收前被拒绝。证据总索引为 `evidence/ticket-mixed-mode-evidence-manifest-2026-11-23.json`。
+- 探索性复现先于登记，预注册保持 `AFTER_EXPLORATORY_REPRO_BEFORE_FIX` 和 `PREREGISTERED_ONLY`。`ANOMALY-1` 明确：Transfer 混合态可在原结果时间戳被吸收，不是永久不可恢复；Revoke 混合态仍因根失活不能经任务票接口恢复。
+- 本地 PASS 不等于推送、外部 CI、发布者认证、签名 witness、ZK、分布式 exactly-once 或联邦 ACK。最终发布边界见 `evidence/ticket-mixed-mode-publication-2026-11-23.json`。
+
+## 2026-11-21：一次性任务票与 v5 恢复闭环（历史证据）
 
 - 实现提交为 `36cf105b6685f0516c9b7aaedcecfbb6c36e6380`（`feat(bridge): bind wave execution to single-use capability tickets`），基线为 `a4365f38ae6e47e0a014077a7c74745c20ca657b`。Mint 创建根控制票与逐作业工作票；Transfer、Revoke、Execute、重放和恢复均校验单次消费、唯一作业链、plan 绑定、根预算与执行结果血缘。
 - 从实现提交的 Git 归档在无 `.git`、初始无 target 环境完整重建，118 个 Rust 测试通过：bridge 单元 56、bridge 集成 48、kernel 11、userspace 3；其中 ticket 模块 9 项。完整 `build-all`、rustfmt、Clippy、独立判读、固定夹具、执行重放、认知示例与 CLI 烟测均通过。

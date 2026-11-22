@@ -248,6 +248,18 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 预登记、最终差分、独立判读和总索引分别为 `docs/evidence/ticket-utxo-preregister-2026-11-21.json`、`docs/evidence/ticket-utxo-differential-2026-11-21.json`、`docs/evidence/ticket-utxo-consistency-2026-11-21.json`、`docs/evidence/ticket-utxo-evidence-manifest-2026-11-21.json`。原预登记旧二进制因环境重置未参与最终差分；最终旧端从同一基线提交重建，哈希差异已登记。PASS 不覆盖分布式 exactly-once、发布者认证、hostile writer／OS、共识、外部结算、签名 witness 或 ZK 证明。
 
+### 3.11 2026-11-23 旧执行与票变更组合门禁
+
+| 攻击／碰撞 | 登记拒绝条件 | 自动化与实测对应 |
+|---|---|---|
+| Transfer-self＋旧 Execute 留下无 Execute 的结果历史 | 新端在任何运行时副作用前拒绝执行＋票变更组合 | 旧端 exit 0，写入 2 个 receipt、5 个 dead letter 和 Transfer；新端 exit 2，Mint 状态字节不变且所有声明输出不存在 |
+| Revoke＋旧 Execute 形成根失活混合态 | 同上，不得先执行再撤销或先撤销再执行 | 旧端复现混合历史；新端拒绝，随后正常 ticketed Execute／Replay 通过 |
+| 将单独旧执行误报为本轮漏洞 | 无票变更的旧接口仍须字节兼容 | v4 旧新控制字节相等；拒绝范围严格限定为同一调用中的组合 |
+| Transfer 混合态被夸大为永久丢失 | 保留反例并缩小结论 | 晚时间戳恢复失败，但原结果时间戳可吸收并补记 Execute；`ANOMALY-1` 明示不是永久丢失 |
+| runner 自报 PASS 或伪造历史混入 | 独立判读、自证、真实状态重验与伪造报告拒绝 | 5 组、17 个真实进程步骤；独立 PASS，伪造真实报告在验收前被拒绝 |
+
+实现提交为 `88e01c894b88773fe5a5f89bac54b285c9d02f1c`，只改变 CLI 组合校验及其验证。探索后预注册保持 `AFTER_EXPLORATORY_REPRO_BEFORE_FIX`；最终新端来自该提交归档的无 `.git`、空 target 重建。完整门禁为 119 项 Rust 测试及既有独立判读、固定夹具和 smoke。证据总索引为 `docs/evidence/ticket-mixed-mode-evidence-manifest-2026-11-23.json`。
+
 ## 4. JCS 候选包评估与不采用结论
 
 检索到 `serde_jcs 0.2.0`、`jcs-canonicalize 0.2.1`、`serde_json_canonicalizer 0.4.1`。目前只评估，没有把任何候选加入本仓依赖。
@@ -298,7 +310,15 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 `scripts/verify-ticket-utxo-python.py` 不调用 Rust 验证器，独立重建版本化票／交易 ID、票账本 digest、控制票／工作票 plan 绑定、唯一作业链、根序列与预算、spent 集合、Execute↔回执／死信绑定和根撤销时间顺序。它先执行 3 个已知答案、1 个合成有效和 4 个合成拒绝，再亲自拒绝报告内每个伪造快照，并验证真实 9 组／48 进程差分；伪造真实报告在验收前被拒绝。该判读不是签名、发布者认证、ZK、分布式 exactly-once 或 hostile writer 防护证明。
 
+`scripts/verify-ticket-mixed-mode-python.py` 复用上述独立票账本校验但不调用 Rust，另以 5 个混合历史已知答案自证，亲自分类旧端原始快照、核对无 Execute 的结果历史和拒绝前后状态字节，再验收 5 组／17 进程真实报告。它还以语义不符但哈希已同步修正的真实报告变体验证拒绝理由，避免只做哈希对拍；Transfer 原时间戳吸收被作为有效反例核对，而非隐藏。
+
 ## 7. 可复算证据入口
+
+- `evidence/ticket-mixed-mode-evidence-manifest-2026-11-23.json`：混合模式实现／基线、探索后登记、干净重建、17 步差分、独立 PASS、异常注记和 artifact 哈希总索引。
+- `evidence/ticket-mixed-mode-differential-2026-11-23.json`：旧端 Transfer／Revoke 混合历史、新端副作用前拒绝、正常执行／重放、独立票变更与 v4 控制的真实进程证据。
+- `evidence/ticket-mixed-mode-consistency-2026-11-23.json`：独立判读 PASS、混合历史已知答案、自证与伪造真实报告拒绝。
+- `../scripts/ticket-mixed-mode-differential.py`：真实旧新 CLI 混合模式 runner；只写 `EXECUTED_AWAITING_INDEPENDENT_ORACLE`，不自行宣称最终 PASS。
+- `../scripts/verify-ticket-mixed-mode-python.py`：独立历史分类、原始状态复验、吸收反例和伪造报告反证入口。
 
 - `evidence/ticket-utxo-evidence-manifest-2026-11-21.json`：实现／基线提交、干净重建环境、实际新旧二进制、环境重置注记、最终 PASS 与 artifact 哈希总索引。
 - `evidence/ticket-utxo-differential-2026-11-21.json`：九组真实旧新 CLI、48 个进程步骤及原始伪造快照；新端来自无 `.git`、空 target 的实现归档。

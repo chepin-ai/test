@@ -167,6 +167,10 @@ Execute 在同一暂存快照中核对执行计划、当前票链、输入指令
 
 票、控制票 plan hash、Execute plan hash 和票账本 policy hash 必须是 64 位小写十六进制 SHA-256。票／交易 ID 使用版本化、域分隔 SHA-256。**这些哈希不是签名、witness、发布者认证或 ZK 证明。**
 
+`--execute-wave` 不得与 `--ticket-mint-root`、`--ticket-transfer` 或 `--ticket-revoke-root` 同用。正确路径是先单独完成票变更，再以 `--execute-wave --ticketed-execution` 执行；非法组合在 Registry 读取、状态锁、轮询、状态变化和全部声明输出之前失败。该门禁阻断旧执行结果与票变更组成无 Execute 交易的混合历史，不改变旧接口单独执行的兼容边界。
+
+异常边界 `ANOMALY-1`：旧端 Transfer-self＋旧执行留下混合历史后，较晚时间戳的任务票执行会因结果时间绑定失败，但在原结果时间戳可吸收旧结果并补记 Execute，因此不是永久不可恢复。Revoke 混合态则因根控制票已消费而不能经任务票接口恢复。修复针对混合历史的产生，不夸大其中一种状态的可恢复性。对应证据见 `docs/evidence/ticket-mixed-mode-evidence-manifest-2026-11-23.json`。
+
 真实旧新 CLI 差分、独立 Python 判读、自洽伪造拒绝和干净重建证据见 `docs/evidence/ticket-utxo-evidence-manifest-2026-11-21.json`。该证据不声称分布式 exactly-once、hostile writer／OS 防护、跨主机锁、WAL／fsync 掉电持久性、共识或外部结算。文章来源仍为二手技术报告，未获得原始 Kiki 实现。
 
 ## 6. 负结果

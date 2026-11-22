@@ -1,0 +1,20 @@
+{
+  "schema_version": "asfa-ticket-mixed-mode-consistency/v1",
+  "verdict": "PASS",
+  "self_test": {
+    "base": {
+      "known_answers": 3,
+      "synthetic_valid": 1,
+      "synthetic_rejections": 4
+    },
+    "mixed_known_answers": 5
+  },
+  "forged_real_report": "REJECTED_BEFORE_ACCEPTANCE",
+  "differential_report_sha256": "513e8fa8999dff519c3c57db91aeb4ea051b0e1410b83fa8a881974b45f9a894",
+  "case_count": 5,
+  "process_steps": 17,
+  "old_mixed_histories": 2,
+  "fixed_rejections": 2,
+  "timestamp_matched_transfer_adoption": "CONFIRMED_ANOMALY_NOT_PERMANENT_LOSS",
+  "boundary": "Independent local CLI composition and snapshot-history oracle. Legacy execution without ticket mutation remains supported; no authentication, consensus, ZK, CI, federation, or distributed exactly-once claim."
+}
