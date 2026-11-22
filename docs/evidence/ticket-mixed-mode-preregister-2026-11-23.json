@@ -1,0 +1,52 @@
+{
+  "schema_version": "asfa-ticket-mixed-mode-preregister/v1",
+  "registered_at": "2026-11-23T00:45:16+08:00",
+  "registration_stage": "AFTER_EXPLORATORY_REPRO_BEFORE_FIX",
+  "baseline_commit": "42e040c82ad22b9de34c42c6438641ef09eea9f7",
+  "vulnerable_binary_sha256": "96f0aaf7cb59a92ed31c073a8fe7123df5f20dfe9a7bcf87ff165155a3a0d551",
+  "hypothesis": "The CLI rejects Mint plus execution but accepts Transfer or Revoke plus legacy --execute-wave. One process can therefore commit legacy outcomes and a ticket mutation without a ticket Execute transaction, producing runtime-reachable v5 histories that the ticketed execution interface cannot resume.",
+  "exploratory_reproduction": {
+    "completed_before_this_record": true,
+    "minted_state_sha256": "b45173194a4fdc031d71206f9e925ccfd60f1512f1417528bde8f1be0950acc1",
+    "transfer_self_state_sha256": "aeda66d42d06a34074e12f44c40f39892be58717b6c2225082f352314928f6c6",
+    "revoke_state_sha256": "18d82b0c8175eedcb4b2e081e5e746b2f71d0edffadfb73310b8f950ded727d4",
+    "transfer_self_mixed_exit": 0,
+    "transfer_self_recovery_exit": 2,
+    "transfer_self_recovery_error": "execution history binding mismatch: missing or conflicting outcome",
+    "revoke_mixed_exit": 0,
+    "revoke_recovery_exit": 2,
+    "revoke_recovery_error": "ticket is not live"
+  },
+  "anomaly_notes": [
+    {
+      "id": "ANOMALY-1",
+      "observed_at": "2026-11-23T00:47:54+08:00",
+      "correction": "A Transfer mixed state is not permanently unrecoverable: ticketed execution at the original legacy outcome timestamp can adopt those outcomes and append an Execute transaction. The later-timestamp recovery failure remains real, but the permanent-loss claim is narrowed to Revoke mixed states. The security invariant is the absence of mixed legacy-outcome/ticket-mutation histories, not universal unrecoverability."
+    }
+  ],
+  "criteria": [
+    {
+      "id": "MIXED-01",
+      "pass": "The pre-fix binary accepts both Transfer plus legacy execution and Revoke plus legacy execution. Each resulting state has legacy outcomes but no ticket Execute transaction, and the subsequent ticketed recovery attempt fails without changing state or creating recovery reports."
+    },
+    {
+      "id": "MIXED-02",
+      "pass": "The fixed binary rejects every ticket mutation combined with --execute-wave before registry polling, state locking, state mutation, or output creation. The error identifies the illegal mutation/execution combination."
+    },
+    {
+      "id": "MIXED-03",
+      "pass": "After fixed-mode rejection, the original Mint state remains byte-identical and a normal --ticketed-execution followed by same-plan replay succeeds. Standalone Transfer and Revoke remain available."
+    },
+    {
+      "id": "MIXED-04",
+      "pass": "An independent Python oracle self-tests known-answer state classifications, rejects a forged real report before acceptance, reconstructs the mixed-history invariant from raw snapshots, and only then returns PASS."
+    },
+    {
+      "id": "MIXED-05",
+      "pass": "Plain legacy v4 execution remains byte-identical on both real binaries; the full workspace gate and a clean archive rebuild pass without .git and with an initially absent target."
+    }
+  ],
+  "root_cause_fix_scope": "CLI composition validation only. No ticket identifier, transaction, ledger schema, execution engine, fixture, wire protocol, or authorization rule changes are permitted for this fix.",
+  "boundary": "This audit addresses local CLI mode composition and recovery consistency. Legacy execution without any ticket operation remains an explicit compatibility interface, not a vulnerability. No signature, consensus, ZK, distributed exactly-once, external CI, or federation claim is implied.",
+  "result_status": "PREREGISTERED_ONLY"
+}

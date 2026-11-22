@@ -1902,6 +1902,63 @@ fn cli_fresh_execution_persists_recovery_plan_before_report_output() {
 }
 
 #[test]
+fn cli_ticket_mutations_cannot_be_combined_with_legacy_execution() {
+    let config = unused_path("mixed-mode-missing-config");
+    let state = temp_file("sentinel-state");
+    let wave = unused_path("mixed-mode-wave");
+    let execution = unused_path("mixed-mode-execution");
+    let ticket = unused_path("mixed-mode-ticket");
+    let report = unused_path("mixed-mode-report");
+    let mutations = [
+        vec![
+            "--ticket-transfer",
+            "00",
+            "--ticket-agent",
+            "alice",
+            "--ticket-to",
+            "alice",
+        ],
+        vec!["--ticket-revoke-root", "00", "--ticket-agent", "root"],
+        vec![
+            "--ticket-mint-root",
+            "nonce",
+            "--ticket-controller",
+            "root",
+            "--ticket-agent",
+            "alice",
+        ],
+    ];
+    for mutation in mutations {
+        let output = Command::new(env!("CARGO_BIN_EXE_asfa-bridge-poller"))
+            .args(["--config", config.to_str().unwrap()])
+            .args(["--state", state.to_str().unwrap()])
+            .args(["--wave-out", wave.to_str().unwrap()])
+            .args([
+                "--execute-wave",
+                "--execution-out",
+                execution.to_str().unwrap(),
+            ])
+            .args(mutation)
+            .args(["--ticket-out", ticket.to_str().unwrap()])
+            .args(["--out", report.to_str().unwrap()])
+            .output()
+            .unwrap();
+        assert!(!output.status.success());
+        assert!(
+            String::from_utf8_lossy(&output.stderr)
+                .contains("cannot be combined with --execute-wave"),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert_eq!(fs::read_to_string(&state).unwrap(), "sentinel-state");
+        for path in [&wave, &execution, &ticket, &report] {
+            assert!(!path.exists(), "unexpected output: {}", path.display());
+        }
+    }
+    fs::remove_file(state).unwrap();
+}
+
+#[test]
 fn v3_snapshot_is_rejected_without_implicit_migration_or_file_mutation() {
     let snapshot = json!({
         "schema_version": "asfa-directive-ledger/v3",

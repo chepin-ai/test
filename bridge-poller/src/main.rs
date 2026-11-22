@@ -167,6 +167,11 @@ fn run() -> Result<(), Box<dyn Error>> {
     if ticket_mutations > 1 {
         return Err("ticket mint, transfer, and revoke are mutually exclusive".into());
     }
+    if execute_wave_mode && ticket_mutations != 0 {
+        return Err(
+            "ticket mint, transfer, or revoke cannot be combined with --execute-wave; use --ticketed-execution without a ticket mutation".into(),
+        );
+    }
     let any_ticket_operation = ticketed_execution || ticket_mutations != 0;
     if any_ticket_operation && (state.is_none() || ticket_out.is_none() || ticket_agent.is_none()) {
         return Err("ticket operations require --state, --ticket-out, and --ticket-agent".into());
