@@ -1,0 +1,17 @@
+{"out": "/tmp/asfa-lean-fed-final-run/report.json", "declarations": 6, "status": "EXECUTED_AWAITING_INDEPENDENT_ORACLE"}
+{
+  "schema_version": "qf-lean-federation-oracle/v1",
+  "self_test": {
+    "relation_known_answers": 8,
+    "synthetic_valid": 2,
+    "synthetic_rejections": 4,
+    "projection_known_answers": 3
+  },
+  "report_sha256": "e3c6e116a5936d068ff9679bf8903ec80e1fb37d9fab4f7f021fa3f286c47888",
+  "verdict": "PASS",
+  "declarations": 6,
+  "attestations": 6,
+  "projections": 36,
+  "forged_real_report": "REJECTED_BEFORE_ACCEPTANCE",
+  "boundary": "Independent source, capsule, registry and projection oracle. FORMAL_R1 only; no sandboxed/multi-kernel replay, global activation, CI, federation ACK, or informal-statement fidelity claim."
+}

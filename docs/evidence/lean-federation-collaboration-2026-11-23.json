@@ -1,0 +1,118 @@
+{
+  "schema_version": "asfa-lean-federation-collaboration/v1",
+  "observed_at": "2026-11-23T11:12:48.637294+00:00",
+  "nonce": "QF-LEAN-FED-20261123-01",
+  "classification": "L1_PUBLIC_EVENT_NONCE_ONLY",
+  "implementation_commit": "280d62f3e2225ac7ea314b4492aa51d78a32f6a8",
+  "local_request": {
+    "path": "collaboration/qf-lean-fed-20261123-01.json",
+    "sha256": "227fdff3e3619b035432bd480b8fb46ea4a887c3c7fba69c7bf5db9240d9550f",
+    "status": "LOCAL_STAGED"
+  },
+  "local_mail": {
+    "path": "ci-control/bridge/inbox/MAIL-20261123T111132Z-QF-LEAN-FED-01.md",
+    "sha256": "b617d44a0e1d0026bc7e211e0c264893ecdb77115d8eed64e9a13f2611365eef",
+    "status": "LOCAL_STAGED"
+  },
+  "authorization_carrier_scan": {
+    "present_names": [],
+    "credential_values_read": false,
+    "note": "No GitHub/CMD/OTP credential carrier is present in this runtime; historical or consumed credentials were not reused."
+  },
+  "public_dispatch_attempts": [
+    {
+      "line": "cisvr",
+      "method": "POST",
+      "url": "https://api.github.com/repos/chepin-ai/vci-inbox/dispatches",
+      "event_type": "qf_lean_federation",
+      "payload_sha256": "d9c75a326429041a30e14cf5a923cb34088c73d83d647799df94dac028ed97da",
+      "http_status": 401,
+      "response_message": "Requires authentication",
+      "response_sha256": "b7dbd173f33b19650f61b1c528737e2037cf768d90076fdfce5d32541765e29e",
+      "transport_error": null,
+      "delivery_verdict": "NOT_DELIVERED"
+    },
+    {
+      "line": "usrm",
+      "method": "POST",
+      "url": "https://api.github.com/repos/chepin-ai/vci-playground/dispatches",
+      "event_type": "lean-build",
+      "payload_sha256": "39ebcdb0e673dfa5e84f25f2d3ffef0245bccbffe1082e686592e351638d1533",
+      "http_status": 401,
+      "response_message": "Requires authentication",
+      "response_sha256": "b7dbd173f33b19650f61b1c528737e2037cf768d90076fdfce5d32541765e29e",
+      "transport_error": null,
+      "delivery_verdict": "NOT_DELIVERED"
+    }
+  ],
+  "line_status": [
+    {
+      "line": "cisvr",
+      "delivery": "NOT_DELIVERED",
+      "ack": "NONE",
+      "verified_complete": false
+    },
+    {
+      "line": "usrm",
+      "delivery": "NOT_DELIVERED",
+      "ack": "NONE",
+      "verified_complete": false
+    },
+    {
+      "line": "vinf",
+      "delivery": "NOT_DELIVERED",
+      "ack": "NONE",
+      "verified_complete": false
+    },
+    {
+      "line": "ucif2",
+      "delivery": "NOT_DELIVERED",
+      "ack": "NONE",
+      "verified_complete": false
+    },
+    {
+      "line": "qgl",
+      "delivery": "NOT_DELIVERED",
+      "ack": "NONE",
+      "verified_complete": false
+    },
+    {
+      "line": "cfts",
+      "delivery": "NOT_DELIVERED",
+      "ack": "NONE",
+      "verified_complete": false
+    },
+    {
+      "line": "qtlv",
+      "delivery": "NOT_DELIVERED",
+      "ack": "NONE",
+      "verified_complete": false
+    },
+    {
+      "line": "lgt",
+      "delivery": "NOT_DELIVERED",
+      "ack": "NONE",
+      "verified_complete": false
+    },
+    {
+      "line": "qlv",
+      "delivery": "NOT_DELIVERED",
+      "ack": "NONE",
+      "verified_complete": false
+    },
+    {
+      "line": "lvlu",
+      "delivery": "NOT_DELIVERED",
+      "ack": "NONE",
+      "verified_complete": false
+    }
+  ],
+  "external_acks": [],
+  "verdict": "LOCAL_CARD_AND_REAL_NEGATIVE_DISPATCH_ONLY",
+  "not_proven": [
+    "Neither API attempt authenticated; HTTP 401 is a real negative dispatch result, not delivery or line acknowledgement.",
+    "No global discussion, cisvr/usrm response, external CI run, cross-line activation or verified completion is established.",
+    "The two attempts do not establish that all repository credentials are invalid; only this runtime lacked an authorized carrier.",
+    "No private payload, credential value, QPU job or QPU shot was included or triggered."
+  ]
+}

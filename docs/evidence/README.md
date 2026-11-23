@@ -153,3 +153,15 @@ cmp /tmp/ticket-consistency-recheck.json \
 - `ticket-mixed-mode-publication-2026-11-23.json`：最终 remote、公开 main、ahead／behind、推送、外部 CI 与联邦状态的独立记录；以文件实测值为准。
 
 本轮只证明本地 CLI 组合门禁与快照历史性质。Transfer 混合态可在原结果时间戳吸收，不是永久丢失；Revoke 混合态不能经任务票接口恢复。旧执行单独使用仍受支持，本地 PASS 不构成认证、共识、ZK、CI、分布式 exactly-once 或联盟 active 声称。
+
+## 2026-11-23：Lean 证据联邦最小切片
+
+- `lean-federation-preregister-2026-11-23.json`：实现前登记的 LEAN-01–06 与 COLLAB-01，保持 `PREREGISTERED_ONLY`。
+- `lean-federation-2026-11-23/report.json`：实现提交 `280d62f3e2225ac7ea314b4492aa51d78a32f6a8` 的真实 Lean 构建、capsule、registry、冲突控制与投影报告；SHA-256 为 `e3c6e116a5936d068ff9679bf8903ec80e1fb37d9fab4f7f021fa3f286c47888`。
+- `lean-federation-2026-11-23/oracle.json`：独立判读 PASS，6 声明、6 attestations、36 投影，伪造真实报告在验收前被拒绝。
+- `lean-federation-2026-11-23/capsule.json`、`registry.json`、`projections.json`：机器可读声明身份、环境证明与跨基座投影；嵌入对拍一致。
+- `lean-federation-2026-11-23/rust-build-all.log` 与 `lean-gate.log`：无 `.git`、空 target／`.lake` 的完整双门禁；119 项 Rust 测试保持通过。
+- `lean-federation-2026-11-23/lake-check-sandbox-failure.log`：官方隔离重放启动失败原记录；R2／多内核不成立，未采用非隔离绕行。
+- `lean-federation-collaboration-2026-11-23.json`：cisvr／usrm 两次真实 HTTP 401 和各线 `NOT_DELIVERED／ACK=NONE`，不构成全局讨论或响应证据。
+- `lean-federation-evidence-manifest-2026-11-23.json`：实现、环境、全部 artifact 哈希、结果与未覆盖边界的总索引。
+- `lean-federation-publication-2026-11-23.json`：唯一远端、HTTP/1.1 重读成功、`ahead_by=10, behind_by=0`、`NOT_PUSHED` 和无外部 CI／ACK 的发布边界。

@@ -260,6 +260,19 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 实现提交为 `88e01c894b88773fe5a5f89bac54b285c9d02f1c`，只改变 CLI 组合校验及其验证。探索后预注册保持 `AFTER_EXPLORATORY_REPRO_BEFORE_FIX`；最终新端来自该提交归档的无 `.git`、空 target 重建。完整门禁为 119 项 Rust 测试及既有独立判读、固定夹具和 smoke。证据总索引为 `docs/evidence/ticket-mixed-mode-evidence-manifest-2026-11-23.json`。
 
+### 3.12 2026-11-23 Lean 证据联邦与跨基座投影门禁
+
+| 攻击／碰撞 | 登记拒绝条件 | 自动化与实测对应 |
+|---|---|---|
+| coupling／bridging 经闭包升级为传递关系 | 无显式组合规则即失败 | Lean `coupling_not_transitive`、`bridging_not_transitive`；独立 Python 8 个关系已知答案 |
+| lossy 图谱／复形／超图／范畴／LaTeX 投影升格 FORMAL | 只有 canonical JSON 精确投影保持 R1，其余均为 CANDIDATE＋反向重放义务 | 6 声明×6 基座共 36 投影逐项复核；Lean 与 Python 均拒绝 FORMAL 升格 |
+| 同逻辑键异命题覆盖 | 整批 `statementConflict`，registry 字节不变 | Lean 冲突定理＋真实同步负控；独立判读亲自构造哈希已修复的语义冲突 |
+| 新环境改写原生产者 | 同键同命题只追加 attestation，幂等重放不变 | Lean 来源保持定理；合成双环境、双 origin 和重放已知答案 |
+| runner 自报证明或哈希修复伪造 | 独立源树、#check、axiom、registry、projection 重建并先自证 | 2 个合成有效、4 个合成拒绝、3 个投影边界；伪造真实报告验收前拒绝 |
+| 普通构建冒充沙箱／多内核／跨机 | R1 与 R2 严格分层 | `lake check` 在 bwrap 初始化失败即记 `NOT_ESTABLISHED`，未使用非隔离绕行 |
+
+实现提交为 `280d62f3e2225ac7ea314b4492aa51d78a32f6a8`。当前仅本线 `FORMAL_R1`；usrm legacy 包未激活，跨线 ACK、外部 CI 和全局统一不成立。总索引为 `docs/evidence/lean-federation-evidence-manifest-2026-11-23.json`。
+
 ## 4. JCS 候选包评估与不采用结论
 
 检索到 `serde_jcs 0.2.0`、`jcs-canonicalize 0.2.1`、`serde_json_canonicalizer 0.4.1`。目前只评估，没有把任何候选加入本仓依赖。

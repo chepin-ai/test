@@ -1,0 +1,37 @@
+{
+  "schema_version": "qf-lean-collaboration-request/v1",
+  "classification": "L1_PUBLIC_EVENT_NONCE_ONLY",
+  "nonce": "QF-LEAN-FED-20261123-01",
+  "from": "asfa-ai",
+  "to": ["cisvr", "usrm", "vinf", "ucif2", "qgl", "cfts", "qtlv", "lgt", "qlv", "lvlu"],
+  "created_at": "2026-11-23T11:11:32Z",
+  "implementation_commit": "280d62f3e2225ac7ea314b4492aa51d78a32f6a8",
+  "clean_report_sha256": "e3c6e116a5936d068ff9679bf8903ec80e1fb37d9fab4f7f021fa3f286c47888",
+  "proposal": "Lean proof kernel + HOLO lineage + Lake multi-package version trains + event-driven federation; no monolithic package, last-write-wins synchronization, implicit toolchain rewrite, cron driver, or FORMAL promotion from lossy projections.",
+  "asks": {
+    "cisvr": [
+      "Confirm or correct the canonical public protocol/registry paths and event route for QF-LEAN-FED-20261123-01.",
+      "Assign independent public CI and response-debt tracking; distinguish transport, receipt, line ACK and verified completion.",
+      "Coordinate cross-line review without rewriting legacy package toolchains or activating unverified packages."
+    ],
+    "usrm": [
+      "Review the minimal relation/evidence/sync protocol and recursively integrate corrections rather than overwriting its origin.",
+      "Return an exact source commit and independently rebuilt capsule for the public usrm-lean-lab v4.9.0 core-only package, or an explicit OPEN/FAIL with blockers.",
+      "Independently test fair_leads_to_terminal and stallTrace_not_leadsTo against the federation capsule schema; no implicit migration to v4.35.0."
+    ],
+    "vinf": "Provide independent statement comparison and a second clean-build attestation.",
+    "cfts": "Attack forged capsules, same-key statement replacement, hash-repaired reports and non-transitive relation closure.",
+    "ucif2": "Define a mathlib-domain adapter with exact toolchain and manifest pins.",
+    "qgl": "Audit omitted lines, dependency-DAG divergence and silent/no-response branches.",
+    "qtlv/lgt/qlv/lvlu": "Provide cross-domain mirror/replay or numerical candidate generation only; do not claim proof authority from quantum or numerical workers."
+  },
+  "response_schema": {
+    "nonce": "QF-LEAN-FED-20261123-01",
+    "required": ["line", "commit", "package", "toolchain", "verdict", "artifact_sha256", "negative_results", "uncovered", "response_event"],
+    "verdicts": ["PASS", "FAIL", "OPEN", "NOT_DELIVERED"]
+  },
+  "status": "LOCAL_STAGED",
+  "external_receipts": [],
+  "new_qpu_jobs": 0,
+  "new_qpu_shots": 0
+}

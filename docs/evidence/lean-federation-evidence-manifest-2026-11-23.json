@@ -1,0 +1,123 @@
+{
+  "schema_version": "asfa-lean-federation-evidence-manifest/v1",
+  "date": "2026-11-23",
+  "implementation_commit": "280d62f3e2225ac7ea314b4492aa51d78a32f6a8",
+  "baseline_commit": "04166e8974583594ff20990d8fa7920c91c0c78a",
+  "preregistration": {
+    "stage": "BEFORE_IMPLEMENTATION",
+    "result_status": "PREREGISTERED_ONLY"
+  },
+  "clean_rebuild": {
+    "source": "git archive of implementation_commit",
+    "git_directory_present": false,
+    "rust_target_initially_present": false,
+    "lean_lake_directory_initially_present": false,
+    "implementation_archive_sha256": "3e060657ec16ab5dc43a62d8ce49013912ec981cb85fa69d91db1576b171179d",
+    "lean_release_archive_sha256": "7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d",
+    "environment_correction": "The first full-gate launch found cargo absent after a temporary-environment reset and failed before target creation. Stable Rust was reinstalled; the logged successful run restarted with empty Rust target and Lean .lake directories."
+  },
+  "results": {
+    "status": "LOCAL_FORMAL_R1_PASS",
+    "rust_tests": 119,
+    "lean_build": "PASS",
+    "axiom_audit": "PASS",
+    "declarations": 6,
+    "attestations": 6,
+    "projections": 36,
+    "independent_oracle": "PASS",
+    "oracle_self_test": {
+      "relation_known_answers": 8,
+      "synthetic_valid": 2,
+      "synthetic_rejections": 4,
+      "projection_known_answers": 3
+    },
+    "forged_real_report": "REJECTED_BEFORE_ACCEPTANCE",
+    "same_key_conflict": "REJECTED_NO_WRITE",
+    "idempotent_replay": "BYTE_IDENTICAL",
+    "legacy_usrm": "REGISTERED_NOT_ACTIVATED",
+    "sandboxed_kernel_replay": "NOT_ESTABLISHED",
+    "independent_kernel_replay": "NOT_ESTABLISHED",
+    "cross_machine_replay": "NOT_ESTABLISHED",
+    "external_ci": "NOT_ESTABLISHED"
+  },
+  "collaboration": {
+    "nonce": "QF-LEAN-FED-20261123-01",
+    "cisvr_http_status": 401,
+    "usrm_http_status": 401,
+    "delivery": "NOT_DELIVERED",
+    "external_acks": [],
+    "global_discussion_verified": false
+  },
+  "repository_artifacts": [
+    {
+      "path": "docs/evidence/lean-federation-2026-11-23/report.json",
+      "sha256": "e3c6e116a5936d068ff9679bf8903ec80e1fb37d9fab4f7f021fa3f286c47888",
+      "role": "real committed-source Lean build, capsule synchronization, conflict control and projections"
+    },
+    {
+      "path": "docs/evidence/lean-federation-2026-11-23/oracle.json",
+      "sha256": "1007fff1f7bb839774a8bda20409c61d96b11bcd1a215edf723a586ee5aa58ef",
+      "role": "independent PASS after self-tests and forged-report rejection"
+    },
+    {
+      "path": "docs/evidence/lean-federation-2026-11-23/capsule.json",
+      "sha256": "d1063d44b60ec078e9605fa068303a8c9651d1ce81af7b65ffdbda73ee58a588",
+      "role": "six declaration certificates and exact provenance"
+    },
+    {
+      "path": "docs/evidence/lean-federation-2026-11-23/registry.json",
+      "sha256": "d2e5d050201881f6e68e6a1c8bbad4408c8b7bbdee6575f31c4051103ad40178",
+      "role": "six local FORMAL_R1 declarations and six attestations; usrm remains unactivated"
+    },
+    {
+      "path": "docs/evidence/lean-federation-2026-11-23/projections.json",
+      "sha256": "e59e5423245386de7814273cafba825a0a96b87aaeb4386f4db65c0062c1e3ce",
+      "role": "36 exact/lossy cross-base projections with reverse replay obligations"
+    },
+    {
+      "path": "docs/evidence/lean-federation-2026-11-23/lake-build.log",
+      "sha256": "f959ab4cd32722a43814bd24ef70aab40ed842359b484b1094276bb6e1dd3ae5",
+      "role": "committed-source Lean build log"
+    },
+    {
+      "path": "docs/evidence/lean-federation-2026-11-23/axiom-audit.log",
+      "sha256": "1eb01b9b6b9eb18329bab170150b05dd4ae8034dac8f64278183ec31afc5f4c7",
+      "role": "actual #check statements and axiom whitelist evidence"
+    },
+    {
+      "path": "docs/evidence/lean-federation-2026-11-23/rust-build-all.log",
+      "sha256": "78d0dbfb31810b3ef2dc0c2c0a0595da8c443e9ee28ca9673b102333a1185d39",
+      "role": "clean full Rust and existing independent gates"
+    },
+    {
+      "path": "docs/evidence/lean-federation-2026-11-23/lean-gate.log",
+      "sha256": "43379138e406bbf791f7851d22cf3a49004392c8841e45185e62fe401a05c2cf",
+      "role": "committed-source Lean gate and independent oracle output"
+    },
+    {
+      "path": "docs/evidence/lean-federation-2026-11-23/lake-check-sandbox-failure.log",
+      "sha256": "ec3b9efcdffdd7a1f9e3a98624c66181d5ef9adf6e88217f24546fb9f971519c",
+      "role": "official sandbox replay failed before checking; no bypass verdict"
+    },
+    {
+      "path": "docs/evidence/lean-federation-2026-11-23/environment.txt",
+      "sha256": "f3b9aeb592278becc8d8f2ee330a58e77d5f860b5e2f0ef8fd5f08648b218df6",
+      "role": "toolchains, clean-rebuild conditions, archive hashes and environment correction"
+    },
+    {
+      "path": "docs/evidence/lean-federation-preregister-2026-11-23.json",
+      "sha256": "70a5425aec086c9c1cd90be45a7283172bcdbc3cbcd1321fa8f42f57cde9f796"
+    },
+    {
+      "path": "docs/evidence/lean-federation-collaboration-2026-11-23.json",
+      "sha256": "735146df84856c93625d31de94a6125f45f7920053efe8412d8e26b82d2d6075"
+    }
+  ],
+  "boundaries": [
+    "FORMAL_R1 covers only the six local Lean relation/evidence/synchronization theorems and their exact source capsule.",
+    "No sandboxed or independent-kernel replay is claimed; bwrap failed before lake check started and no no-sandbox bypass was used.",
+    "Lean acceptance does not establish informal statement fidelity, external QF-OS canon, graph semantics, global package migration, or cross-line mathematical equivalence.",
+    "Local mail and API attempts are not global discussion, delivery, ACK, CI or federation activation. Both dispatches returned HTTP 401.",
+    "Hashes are provenance digests, not publisher signatures, witnesses, ZK proofs or remote attestation."
+  ]
+}

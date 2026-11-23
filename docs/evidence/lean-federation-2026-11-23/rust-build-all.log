@@ -1,0 +1,595 @@
+    Updating `rsproxy-sparse` index
+ Downloading crates ...
+  Downloaded flate2 v1.1.11 (registry `rsproxy-sparse`)
+  Downloaded digest v0.10.7 (registry `rsproxy-sparse`)
+  Downloaded displaydoc v0.2.7 (registry `rsproxy-sparse`)
+  Downloaded icu_properties_data v2.4.0 (registry `rsproxy-sparse`)
+  Downloaded adler2 v2.0.1 (registry `rsproxy-sparse`)
+  Downloaded block-buffer v0.10.4 (registry `rsproxy-sparse`)
+  Downloaded serde_core v1.0.229 (registry `rsproxy-sparse`)
+  Downloaded thiserror v2.0.21 (registry `rsproxy-sparse`)
+  Downloaded utf_types v1.0.0 (registry `rsproxy-sparse`)
+  Downloaded icu_locale_core v2.4.0 (registry `rsproxy-sparse`)
+  Downloaded litemap v0.8.3 (registry `rsproxy-sparse`)
+  Downloaded zerofrom v0.1.8 (registry `rsproxy-sparse`)
+  Downloaded version_check v0.9.5 (registry `rsproxy-sparse`)
+  Downloaded shlex v2.0.1 (registry `rsproxy-sparse`)
+  Downloaded tinystr v0.8.5 (registry `rsproxy-sparse`)
+  Downloaded utf8_iter v1.1.0 (registry `rsproxy-sparse`)
+  Downloaded crc32fast v1.5.4 (registry `rsproxy-sparse`)
+  Downloaded icu_normalizer_data v2.4.0 (registry `rsproxy-sparse`)
+  Downloaded zeroize v1.9.1 (registry `rsproxy-sparse`)
+  Downloaded icu_collections v2.4.0 (registry `rsproxy-sparse`)
+  Downloaded untrusted v0.9.0 (registry `rsproxy-sparse`)
+  Downloaded find-msvc-tools v0.1.15 (registry `rsproxy-sparse`)
+  Downloaded idna_adapter v1.2.2 (registry `rsproxy-sparse`)
+  Downloaded zerofrom-derive v0.1.8 (registry `rsproxy-sparse`)
+  Downloaded cpufeatures v0.2.17 (registry `rsproxy-sparse`)
+  Downloaded cfg-if v1.0.5 (registry `rsproxy-sparse`)
+  Downloaded icu_normalizer v2.4.0 (registry `rsproxy-sparse`)
+  Downloaded fs2 v0.4.3 (registry `rsproxy-sparse`)
+  Downloaded synstructure v0.14.0 (registry `rsproxy-sparse`)
+  Downloaded cc v1.11.1 (registry `rsproxy-sparse`)
+  Downloaded url v2.5.8 (registry `rsproxy-sparse`)
+  Downloaded rustls-pki-types v1.15.1 (registry `rsproxy-sparse`)
+  Downloaded zerovec v0.11.9 (registry `rsproxy-sparse`)
+  Downloaded rustls-webpki v0.103.16 (registry `rsproxy-sparse`)
+  Downloaded sha2 v0.10.9 (registry `rsproxy-sparse`)
+  Downloaded miniz_oxide v0.9.1 (registry `rsproxy-sparse`)
+  Downloaded libc v0.2.191 (registry `rsproxy-sparse`)
+  Downloaded memchr v2.8.3 (registry `rsproxy-sparse`)
+  Downloaded icu_provider v2.4.0 (registry `rsproxy-sparse`)
+  Downloaded log v0.4.35 (registry `rsproxy-sparse`)
+  Downloaded proc-macro2 v1.0.107 (registry `rsproxy-sparse`)
+  Downloaded thiserror-impl v2.0.21 (registry `rsproxy-sparse`)
+  Downloaded webpki-roots v1.0.11 (registry `rsproxy-sparse`)
+  Downloaded writeable v0.6.4 (registry `rsproxy-sparse`)
+  Downloaded rustls v0.23.46 (registry `rsproxy-sparse`)
+  Downloaded smallvec v1.16.4 (registry `rsproxy-sparse`)
+  Downloaded syn v3.0.9 (registry `rsproxy-sparse`)
+  Downloaded serde_json v1.0.154 (registry `rsproxy-sparse`)
+  Downloaded zmij v1.0.23 (registry `rsproxy-sparse`)
+  Downloaded itoa v1.0.18 (registry `rsproxy-sparse`)
+  Downloaded form_urlencoded v1.2.2 (registry `rsproxy-sparse`)
+  Downloaded ureq v2.12.1 (registry `rsproxy-sparse`)
+  Downloaded percent-encoding v2.3.2 (registry `rsproxy-sparse`)
+  Downloaded quote v1.0.47 (registry `rsproxy-sparse`)
+  Downloaded serde_derive v1.0.229 (registry `rsproxy-sparse`)
+  Downloaded simd-adler32 v0.3.10 (registry `rsproxy-sparse`)
+  Downloaded unicode-ident v1.0.27 (registry `rsproxy-sparse`)
+  Downloaded yoke-derive v0.8.4 (registry `rsproxy-sparse`)
+  Downloaded zerotrie v0.2.5 (registry `rsproxy-sparse`)
+  Downloaded serde v1.0.229 (registry `rsproxy-sparse`)
+  Downloaded stable_deref_trait v1.2.1 (registry `rsproxy-sparse`)
+  Downloaded generic-array v0.14.7 (registry `rsproxy-sparse`)
+  Downloaded potential_utf v0.1.6 (registry `rsproxy-sparse`)
+  Downloaded zerovec-derive v0.11.7 (registry `rsproxy-sparse`)
+  Downloaded getrandom v0.2.17 (registry `rsproxy-sparse`)
+  Downloaded ring v0.17.14 (registry `rsproxy-sparse`)
+  Downloaded idna v1.1.0 (registry `rsproxy-sparse`)
+  Downloaded zlib-rs v0.6.8 (registry `rsproxy-sparse`)
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://rsproxy.cn/api/v1/crates/base64/0.22.1/download` (101.126.58.175), got 504
+body:
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>TLB</center>
+</body>
+</html>
+
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://rsproxy.cn/api/v1/crates/crypto-common/0.1.7/download` (101.126.58.175), got 504
+body:
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>TLB</center>
+</body>
+</html>
+
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://rsproxy.cn/api/v1/crates/icu_properties/2.4.0/download` (101.126.58.175), got 504
+body:
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>TLB</center>
+</body>
+</html>
+
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://rsproxy.cn/api/v1/crates/once_cell/1.21.4/download` (101.126.58.175), got 504
+body:
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>TLB</center>
+</body>
+</html>
+
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://rsproxy.cn/api/v1/crates/subtle/2.6.1/download` (101.126.58.175), got 504
+body:
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>TLB</center>
+</body>
+</html>
+
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://rsproxy.cn/api/v1/crates/typenum/1.20.1/download` (101.126.58.175), got 504
+body:
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>TLB</center>
+</body>
+</html>
+
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://rsproxy.cn/api/v1/crates/webpki-roots/0.26.11/download` (101.126.58.175), got 504
+body:
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>TLB</center>
+</body>
+</html>
+
+warning: spurious network error (3 tries remaining): failed to get successful HTTP response from `https://rsproxy.cn/api/v1/crates/yoke/0.8.4/download` (101.126.58.175), got 504
+body:
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>TLB</center>
+</body>
+</html>
+
+  Downloaded base64 v0.22.1 (registry `rsproxy-sparse`)
+  Downloaded icu_properties v2.4.0 (registry `rsproxy-sparse`)
+  Downloaded typenum v1.20.1 (registry `rsproxy-sparse`)
+  Downloaded yoke v0.8.4 (registry `rsproxy-sparse`)
+  Downloaded subtle v2.6.1 (registry `rsproxy-sparse`)
+  Downloaded once_cell v1.21.4 (registry `rsproxy-sparse`)
+  Downloaded webpki-roots v0.26.11 (registry `rsproxy-sparse`)
+  Downloaded crypto-common v0.1.7 (registry `rsproxy-sparse`)
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+    Checking stable_deref_trait v1.2.1
+    Checking cfg-if v1.0.5
+   Compiling find-msvc-tools v0.1.15
+    Checking utf_types v1.0.0
+   Compiling shlex v2.0.1
+   Compiling syn v3.0.9
+    Checking litemap v0.8.3
+   Compiling libc v0.2.191
+    Checking writeable v0.6.4
+   Compiling cc v1.11.1
+   Compiling synstructure v0.14.0
+    Checking utf8_iter v1.1.0
+   Compiling serde_core v1.0.229
+   Compiling version_check v0.9.5
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+    Checking zerofrom v0.1.8
+   Compiling zerovec-derive v0.11.7
+    Checking yoke v0.8.4
+   Compiling displaydoc v0.2.7
+    Checking zerotrie v0.2.5
+    Checking zerovec v0.11.9
+   Compiling icu_normalizer_data v2.4.0
+   Compiling icu_properties_data v2.4.0
+   Compiling generic-array v0.14.7
+   Compiling ring v0.17.14
+    Checking tinystr v0.8.5
+    Checking icu_locale_core v2.4.0
+    Checking potential_utf v0.1.6
+    Checking icu_collections v2.4.0
+    Checking icu_provider v2.4.0
+    Checking zeroize v1.9.1
+   Compiling zmij v1.0.23
+    Checking rustls-pki-types v1.15.1
+   Compiling serde_json v1.0.154
+    Checking typenum v1.20.1
+    Checking smallvec v1.16.4
+    Checking icu_normalizer v2.4.0
+    Checking icu_properties v2.4.0
+    Checking getrandom v0.2.17
+    Checking memchr v2.8.3
+    Checking untrusted v0.9.0
+    Checking itoa v1.0.18
+   Compiling crc32fast v1.5.4
+    Checking idna_adapter v1.2.2
+   Compiling rustls v0.23.46
+    Checking adler2 v2.0.1
+    Checking simd-adler32 v0.3.10
+    Checking percent-encoding v2.3.2
+    Checking form_urlencoded v1.2.2
+    Checking miniz_oxide v0.9.1
+    Checking rustls-webpki v0.103.16
+    Checking idna v1.1.0
+    Checking crypto-common v0.1.7
+    Checking block-buffer v0.10.4
+    Checking webpki-roots v1.0.11
+    Checking once_cell v1.21.4
+    Checking log v0.4.35
+   Compiling thiserror v2.0.21
+    Checking subtle v2.6.1
+   Compiling serde v1.0.229
+    Checking webpki-roots v0.26.11
+    Checking digest v0.10.7
+    Checking flate2 v1.1.11
+    Checking url v2.5.8
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.21
+    Checking cpufeatures v0.2.17
+    Checking base64 v0.22.1
+    Checking ureq v2.12.1
+    Checking sha2 v0.10.9
+    Checking fs2 v0.4.3
+    Checking asfa-kernel v0.2.0 (/tmp/asfa-lean-fed-final-src/kernel)
+    Checking asfa-userspace v0.2.0 (/tmp/asfa-lean-fed-final-src/userspace)
+    Checking asfa-bridge-poller v0.2.0 (/tmp/asfa-lean-fed-final-src/bridge-poller)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 23.47s
+   Compiling stable_deref_trait v1.2.1
+   Compiling zerofrom v0.1.8
+   Compiling utf_types v1.0.0
+   Compiling yoke v0.8.4
+   Compiling zerovec v0.11.9
+   Compiling cfg-if v1.0.5
+   Compiling litemap v0.8.3
+   Compiling writeable v0.6.4
+   Compiling zerotrie v0.2.5
+   Compiling tinystr v0.8.5
+   Compiling icu_locale_core v2.4.0
+   Compiling potential_utf v0.1.6
+   Compiling utf8_iter v1.1.0
+   Compiling icu_collections v2.4.0
+   Compiling libc v0.2.191
+   Compiling icu_provider v2.4.0
+   Compiling zeroize v1.9.1
+   Compiling rustls-pki-types v1.15.1
+   Compiling serde_core v1.0.229
+   Compiling icu_normalizer_data v2.4.0
+   Compiling icu_properties_data v2.4.0
+   Compiling typenum v1.20.1
+   Compiling smallvec v1.16.4
+   Compiling icu_normalizer v2.4.0
+   Compiling generic-array v0.14.7
+   Compiling icu_properties v2.4.0
+   Compiling getrandom v0.2.17
+   Compiling zmij v1.0.23
+   Compiling untrusted v0.9.0
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling serde_json v1.0.154
+   Compiling idna_adapter v1.2.2
+   Compiling ring v0.17.14
+   Compiling adler2 v2.0.1
+   Compiling simd-adler32 v0.3.10
+   Compiling percent-encoding v2.3.2
+   Compiling form_urlencoded v1.2.2
+   Compiling rustls-webpki v0.103.16
+   Compiling miniz_oxide v0.9.1
+   Compiling idna v1.1.0
+   Compiling crc32fast v1.5.4
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling webpki-roots v1.0.11
+   Compiling once_cell v1.21.4
+   Compiling log v0.4.35
+   Compiling subtle v2.6.1
+   Compiling webpki-roots v0.26.11
+   Compiling digest v0.10.7
+   Compiling rustls v0.23.46
+   Compiling flate2 v1.1.11
+   Compiling url v2.5.8
+   Compiling base64 v0.22.1
+   Compiling cpufeatures v0.2.17
+   Compiling sha2 v0.10.9
+   Compiling serde v1.0.229
+   Compiling thiserror v2.0.21
+   Compiling fs2 v0.4.3
+   Compiling asfa-kernel v0.2.0 (/tmp/asfa-lean-fed-final-src/kernel)
+   Compiling asfa-userspace v0.2.0 (/tmp/asfa-lean-fed-final-src/userspace)
+   Compiling ureq v2.12.1
+   Compiling asfa-bridge-poller v0.2.0 (/tmp/asfa-lean-fed-final-src/bridge-poller)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.90s
+     Running unittests src/lib.rs (/tmp/asfa-lean-fed-final-target/debug/build/asfa-bridge-poller/0fd4a40108602c96/out/asfa_bridge_poller-0fd4a40108602c96)
+
+running 56 tests
+test chain::tests::append_rejects_forged_source_without_mutating_chain ... ok
+test chain::tests::appended_blocks_verify_and_tampering_fails ... ok
+test chain::tests::broken_previous_link_fails_closed ... ok
+test chain::tests::genesis_is_valid_only_with_zero_height ... ok
+test chain::tests::directives_are_bound_to_blocks_not_legacy_metadata ... ok
+test chain::tests::manually_inserted_forged_directive_fails_verification ... ok
+test egress::tests::mixed_answers_and_answer_capacity_fail_closed ... ok
+test egress::tests::preregistered_address_classes_match_independent_known_answers ... ok
+test execution::tests::builtins_dead_letters_and_replay_are_real_and_idempotent ... ok
+test execution::tests::capacity_failure_leaves_the_caller_ledger_byte_for_byte_equivalent ... ok
+test execution::tests::consumed_without_an_outcome_fails_closed_without_mutation ... ok
+test ledger::tests::atomic_save_and_load_preserves_consumed_tombstones ... ok
+test ledger::tests::atomic_save_exhaustion_preserves_every_collision ... ok
+test ledger::tests::atomic_save_preserves_preexisting_temporary_symlink ... ok
+test ledger::tests::changed_payload_with_same_id_is_a_conflict ... ok
+test ledger::tests::consumption_leaves_a_replay_blocking_tombstone ... ok
+test ledger::tests::ingestion_is_idempotent_and_rejects_expired ... ok
+test ledger::tests::ledger_rejects_forged_source_and_empty_fields ... ok
+test ledger::tests::pending_and_prune_recheck_expiration ... ok
+test ledger::tests::resource_limits_preserve_pending_work_and_replay_tombstones ... ok
+test ledger::tests::restore_enforces_local_cardinality_limits ... ok
+test ledger::tests::restore_rejects_duplicate_and_malformed_checkpoints ... ok
+test ledger::tests::restore_rejects_pending_consumed_overlap ... ok
+test ledger::tests::snapshot_parser_rejects_duplicate_members ... ok
+test ledger::tests::snapshot_round_trip_is_deterministic ... ok
+test ledger::tests::structured_keys_prevent_separator_collisions ... ok
+test output_paths::tests::dangling_symlink_alias_is_rejected_before_target_creation ... ok
+test output_paths::tests::distinct_nonexistent_nested_outputs_are_accepted ... ok
+test output_paths::tests::existing_hardlinks_share_an_output_identity ... ok
+test output_paths::tests::parent_and_dot_aliases_resolve_to_one_output ... ok
+test poller::tests::hostname_resolving_to_loopback_is_blocked_before_any_dial ... ok
+test poller::tests::validated_resolution_is_the_only_resolution_and_the_actual_dial_target ... ok
+test state_lock::tests::dangling_symlink_sidecar_is_rejected_without_creating_target ... ok
+test state_lock::tests::final_symlink_alias_contends_for_the_target_lock ... ok
+test state_lock::tests::regular_sidecar_excludes_second_writer_after_state_rename ... ok
+test state_lock::tests::sidecar_excludes_a_second_writer_and_releases_on_drop ... ok
+test state_lock::tests::symlink_sidecar_is_rejected_without_touching_state ... ok
+test strict_json::tests::accepts_nested_unique_objects_and_escape_decoding ... ok
+test strict_json::tests::bounded_file_reader_rejects_oversize_input ... ok
+test strict_json::tests::exact_default_depth_boundary_is_enforced ... ok
+test egress::tests::resolution_wait_is_bounded_even_when_the_worker_is_slow ... ok
+test strict_json::tests::node_budget_is_shared_across_branches ... ok
+test strict_json::tests::rejects_duplicate_members_at_every_depth ... ok
+test strict_json::tests::typed_entry_uses_the_same_uniqueness_gate ... ok
+test strict_json::tests::exact_default_node_boundary_is_enforced ... ok
+test ticket::tests::instruction_text_is_hashed_as_data_not_dispatched_as_an_action ... ok
+test ticket::tests::corrupt_v5_history_and_schema_mixes_fail_closed ... ok
+test ticket::tests::only_controller_revokes_and_revocation_kills_every_descendant ... ok
+test ticket::tests::self_consistent_duplicate_job_mint_is_still_rejected ... ok
+test ticket::tests::mint_execute_restore_and_replay_form_one_atomic_history ... ok
+test ticket::tests::self_consistent_post_revoke_descendant_history_is_rejected ... ok
+test ticket::tests::transfer_consumes_parent_and_moves_the_single_job_chain_tip ... ok
+test ticket::tests::wrong_recipient_stale_plan_duplicate_mint_and_double_spend_do_not_mutate ... ok
+test wave::tests::wave_is_fair_bounded_deterministic_and_non_mutating ... ok
+test wave::tests::wave_requires_bound_ledger_and_nonzero_quotas ... ok
+test ticket::tests::twenty_first_root_ticket_fails_without_consuming_parent ... ok
+
+test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running unittests src/main.rs (/tmp/asfa-lean-fed-final-target/debug/build/asfa-bridge-poller/133bdeaf91cefe8f/out/asfa_bridge_poller-133bdeaf91cefe8f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/bridge.rs (/tmp/asfa-lean-fed-final-target/debug/build/asfa-bridge-poller/98b51ccecef100bb/out/bridge-98b51ccecef100bb)
+
+running 49 tests
+test capacity_failures_discard_the_entire_staged_batch ... ok
+test checkpoints_accept_extension_and_reject_rollback_and_forks_without_mutation ... ok
+test cli_capacity_flags_require_values_and_cannot_raise_hard_caps ... ok
+test cli_duplicate_registry_member_does_not_create_state ... ok
+test cli_cross_network_state_reuse_fails_without_overwrite ... ok
+test cli_fresh_execution_persists_recovery_plan_before_report_output ... ok
+test cli_invalid_state_fails_without_overwriting_it ... ok
+test cli_execution_dead_letters_and_report_failure_resume_without_reexecution ... ok
+test cli_json_budget_also_covers_registry_and_snapshot_restore ... ok
+test cli_oversized_registry_fails_before_state_or_report_creation ... ok
+test cli_pending_capacity_does_not_create_state_or_report ... ok
+test cli_json_depth_and_node_budgets_reject_open_outbox_payloads ... ok
+test cli_poll_timeout_flag_requires_a_bounded_value ... ok
+test cli_registry_fanout_fails_before_transport_or_outputs ... ok
+test cli_same_network_policy_change_preserves_state_but_description_change_is_compatible ... ok
+test cli_state_survives_independent_processes_and_blocks_replay ... ok
+test cli_ticket_mutations_cannot_be_combined_with_legacy_execution ... ok
+test cli_v2_snapshot_is_not_implicitly_migrated ... ok
+test cli_tombstone_capacity_preserves_state_and_pending_job ... ok
+test cli_wave_plan_is_deterministic_fair_and_state_bound ... ok
+test default_public_only_policy_blocks_loopback_before_tcp_accept ... ok
+test duplicate_json_members_are_rejected_before_schema_or_chain_processing ... ok
+test execution_fixture_replays_exact_known_answers ... ok
+test file_transport_verifies_genesis_document ... ok
+test forged_directive_source_is_an_observable_failure ... ok
+test hmac_is_explicitly_unsupported_not_treated_as_valid ... ok
+test http_404_is_not_silently_skipped ... ok
+test http_transport_verifies_two_linked_blocks ... ok
+test ingest_outbox_does_not_partially_apply_a_later_forged_block ... ok
+test insecure_transports_require_explicit_opt_in_before_io ... ok
+test malformed_json_is_an_observable_negative_result ... ok
+test outbox_url_must_match_the_declared_canonical_url ... ok
+test oversized_document_is_rejected ... ok
+test policy_digest_binds_security_fields_and_excludes_descriptions ... ok
+test policy_digest_matches_independent_python_known_answer ... ok
+test poll_reports_verified_and_legacy_directives_separately ... ok
+test python_generated_non_ascii_chain_verifies_in_rust ... ok
+test redirects_are_explicit_failures_and_never_reach_the_second_hop ... ok
+test registry_and_document_session_must_match ... ok
+test registry_trust_model_is_enforced_for_every_session ... ok
+test session_trust_is_enforced_before_transport ... ok
+test tampered_http_payload_fails_chain_verification ... ok
+test unknown_protocol_fields_are_rejected_instead_of_silently_ignored ... ok
+test untrusted_session_json_cannot_enable_non_public_egress ... ok
+test v3_snapshot_is_rejected_without_implicit_migration_or_file_mutation ... ok
+test valid_json_with_wrong_schema_is_not_accepted ... ok
+test verified_directive_cannot_reenter_ledger_after_consumption ... ok
+test cli_whole_poll_deadline_prevents_later_transport_and_report ... ok
+test whole_poll_deadline_shrinks_the_active_request ... ok
+
+test result: ok. 49 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running unittests src/lib.rs (/tmp/asfa-lean-fed-final-target/debug/build/asfa-kernel/ab55bbb4dbba15cb/out/asfa_kernel-ab55bbb4dbba15cb)
+
+running 11 tests
+test cognitive::hippocampus::tests::navigation_uses_nearest_position_with_stable_tie_break ... ok
+test cognitive::hippocampus::tests::rejects_nan_and_missing_start ... ok
+test cognitive::hippocampus::tests::retrieves_real_encoded_values ... ok
+test cognitive::hypergraph::tests::completion_is_deterministic_and_subset_based ... ok
+test cognitive::hypergraph::tests::rejects_empty_dimensions ... ok
+test cognitive::hypergraph::tests::traversal_requires_relation_and_shared_agent ... ok
+test cognitive::operad::tests::composition_executes_both_stages_in_order ... ok
+test cognitive::operad::tests::execution_errors_are_not_silently_skipped ... ok
+test cognitive::operad::tests::non_unary_second_stage_cannot_be_composed ... ok
+test cognitive::operad::tests::wrong_arity_is_rejected_before_execution ... ok
+test cognitive::hypergraph::tests::concurrent_creation_never_reuses_ids ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/tmp/asfa-lean-fed-final-target/debug/build/asfa-userspace/dd871241b66dce91/out/asfa_userspace-dd871241b66dce91)
+
+running 3 tests
+test agent::tests::agent_owns_mutable_skills_and_position ... ok
+test skills::tests::registered_skill_executes_real_handler ... ok
+test skills::tests::unknown_and_invalid_skills_fail_loudly ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/cognitive_demo.rs (/tmp/asfa-lean-fed-final-target/debug/build/asfa-userspace/d9aa4c2e822dea01/out/cognitive_demo-d9aa4c2e822dea01)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+credential scan: PASS
+{
+  "oracle_profile": "asfa-v1-python/no-floats/non-jcs",
+  "results": [
+    {
+      "session": "oracle",
+      "height": 1,
+      "latest": "87774ce37ab65262df3f5efdd331ed711104cbd9b35ab562cc94b474109d302f",
+      "verified_directives": 1,
+      "path": "fixtures/python-oracle-outbox.json",
+      "document_sha256": "16de68101d8171fba044d7fcd63a40f1d6bbb2c954d85fa1a2220a5855fce80f",
+      "verdict": "verified",
+      "self_test": [
+        {
+          "case": "escaped_duplicate_member",
+          "verdict": "rejected"
+        },
+        {
+          "case": "tampered_chain",
+          "verdict": "rejected"
+        }
+      ]
+    },
+    {
+      "session": "exec",
+      "height": 1,
+      "latest": "4997c61f4cc4a52b0851b2b29d0bd15e8872271ed64bf81a28f0332b2f93a5f4",
+      "verified_directives": 7,
+      "path": "fixtures/qfos-exec-outbox.json",
+      "document_sha256": "d1f31f00cd34926de7c0a38045f3f04f5d17f370b5c5463846164ec771067352",
+      "verdict": "verified",
+      "self_test": [
+        {
+          "case": "escaped_duplicate_member",
+          "verdict": "rejected"
+        },
+        {
+          "case": "tampered_chain",
+          "verdict": "rejected"
+        }
+      ]
+    },
+    {
+      "session": "asfa-ai",
+      "height": 0,
+      "latest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "verified_directives": 0,
+      "path": "outbox/asfa-ai-outbox.json",
+      "document_sha256": "c0df0e35f63b20049ab9da97fe80509ef918ae0e3b1ad79d5e5f9ac7e36f56b4",
+      "verdict": "verified",
+      "self_test": [
+        {
+          "case": "escaped_duplicate_member",
+          "verdict": "rejected"
+        },
+        {
+          "case": "tampered_chain",
+          "verdict": "rejected"
+        }
+      ]
+    }
+  ]
+}
+policy_oracle=PASS digest=d5805bd450f0778f996fd6094d3a1723114da35be1adee5ca8bd0f361a3c7a21 self_tests=3
+egress oracle self-test: PASS cases=48 rejected=wrong_status,false_verified_summary,actual_connection,extra_record
+json_budget_oracle=PASS depth_limit=64 node_limit=16384 self_tests=5
+path verifier self-test: PASS (5 path oracles, 5 rejected fake reports)
+atomic-write oracle self-test: PASS (4 filesystem answers, 5 fake reports)
+lock-symlink oracle self-test: PASS (5 filesystem answers, 6 fake reports)
+{"self_test": "PASS", "known_answers": 3, "synthetic_valid": 1, "synthetic_rejections": 4}
+{"self_test": "PASS", "base": {"known_answers": 3, "synthetic_valid": 1, "synthetic_rejections": 4}, "mixed_known_answers": 5}
+{
+  "schema_version": "qf-lean-federation-oracle/v1",
+  "self_test": "PASS",
+  "details": {
+    "relation_known_answers": 8,
+    "synthetic_valid": 2,
+    "synthetic_rejections": 4,
+    "projection_known_answers": 3
+  }
+}
+wave_oracle=PASS plan_hash=5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34 jobs=3 deferred=2 self_tests=2
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running `/tmp/asfa-lean-fed-final-target/debug/asfa-bridge-poller --config config/sessions.wave.json --state /tmp/asfa-wave-state.json --out /tmp/asfa-wave-report.json --wave-out /tmp/asfa-wave-plan.json --now 100 --wave-max-jobs 3 --wave-max-per-source 2`
+wave_jobs=3 wave_deferred=2 plan_hash=5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34
+polled=2 verified=2 failed=0
+wave_oracle=PASS plan_hash=5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34 jobs=3 deferred=2 self_tests=2
+wave_oracle=PASS plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a jobs=7 deferred=0 self_tests=2
+execution_oracle=PASS plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a execution_hash=4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c jobs=7 receipts=2 dead_letters=5 self_tests=5
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running `/tmp/asfa-lean-fed-final-target/debug/asfa-bridge-poller --config config/sessions.execution.json --state /tmp/asfa-exec-state.json --out /tmp/asfa-exec-bridge.json --wave-out /tmp/asfa-exec-plan.json --now 50`
+wave_jobs=7 wave_deferred=0 plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a
+polled=1 verified=1 failed=0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running `/tmp/asfa-lean-fed-final-target/debug/asfa-bridge-poller --config config/sessions.execution.json --state /tmp/asfa-exec-state.json --out /tmp/asfa-exec-bridge.json --wave-out /tmp/asfa-exec-plan.json --execute-wave --execution-out /tmp/asfa-exec-report.json --now 100`
+wave_jobs=7 wave_deferred=0 plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a
+execution_succeeded=2 execution_dead_lettered=5 execution_skipped=0 execution_hash=4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c
+polled=1 verified=1 failed=0
+execution_oracle=PASS plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a execution_hash=4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c jobs=7 receipts=2 dead_letters=5 self_tests=5
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running `/tmp/asfa-lean-fed-final-target/debug/asfa-bridge-poller --config config/sessions.execution.json --state /tmp/asfa-exec-state.json --out /tmp/asfa-exec-bridge.json --wave-out /tmp/asfa-exec-plan.json --execute-wave --execution-out /tmp/asfa-exec-replay-report.json --now 100`
+wave_jobs=7 wave_deferred=0 plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a
+execution_succeeded=0 execution_dead_lettered=0 execution_skipped=7 execution_hash=9dce14b4b357f72851dff2d67af085bd8c10e560aca51c414fd07ffe416be36f
+polled=1 verified=1 failed=0
+execution replay: PASS {'offered': 7, 'succeeded': 0, 'dead_lettered': 0, 'skipped_succeeded': 2, 'skipped_dead_lettered': 5}
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running `/tmp/asfa-lean-fed-final-target/debug/asfa-bridge-poller --config config/sessions.execution.json --state /tmp/asfa-ticket-v5/state.json --out /tmp/asfa-ticket-v5/mint-bridge.json --wave-out /tmp/asfa-ticket-v5/plan.json --ticket-mint-root nonce-1 --ticket-controller root --ticket-agent alice --ticket-out /tmp/asfa-ticket-v5/mint.json --now 50`
+wave_jobs=7 wave_deferred=0 plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a
+ticket_operation=mint ticket_count=8 ticket_transactions=1 ticket_ledger_hash=a09760bce33fabde79aec305381617bfe4910fb9ad95a94e27bf67519d13ab2b
+polled=1 verified=1 failed=0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running `/tmp/asfa-lean-fed-final-target/debug/asfa-bridge-poller --config config/sessions.execution.json --state /tmp/asfa-ticket-v5/state.json --out /tmp/asfa-ticket-v5/execute-bridge.json --wave-out /tmp/asfa-ticket-v5/plan.json --execute-wave --ticketed-execution --ticket-agent alice --execution-out /tmp/asfa-ticket-v5/execution.json --ticket-out /tmp/asfa-ticket-v5/execute.json --now 100`
+wave_jobs=7 wave_deferred=0 plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a
+execution_succeeded=2 execution_dead_lettered=5 execution_skipped=0 execution_hash=4cefca364f55ef97a41aeb580ab01b6c16c7a754a02acc78b23e14fc6da5a78c
+ticket_operation=execute ticket_count=8 ticket_transactions=2 ticket_ledger_hash=75e657fb8119056491d1893a9f025c89f0b20bfaff7acef172ea65fae7b7c733
+polled=1 verified=1 failed=0
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running `/tmp/asfa-lean-fed-final-target/debug/asfa-bridge-poller --config config/sessions.execution.json --state /tmp/asfa-ticket-v5/state.json --out /tmp/asfa-ticket-v5/replay-bridge.json --wave-out /tmp/asfa-ticket-v5/plan.json --execute-wave --ticketed-execution --ticket-agent alice --execution-out /tmp/asfa-ticket-v5/replay.json --ticket-out /tmp/asfa-ticket-v5/replay-ticket.json --now 101`
+wave_jobs=7 wave_deferred=0 plan_hash=f64a8bcc87aa7c2a33f59bfc084bc34ab6626c51d263aac86c1190b35e54254a
+execution_succeeded=0 execution_dead_lettered=0 execution_skipped=7 execution_hash=6fac68bcf89a91418246ec1080b2050c7ab547fd3eccb94791e0f3b6cfbb8d37
+ticket_operation=execute ticket_count=8 ticket_transactions=2 ticket_ledger_hash=75e657fb8119056491d1893a9f025c89f0b20bfaff7acef172ea65fae7b7c733
+polled=1 verified=1 failed=0
+{
+  "schema_version": "asfa-ticket-state-verdict/v1",
+  "verdict": "PASS",
+  "ticket_ledger_hash": "75e657fb8119056491d1893a9f025c89f0b20bfaff7acef172ea65fae7b7c733",
+  "self_test": {
+    "known_answers": 3,
+    "synthetic_valid": 1,
+    "synthetic_rejections": 4
+  }
+}
+cognitive demo: PASS skill_output={"sum":42}; edge=1; matches=[1]
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running `/tmp/asfa-lean-fed-final-target/debug/asfa-bridge-poller --config config/sessions.smoke.json --out /tmp/asfa-smoke-report.json --state /tmp/asfa-smoke-state.json --now 1000`
+polled=3 verified=1 failed=2
+policy_oracle=PASS digest=d5805bd450f0778f996fd6094d3a1723114da35be1adee5ca8bd0f361a3c7a21 self_tests=3
+live_policy=PASS digest=d7bb090c4022b10a3f46ca236315cd96a77091ca0edeac038fac4016245d6a19
+smoke: PASS {'total': 3, 'verified': 1, 'failed': 2} {'good': 'verified', 'malformed': 'invalid_json', 'missing': 'transport'}

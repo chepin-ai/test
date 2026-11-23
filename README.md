@@ -163,6 +163,7 @@ python3 scripts/verify-lean-federation-python.py --self-test
 - [实现状态与未覆盖边界](docs/STATUS.md)
 - [实际架构](docs/ARCHITECTURE.md)
 - [全局 Lean 证据联邦与数学操作系统方案](docs/LEAN_FEDERATION.md)
+- [Lean 联邦 R1 证据总索引](docs/evidence/lean-federation-evidence-manifest-2026-11-23.json)
 - [Outbox / 哈希链协议](docs/BRIDGE_PROTOCOL.md)
 - [任务票最终证据总索引](docs/evidence/ticket-utxo-evidence-manifest-2026-11-21.json)
 - [混合执行／票变更门禁证据总索引](docs/evidence/ticket-mixed-mode-evidence-manifest-2026-11-23.json)

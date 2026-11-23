@@ -1,6 +1,14 @@
 # 实现状态（本轮实测证据：2026-11-16—23）
 
-## 最新续拍：旧执行／任务票混合模式失败关闭
+## 最新续拍：Lean 证据联邦最小垂直切片
+
+- 实现提交为 `280d62f3e2225ac7ea314b4492aa51d78a32f6a8`，基线为 `04166e8974583594ff20990d8fa7920c91c0c78a`。采用 Lean 证明核＋HOLO 血缘核＋Lake 多包版本列车＋事件驱动联邦，不以单一巨包、隐式升级或最后写入覆盖强求全局一致。
+- 从实现提交归档，在无 `.git`、空 Rust target、空 Lean `.lake` 环境重跑：119 项 Rust 测试及既有全部门禁保持；Lean `v4.35.0` 实际构建和公理审计通过，六个定理只依赖 `propext`，形成 6 个声明、6 个 attestation 和 36 个精确／有损投影。
+- 独立 Python 判读先通过 8 个关系已知答案、2 个合成有效、4 个合成拒绝和 3 个投影边界，再验收真实报告为 PASS；同键异命题冲突零写入、重放字节不变、语义伪造报告在验收前被拒绝。证据总索引为 `evidence/lean-federation-evidence-manifest-2026-11-23.json`。
+- 当前仅为本线 `FORMAL_R1`。官方 `lake check` 因 `bwrap` 无法创建 `/run/user` 而在检查前失败，未使用非隔离绕行；独立内核、跨机重放和 R2 均未建立。usrm 公共包保持 `v4.9.0` 与 `REGISTERED_NOT_ACTIVATED`，未强行迁移。
+- 协作 nonce 为 `QF-LEAN-FED-20261123-01`。cisvr 与 usrm 的真实 API dispatch 均返回 HTTP 401，全部请求线路为 `NOT_DELIVERED／ACK=NONE`；本地责任单、请求和负回执已入仓，不能声称全局讨论、跨线响应或外部 CI 已发生。
+
+## 2026-11-23：旧执行／任务票混合模式失败关闭
 
 - 实现提交为 `88e01c894b88773fe5a5f89bac54b285c9d02f1c`，基线为 `42e040c82ad22b9de34c42c6438641ef09eea9f7`。CLI 在参数解析阶段拒绝 `--execute-wave` 与 Mint／Transfer／Revoke 同用，阻断“旧执行结果已写入、票状态也变更、但没有任务票 Execute 交易”的混合历史。单独旧执行、单独票变更和 `--execute-wave --ticketed-execution` 的既有契约不变。
 - 从实现提交归档在无 `.git`、初始无 target 环境完整重建，119 项 Rust 测试通过：bridge 单元 56、bridge 集成 49、kernel 11、userspace 3；格式、Clippy、秘密扫描、独立 Python 自证、固定 v4／v5、执行重放、认知示例和 smoke 均通过。

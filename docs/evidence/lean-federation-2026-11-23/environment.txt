@@ -1,0 +1,19 @@
+schema=asfa-lean-federation-environment/v1
+observed_at=2026-11-23T19:13:46+08:00
+implementation_commit=280d62f3e2225ac7ea314b4492aa51d78a32f6a8
+implementation_source=git archive of implementation_commit
+implementation_git_directory_present=false
+rust_target_initially_present=false
+lean_lake_directory_initially_present=false
+initial_rust_launch=cargo missing after temporary-environment reset; failed before target creation; stable toolchain reinstalled and full gate rerun
+rustc 1.100.0 (0ef1bc386 2026-11-09)
+cargo 1.100.0 (3acc79c0c 2026-11-05)
+rustfmt 1.11.0-stable (0ef1bc3860 2026-11-09)
+clippy 0.1.100 (0ef1bc3860 2026-11-09)
+Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)
+Lake version 5.0.0-src+eb6cafb (Lean version 4.35.0)
+python=Python 3.12.12
+sandbox_kernel_replay=NOT_ESTABLISHED bwrap failed before replay: Cannot mkdir /run/user Read-only file system
+no_sandbox_bypass_used=true
+3e060657ec16ab5dc43a62d8ce49013912ec981cb85fa69d91db1576b171179d  /tmp/asfa-lean-fed-implementation.tar
+7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d  /tmp/asfa-lean.tar.zst
