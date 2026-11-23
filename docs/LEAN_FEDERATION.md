@@ -175,3 +175,9 @@ KG／复形／超超图／范畴／LaTeX／自然语言新发现
 bash scripts/lean-federation-gate.sh FULL_IMPLEMENTATION_COMMIT /tmp/qf-lean-gate "$PWD"
 python3 scripts/verify-lean-federation-python.py --self-test
 ```
+
+## 10. QI-OS 原生协同面
+
+全局自动协同直接复用 QI-OS 的 `qi-event/v1`、工单读回、答件不可覆写、异身份 crosscheck 和大小周天，不另造一套共识语义。Lean capsule 作为其 artifacts／requested_evidence 接入；QI-OS 的运输与身份判词不代替 Lean 证明，Lean 证明也不代替独立答件。
+
+适配与独立在线判读见 `docs/QI_OS_WAVE.md`。当前 11 个工单均为 `DELIVERED`，但研究状态仍为 `OPEN`；任何自动回复都必须同时满足作者关联、事件 schema、原线绑定和独立 crosscheck。

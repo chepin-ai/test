@@ -44,6 +44,9 @@
   - 钉定 Lean `v4.35.0` 的 core-only 最小约束核，实际证明非传递关系拒绝、lossy 投影不降格、非 FORMAL 拒绝、同键异命题冲突和同命题来源保持；
   - 真实构建生成 declaration capsule、环境 attestation、registry 和六类投影；独立 Python 重建声明／证据／同步语义并亲自拒绝伪造报告；
   - 只声称本线 `FORMAL_R1`，不把普通构建升级为沙箱多内核、跨机、跨线或全局激活。
+- QI-OS 大周天适配
+  - 复用 QI-OS 原生工单、append-only 账本和独立 crosscheck，不另造共识格式；Lean 野问与 usrm peer 可经真实 issue 通道发送和轮询；
+  - 独立判读器重建 canonical 工单与哈希链，严格区分 `DELIVERED`、有效答件、crosscheck 和 promotion；非合规 bot 回复不得冒充 ACK。
 
 ## 复验
 
@@ -164,6 +167,7 @@ python3 scripts/verify-lean-federation-python.py --self-test
 - [实际架构](docs/ARCHITECTURE.md)
 - [全局 Lean 证据联邦与数学操作系统方案](docs/LEAN_FEDERATION.md)
 - [Lean 联邦 R1 证据总索引](docs/evidence/lean-federation-evidence-manifest-2026-11-23.json)
+- [QI-OS 原生大周天与独立读回](docs/QI_OS_WAVE.md)
 - [Outbox / 哈希链协议](docs/BRIDGE_PROTOCOL.md)
 - [任务票最终证据总索引](docs/evidence/ticket-utxo-evidence-manifest-2026-11-21.json)
 - [混合执行／票变更门禁证据总索引](docs/evidence/ticket-mixed-mode-evidence-manifest-2026-11-23.json)
