@@ -8,6 +8,7 @@
 - 跨线落实：usrm 与 QFA responder 已支持由 `AI_FULL_PAT` 承载的规范答件；随后修复认证答件反馈环。规范答件 E2E run 为 `45284008539`／`45284023261`，环闸 run 为 `45286403540`／`45286410920`，均成功；环闸显式 skip 且不新增答件。
 - 独立判读已区分 `protocol_answers_seen=22`、`unique_answers_accepted=2`、`independent_crosschecks=2` 和 `duplicate_answer_rejections=18`，不再把线上重复评论虚增为独立成果。QI 公共 CI crosscheck run 为 `45289708599`／`45289712612`，两份复核均绑定首答摘要、异身份主体且结论 `OPEN`。
 - QI-OS HMAC 传输与 crosscheck 攻击回归为 140/140：弱关联只放行签名候选，实际接受仍需正钥；错钥、错事件 ID、错摘要、同主体、重复复核及 OPEN 晋级均被拒绝。
+- 构建债修复：`702de82` 的外部 Rust CI 因 RsProxy 504 连续失败两次；移除仓级强制镜像替换，恢复标准 crates.io sparse registry，锁文件和测试判据不变，由后续空缓存 CI 判定。
 
 ## 2026-11-23：QI-OS 全局大周天真实投递与独立读回（历史快照）
 

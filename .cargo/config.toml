@@ -1,8 +1,4 @@
-[source.crates-io]
-replace-with = 'rsproxy-sparse'
-
-[source.rsproxy-sparse]
-registry = 'sparse+https://rsproxy.cn/index/'
-
+# Use the standard crates.io sparse registry. A repository-wide mirror override
+# previously made CI depend on a single intermittently unavailable intermediary.
 [net]
 git-fetch-with-cli = true
