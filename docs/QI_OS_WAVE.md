@@ -43,11 +43,12 @@ python3 scripts/verify-qios-wave-python.py \
 ## 当前实测
 
 - QI-OS 原始源提交：`c13dcee8f67fce568e8b160be39c3d6ff8755736`。
-- 原始归档独立测试：128 项通过；加入 usrm、qgl、ucif2、vinf 后的配置驱动测试同为 128 项通过。
+- 原始归档独立测试：128 项通过；加入 usrm、qgl、ucif2、vinf 及 HMAC 攻击回归后为 140 项通过。
 - 14 个工单全部远端读回 `DELIVERED`；其中公共入口包括 usrm issue #24、cisvr issue #2、federation issue #18、qgl #16、ucif2 #2、vinf #7。
-- 独立在线判读：14/14 issue 标题与 canonical body 一致，账本完整；`protocol_answers_seen=20`、`unique_answers_accepted=2`、`duplicate_answer_rejections=18`、`promotion=false`。
+- 独立在线判读：14/14 issue 标题与 canonical body 一致，账本完整；`protocol_answers_seen=22`、`unique_answers_accepted=2`、`independent_crosschecks=2`、`duplicate_answer_rejections=18`、`promotion=false`。
 - usrm 自动回复最初因作者关联与格式不合规被拒绝；修复后 usrm 与 qfa-ai 各有 1 份唯一 `OPEN` 答件被 QI-OS 接受。重复答件不覆盖首答，18 份均为 `ANSWER_IMMUTABLE`。
 - 规范答件曾触发认证作者反馈环；usrm／QFA 已加入“协议答件与管理非答件不再触发 responder”的根因门禁。外部 CI 显式 skip 复核通过，协议答件数停止增长。
+- 独立 crosscheck 由 QI 公共 CI 对原首答重算摘要并签发 HMAC；弱作者关联只让形态完整的签名事件进入内核，实际接受仍需正钥、正确事件 ID、正确摘要和异身份主体。错钥、错摘要、同主体与重复复核均在 140 项回归中失败关闭。
 
 ## 异常与开放项
 

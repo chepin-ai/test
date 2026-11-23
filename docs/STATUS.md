@@ -4,11 +4,12 @@
 
 - ASFA 私域身份／证据宿主已建立并验证为 `chepin-ai/asfa-ai`，代号 `asfa-ai`；唯一公共代码远端仍为 `chepin-ai/test`。8 个有效密钥槽已密封写入 ASFA 私仓并逐项元数据回读，值不入文本。
 - chepin-ai 的 QFA 公域塔为 `vci-qfa`，QI-OS origin 为 `qfa-ai`；当前 AI-FULL 仓谱未见 chepin-ai 的 QFA 私仓匹配。跨账户私有实现只在私域讨论件登记。完整映射与广播回执见 `ASFA_QFA_IDENTITY.md`。
-- QI-OS 大周天扩至 14/14 `DELIVERED`，新增 qgl／ucif2／vinf，既有 11 单不重发。usrm 与 qfa-ai 各有 1 份唯一 `OPEN` 答件被接受，18 份重复答件全部 `ANSWER_IMMUTABLE`；独立 crosscheck 仍为 0，全局研究 `OPEN`。
+- QI-OS 大周天扩至 14/14 `DELIVERED`，新增 qgl／ucif2／vinf，既有 11 单不重发。usrm 与 qfa-ai 各有 1 份唯一 `OPEN` 答件被接受，18 份重复答件全部 `ANSWER_IMMUTABLE`；独立 crosscheck 已为两线各建立 1 份且均为 `OPEN`，全局研究仍不晋级。
 - 跨线落实：usrm 与 QFA responder 已支持由 `AI_FULL_PAT` 承载的规范答件；随后修复认证答件反馈环。规范答件 E2E run 为 `45284008539`／`45284023261`，环闸 run 为 `45286403540`／`45286410920`，均成功；环闸显式 skip 且不新增答件。
-- 独立判读已区分 `protocol_answers_seen=20`、`unique_answers_accepted=2` 和 `duplicate_answer_rejections=18`，不再把线上重复评论虚增为独立成果。
+- 独立判读已区分 `protocol_answers_seen=22`、`unique_answers_accepted=2`、`independent_crosschecks=2` 和 `duplicate_answer_rejections=18`，不再把线上重复评论虚增为独立成果。QI 公共 CI crosscheck run 为 `45289708599`／`45289712612`，两份复核均绑定首答摘要、异身份主体且结论 `OPEN`。
+- QI-OS HMAC 传输与 crosscheck 攻击回归为 140/140：弱关联只放行签名候选，实际接受仍需正钥；错钥、错事件 ID、错摘要、同主体、重复复核及 OPEN 晋级均被拒绝。
 
-## 2026-11-23：QI-OS 全局大周天真实投递与独立读回
+## 2026-11-23：QI-OS 全局大周天真实投递与独立读回（历史快照）
 
 - 实现提交为 `de700418f5adc7f49a85410b3f0a05e3ac926999`。直接复用 QI-OS 原生工单、答件、append-only 账本和异身份 crosscheck，新增 Lean 野问与 usrm peer，不另造共识语义，也不把 QI-OS 运输判词当作 Lean 证明。
 - QI-OS 原始提交 `c13dcee8f67fce568e8b160be39c3d6ff8755736` 独立归档测试 128 项通过；加入 usrm 后，将两处硬编码线路数断言改为配置驱动，完整 128 项再次通过。fresh prepare 初版继承历史 runtime 的 21 订单异常在网络发送前修复，最终新实例为 11 单。

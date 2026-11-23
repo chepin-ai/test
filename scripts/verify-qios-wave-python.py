@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import copy
 import hashlib
+import hmac
 import json
 import os
 from pathlib import Path
@@ -40,6 +41,30 @@ def body_for(order: dict) -> str:
 
 def valid_issue_number(value) -> bool:
     return type(value) is int and value >= 1
+
+
+def verify_event_identity(event: dict) -> None:
+    unsigned = copy.deepcopy(event)
+    claimed = unsigned.pop("event_id", None)
+    if not isinstance(claimed, str):
+        raise Reject("event id missing")
+    unsigned.setdefault("auth", {})["signature"] = ""
+    if "EVT-" + digest(unsigned)[:24] != claimed:
+        raise Reject("EVENT_ID_MISMATCH")
+
+
+def verify_hmac_event(event: dict, secret: str) -> None:
+    verify_event_identity(event)
+    auth = event.get("auth", {})
+    signature = auth.get("signature")
+    if auth.get("mode") not in {"api", "otp"} or auth.get("credential_ref") != "QLV":
+        raise Reject("HMAC auth mode or credential mismatch")
+    if not isinstance(signature, str) or len(signature) != 64:
+        raise Reject("HMAC signature shape")
+    expected = hmac.new(secret.encode(), f"{event['event_id']}|{auth.get('nonce')}".encode(),
+                        hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, signature):
+        raise Reject("HMAC signature mismatch")
 
 
 def verify_ledger(path: Path) -> dict:
@@ -118,10 +143,32 @@ def self_test() -> dict:
                 raise
     finally:
         path.unlink(missing_ok=True)
-    return {"known_answers": 3, "synthetic_valid": 1, "synthetic_rejections": 2}
+    event = {"schema": "qi-event/v1", "origin": "qlv", "kind": "answer", "subject": "s",
+             "payload": {"loop_id": "LOOP-HMAC", "role": "crosscheck"}, "parents": [],
+             "causation_id": "LOOP-HMAC", "correlation_id": WAVE_ID,
+             "auth": {"mode": "api", "credential_ref": "QLV", "nonce": "0" * 32, "signature": ""}}
+    event["event_id"] = "EVT-" + digest(event)[:24]
+    signature = hmac.new(b"correct", f"{event['event_id']}|{'0' * 32}".encode(), hashlib.sha256).hexdigest()
+    event["auth"]["signature"] = signature
+    verify_hmac_event(event, "correct")
+    rejected = 0
+    for secret in ("wrong",):
+        try:
+            verify_hmac_event(event, secret)
+        except Reject:
+            rejected += 1
+    tampered = copy.deepcopy(event)
+    tampered["event_id"] = "EVT-" + "0" * 24
+    try:
+        verify_hmac_event(tampered, "correct")
+    except Reject:
+        rejected += 1
+    if rejected != 2:
+        raise Reject("HMAC negative controls")
+    return {"known_answers": 4, "synthetic_valid": 2, "synthetic_rejections": 4}
 
 
-def verify(root: Path, token: str | None, network: bool) -> dict:
+def verify(root: Path, token: str | None, network: bool, hmac_secret: str | None) -> dict:
     result_path = root / "runtime/federation-wave-result.json"
     result = json.loads(result_path.read_text(encoding="utf-8"))
     if result.get("schema") != "qi-federation-wave-result/v1":
@@ -154,14 +201,19 @@ def verify(root: Path, token: str | None, network: bool) -> dict:
                 body = comment.get("body") or ""
                 if not body.startswith("QI-OS-ANSWER-V1\n"):
                     continue
-                if comment.get("author_association") not in TRUSTED:
-                    continue
                 try:
                     payload = json.loads(body.split("\n", 1)[1])
                 except json.JSONDecodeError:
                     continue
-                if isinstance(payload, dict) and payload.get("kind") == "answer":
-                    valid_answers += 1
+                if not isinstance(payload, dict) or payload.get("kind") != "answer":
+                    continue
+                verify_event_identity(payload)
+                association = comment.get("author_association")
+                if association not in TRUSTED:
+                    if not hmac_secret:
+                        raise Reject("HMAC_SECRET_UNAVAILABLE")
+                    verify_hmac_event(payload, hmac_secret)
+                valid_answers += 1
             if poll_by_id.get(order_id, {}).get("answers") != valid_answers:
                 raise Reject(f"answer count changed or mismatched after QI-OS poll: {order_id}")
         checked.append(order_id)
@@ -175,8 +227,9 @@ def verify(root: Path, token: str | None, network: bool) -> dict:
     polls = result.get("polls", [])
     protocol_answers = sum(poll.get("answers", 0) for poll in polls)
     adjudications = [item for poll in polls for item in poll.get("adjudications", [])]
-    unique_accepted = sum(not item.get("errors") and item.get("verdict") in {"PASS", "OPEN"}
-                          for item in adjudications)
+    loops = json.loads((root / "runtime/loops.json").read_text(encoding="utf-8"))["loops"]
+    unique_accepted = sum(len(loop.get("answers", {})) for loop in loops.values())
+    independent_crosschecks = sum(len(loop.get("crosschecks", {})) for loop in loops.values())
     duplicate_rejections = sum("ANSWER_IMMUTABLE" in item.get("errors", [])
                                for item in adjudications)
     if protocol_answers == 0 and research_verdict != "OPEN":
@@ -187,6 +240,7 @@ def verify(root: Path, token: str | None, network: bool) -> dict:
             "promotion": promotion, "deliveries_checked": len(checked),
             "protocol_answers_seen": protocol_answers,
             "unique_answers_accepted": unique_accepted,
+            "independent_crosschecks": independent_crosschecks,
             "duplicate_answer_rejections": duplicate_rejections,
             "ledger": ledger,
             "evidence_status": "DELIVERED_NOT_CONSENSUS" if unique_accepted == 0 else "ANSWERS_REQUIRE_CROSSCHECK"}
@@ -210,7 +264,7 @@ def main() -> int:
             token = os.environ.get(args.token_env)
             if not args.offline and not token:
                 raise Reject(f"AUTH_UNAVAILABLE:{args.token_env}")
-            verdict = verify(args.root.resolve(), token, not args.offline)
+            verdict = verify(args.root.resolve(), token, not args.offline, os.environ.get("QIOS_API_QLV"))
             result = {"schema": "asfa-qios-wave-oracle/v1", "self_test": base, **verdict,
                       "network_readback": not args.offline,
                       "boundary": "Transport and ledger verification only. Research consensus remains separate and cannot be promoted without answers and independent crosschecks."}

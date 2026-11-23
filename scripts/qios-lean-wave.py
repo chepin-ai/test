@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -72,6 +73,215 @@ def replace_exact(path: Path, old: str, new: str) -> None:
     path.write_text(text.replace(old, new), encoding="utf-8")
 
 
+TRANSPORT_OLD = '''        # It is an answer attempt: it MUST yield an explicit verdict.
+        if assoc not in TRUSTED_AUTHOR_ASSOCIATIONS:
+            return reject(
+                "untrusted author_association %r (required one of %s)"
+                % (assoc, sorted(TRUSTED_AUTHOR_ASSOCIATIONS))
+            )
+
+        lines = body.splitlines()
+        if not lines or lines[0].strip() != marker:
+            return reject("marker %r must be the first line of the comment" % marker)
+
+        payload_text = "\\n".join(lines[1:]).strip()
+        if not payload_text:
+            return reject("missing JSON payload after marker")
+        try:
+            payload = json.loads(payload_text)
+        except ValueError as exc:
+            return reject("invalid JSON payload: %s" % exc)
+        if not isinstance(payload, dict):
+            return reject("payload must be a JSON object, got %s" % type(payload).__name__)
+'''
+TRANSPORT_NEW = '''        # Parse the event before applying the association gate. A weak association
+        # is accepted only as a transport candidate for a shaped OTP/API HMAC;
+        # the kernel still has to verify the actual signature. Unsigned bot
+        # responses remain rejected exactly as before.
+        lines = body.splitlines()
+        if not lines or lines[0].strip() != marker:
+            return reject("marker %r must be the first line of the comment" % marker)
+
+        payload_text = "\\n".join(lines[1:]).strip()
+        if not payload_text:
+            return reject("missing JSON payload after marker")
+        try:
+            payload = json.loads(payload_text)
+        except ValueError as exc:
+            return reject("invalid JSON payload: %s" % exc)
+        if not isinstance(payload, dict):
+            return reject("payload must be a JSON object, got %s" % type(payload).__name__)
+
+        auth = payload.get("auth")
+        signature = auth.get("signature") if isinstance(auth, dict) else None
+        signed_hmac = isinstance(auth, dict) and auth.get("mode") in {"otp", "api"} and \
+            isinstance(signature, str) and len(signature) == 64 and \
+            all(char in "0123456789abcdef" for char in signature.lower())
+        if assoc not in TRUSTED_AUTHOR_ASSOCIATIONS and not signed_hmac:
+            return reject(
+                "untrusted author_association %r (required one of %s or a kernel-verified HMAC)"
+                % (assoc, sorted(TRUSTED_AUTHOR_ASSOCIATIONS))
+            )
+'''
+
+HMAC_TESTS = '''from __future__ import annotations
+
+import unittest
+
+from qios.canon import canonical
+from qios.envelope import make_event, verify_event
+from qios.transport import ANSWER_MARKER, GitHubIssueTransport
+
+
+class HmacTransportTests(unittest.TestCase):
+    def event(self, secret=None):
+        return make_event("qlv", "answer", "hmac-test", {
+            "loop_id": "LOOP-HMAC", "role": "crosscheck", "verdict": "OPEN",
+            "target_peer": "usrm", "subject_answer_digest": "a" * 64,
+        }, mode="api", credential_ref="QLV", secret=secret)
+
+    def comment(self, event):
+        return {"id": 1, "user": {"login": "github-actions[bot]"},
+                "author_association": "CONTRIBUTOR",
+                "body": ANSWER_MARKER + "\\n" + canonical(event)}
+
+    def test_01_signed_api_shape_is_a_transport_candidate(self):
+        accepted, rejected = GitHubIssueTransport._evaluate_comment(
+            self.comment(self.event(b"correct")), ANSWER_MARKER)
+        self.assertIsNotNone(accepted)
+        self.assertIsNone(rejected)
+
+    def test_02_unsigned_weak_author_remains_rejected(self):
+        accepted, rejected = GitHubIssueTransport._evaluate_comment(
+            self.comment(self.event()), ANSWER_MARKER)
+        self.assertIsNone(accepted)
+        self.assertIn("untrusted author_association", rejected["reason"])
+
+    def test_03_nonhex_signature_is_rejected_at_transport(self):
+        event = self.event(b"correct")
+        event["auth"]["signature"] = "x" * 64
+        accepted, rejected = GitHubIssueTransport._evaluate_comment(
+            self.comment(event), ANSWER_MARKER)
+        self.assertIsNone(accepted)
+        self.assertIsNotNone(rejected)
+
+    def test_04_correct_hmac_passes_envelope(self):
+        verdict, code = verify_event(self.event(b"correct"), api_secret=b"correct",
+                                     trusted_api_transport=True)
+        self.assertEqual("PASS", verdict)
+        self.assertEqual("API_HMAC_VERIFIED", code)
+
+    def test_05_wrong_hmac_key_fails(self):
+        verdict, code = verify_event(self.event(b"correct"), api_secret=b"wrong",
+                                     trusted_api_transport=True)
+        self.assertEqual("FAIL", verdict)
+        self.assertEqual("AUTH_SIGNATURE", code)
+
+    def test_06_missing_hmac_key_is_open_not_pass(self):
+        verdict, code = verify_event(self.event(b"correct"), api_secret=None,
+                                     trusted_api_transport=True)
+        self.assertEqual("OPEN", verdict)
+        self.assertEqual("AUTH_UNAVAILABLE", code)
+
+
+if __name__ == "__main__":
+    unittest.main()
+'''
+
+HMAC_CROSSCHECK_TESTS = '''from __future__ import annotations
+
+import json
+import os
+import shutil
+import tempfile
+import unittest
+from pathlib import Path
+
+from qios.envelope import make_event
+from qios.kernel import QiKernel
+
+REPO = Path(__file__).resolve().parents[1]
+
+
+class HmacCrosscheckTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="qios-hmac-crosscheck-"))
+        self.addCleanup(lambda: shutil.rmtree(self.tmp, ignore_errors=True))
+        shutil.copytree(REPO / "config", self.tmp / "config")
+        os.environ["QIOS_API_QLV"] = "correct"
+        self.addCleanup(lambda: os.environ.pop("QIOS_API_QLV", None))
+        self.kernel = QiKernel(self.tmp, allow_local=True)
+        self.kernel.activate(wave_id="WAVE-HMAC-TEST")
+        loops = self.kernel._loops()["loops"]
+        self.loop = next(loop for loop in loops.values() if loop["peer"] == "usrm")
+        self.loop_id = self.loop["loop_id"]
+        self.kernel.record_delivery(self.loop["workorder_id"], {
+            "state": "DELIVERED", "repo": "chepin-ai/vci-usrm",
+            "issue_number": 1, "issue_url": "https://example.invalid/1"})
+        answer = make_event("usrm", "answer", self.loop_id, {
+            "loop_id": self.loop_id, "role": "answer", "verdict": "OPEN",
+            "claims": [], "artifacts": [], "open_items": ["content-unverified"]},
+            mode="api", credential_ref="GITHUB", correlation_id="WAVE-HMAC-TEST")
+        result = self.kernel.ingest(answer, trusted_api_transport=True,
+                                    transport_actor="chepin-ai", expected_origin="usrm")
+        self.assertEqual("OPEN", result["verdict"])
+        current = self.kernel._loops()["loops"][self.loop_id]
+        self.answer_digest = current["answers"]["usrm"]["answer_digest"]
+
+    def crosscheck(self, origin="qlv", secret=b"correct", answer_digest=None):
+        credential = "QLV" if origin == "qlv" else "GITHUB"
+        return make_event(origin, "answer", self.loop_id, {
+            "loop_id": self.loop_id, "role": "crosscheck", "target_peer": "usrm",
+            "verdict": "OPEN", "subject_answer_digest": answer_digest or self.answer_digest},
+            mode="api", credential_ref=credential, secret=secret,
+            correlation_id="WAVE-HMAC-TEST")
+
+    def ingest(self, event, actor="github-actions[bot]"):
+        return self.kernel.ingest(event, trusted_api_transport=True, transport_actor=actor,
+                                  expected_loop_id=self.loop_id, expected_origin="usrm")
+
+    def test_01_independent_hmac_crosscheck_is_accepted_open(self):
+        result = self.ingest(self.crosscheck())
+        self.assertEqual("OPEN", result["verdict"])
+        self.assertEqual([], result["errors"])
+        cross = self.kernel._loops()["loops"][self.loop_id]["crosschecks"]["usrm"]
+        self.assertEqual("api:hmac:QLV", cross["identity"]["principal"])
+
+    def test_02_wrong_hmac_secret_fails_without_crosscheck(self):
+        result = self.ingest(self.crosscheck(secret=b"wrong"))
+        self.assertEqual("FAIL", result["verdict"])
+        self.assertIn("AUTH_SIGNATURE", result["errors"])
+        self.assertEqual({}, self.kernel._loops()["loops"][self.loop_id]["crosschecks"])
+
+    def test_03_wrong_answer_digest_fails(self):
+        result = self.ingest(self.crosscheck(answer_digest="0" * 64))
+        self.assertEqual("FAIL", result["verdict"])
+        self.assertIn("CROSSCHECK_DIGEST_MISMATCH", result["errors"])
+        self.assertEqual({}, self.kernel._loops()["loops"][self.loop_id]["crosschecks"])
+
+    def test_04_same_authenticated_principal_is_not_independent(self):
+        result = self.ingest(self.crosscheck(origin="vinf", secret=None), actor="chepin-ai")
+        self.assertEqual("FAIL", result["verdict"])
+        self.assertIn("CROSSCHECK_NOT_INDEPENDENT", result["errors"])
+
+    def test_05_duplicate_crosscheck_is_immutable(self):
+        self.ingest(self.crosscheck())
+        result = self.ingest(self.crosscheck())
+        self.assertEqual("FAIL", result["verdict"])
+        self.assertIn("CROSSCHECK_IMMUTABLE", result["errors"])
+
+    def test_06_open_answer_and_crosscheck_never_promote(self):
+        result = self.ingest(self.crosscheck())
+        self.assertEqual("OPEN", result["verdict"])
+        current = self.kernel._loops()["loops"][self.loop_id]
+        self.assertEqual("OPEN", current["verdict"])
+        self.assertFalse(current["promotion"])
+
+
+if __name__ == "__main__":
+    unittest.main()
+'''
+
 NEW_PEERS = {
     "usrm": "chepin-ai/vci-usrm",
     "qgl": "chepin-ai/vci-qgl",
@@ -106,6 +316,15 @@ def configure(work: Path) -> None:
     save(wild_path, wild)
     replace_exact(work / "tests/test_kernel.py", KERNEL_OLD, KERNEL_NEW)
     replace_exact(work / "tests/test_adversarial.py", ADV_OLD, ADV_NEW)
+    replace_exact(work / "qios/transport.py", TRANSPORT_OLD, TRANSPORT_NEW)
+    test_path = work / "tests/test_hmac_transport.py"
+    if test_path.exists() and test_path.read_text(encoding="utf-8") != HMAC_TESTS:
+        raise WaveError("HMAC transport test fixture drift")
+    test_path.write_text(HMAC_TESTS, encoding="utf-8")
+    crosscheck_test_path = work / "tests/test_hmac_crosscheck.py"
+    if crosscheck_test_path.exists() and crosscheck_test_path.read_text(encoding="utf-8") != HMAC_CROSSCHECK_TESTS:
+        raise WaveError("HMAC crosscheck test fixture drift")
+    crosscheck_test_path.write_text(HMAC_CROSSCHECK_TESTS, encoding="utf-8")
 
 
 def test_and_activate(work: Path, record_name: str) -> dict:
@@ -116,6 +335,11 @@ def test_and_activate(work: Path, record_name: str) -> dict:
                                    stdout=log, stderr=subprocess.STDOUT, check=False, timeout=180)
     if completed.returncode != 0:
         raise WaveError(f"QI-OS prepared tests failed; see {work / f'{record_name}-tests.log'}")
+    test_log = (work / f"{record_name}-tests.log").read_text(encoding="utf-8")
+    match = re.search(r"Ran (\d+) tests", test_log)
+    if not match or "\nOK\n" not in test_log:
+        raise WaveError("cannot independently determine the unittest count")
+    test_count = int(match.group(1))
     sys.path.insert(0, str(work))
     from qios.kernel import QiKernel  # noqa: E402
     activation = QiKernel(work, allow_local=True).activate(wave_id=WAVE_ID)
@@ -124,7 +348,8 @@ def test_and_activate(work: Path, record_name: str) -> dict:
     if len(orders) != 14:
         raise WaveError(f"expected 14 enabled work orders, got {len(orders)}")
     return {"wave_id": WAVE_ID, "qios_source_commit": EXPECTED_QIOS_COMMIT,
-            "work_orders": len(orders), "tests": "128_PASS", "activation": activation}
+            "work_orders": len(orders), "tests": f"{test_count}_PASS", "test_count": test_count,
+            "activation": activation}
 
 
 def prepare(source: Path, work: Path) -> dict:
