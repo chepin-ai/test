@@ -127,8 +127,8 @@ def verify(root: Path, token: str | None, network: bool) -> dict:
     if result.get("schema") != "qi-federation-wave-result/v1":
         raise Reject("wave result schema")
     deliveries = result.get("deliveries", [])
-    if len(deliveries) != 11:
-        raise Reject(f"expected 11 deliveries, got {len(deliveries)}")
+    if len(deliveries) != 14:
+        raise Reject(f"expected 14 deliveries, got {len(deliveries)}")
     ledger = verify_ledger(root / "runtime/ledger.jsonl")
     checked = []
     poll_by_id = {poll.get("workorder_id"): poll for poll in result.get("polls", [])}
@@ -173,15 +173,23 @@ def verify(root: Path, token: str | None, network: bool) -> dict:
         if pending or "no-independent-crosscheck-observed" in status.get("negative", []):
             raise Reject("promotion with unresolved answer/crosscheck debt")
     polls = result.get("polls", [])
-    accepted = sum(poll.get("answers", 0) for poll in polls)
-    if accepted == 0 and research_verdict != "OPEN":
+    protocol_answers = sum(poll.get("answers", 0) for poll in polls)
+    adjudications = [item for poll in polls for item in poll.get("adjudications", [])]
+    unique_accepted = sum(not item.get("errors") and item.get("verdict") in {"PASS", "OPEN"}
+                          for item in adjudications)
+    duplicate_rejections = sum("ANSWER_IMMUTABLE" in item.get("errors", [])
+                               for item in adjudications)
+    if protocol_answers == 0 and research_verdict != "OPEN":
         raise Reject("zero-answer wave is not OPEN")
-    if accepted == 0 and promotion:
+    if protocol_answers == 0 and promotion:
         raise Reject("zero-answer promotion")
     return {"oracle_verdict": "PASS", "research_verdict": research_verdict,
             "promotion": promotion, "deliveries_checked": len(checked),
-            "accepted_answers": accepted, "ledger": ledger,
-            "evidence_status": "DELIVERED_NOT_CONSENSUS" if accepted == 0 else "ANSWERS_REQUIRE_CROSSCHECK"}
+            "protocol_answers_seen": protocol_answers,
+            "unique_answers_accepted": unique_accepted,
+            "duplicate_answer_rejections": duplicate_rejections,
+            "ledger": ledger,
+            "evidence_status": "DELIVERED_NOT_CONSENSUS" if unique_accepted == 0 else "ANSWERS_REQUIRE_CROSSCHECK"}
 
 
 def main() -> int:

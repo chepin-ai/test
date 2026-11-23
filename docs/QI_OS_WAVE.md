@@ -43,15 +43,15 @@ python3 scripts/verify-qios-wave-python.py \
 ## 当前实测
 
 - QI-OS 原始源提交：`c13dcee8f67fce568e8b160be39c3d6ff8755736`。
-- 原始归档独立测试：128 项通过；加入 usrm 后的配置驱动测试同为 128 项通过。
-- 11 个工单全部远端读回 `DELIVERED`；其中公共入口包括 usrm issue #24、cisvr issue #2、federation issue #18。
-- 独立在线判读：11/11 issue 标题与 canonical body 一致，账本完整，`accepted_answers=0`、`promotion=false`。
-- usrm 自动回复真实存在，但 `github-actions[bot]` 为 `CONTRIBUTOR`，且正文不满足首行 `QI-OS-ANSWER-V1`＋规范事件，故不是有效 ACK。
-- 修正单已分别写入 usrm #24 和 cisvr #2：要求使用满足作者关联的 `chepin-ai` API 身份，或 `USRM` HMAC，禁止为求闭环放宽认证。
+- 原始归档独立测试：128 项通过；加入 usrm、qgl、ucif2、vinf 后的配置驱动测试同为 128 项通过。
+- 14 个工单全部远端读回 `DELIVERED`；其中公共入口包括 usrm issue #24、cisvr issue #2、federation issue #18、qgl #16、ucif2 #2、vinf #7。
+- 独立在线判读：14/14 issue 标题与 canonical body 一致，账本完整；`protocol_answers_seen=20`、`unique_answers_accepted=2`、`duplicate_answer_rejections=18`、`promotion=false`。
+- usrm 自动回复最初因作者关联与格式不合规被拒绝；修复后 usrm 与 qfa-ai 各有 1 份唯一 `OPEN` 答件被 QI-OS 接受。重复答件不覆盖首答，18 份均为 `ANSWER_IMMUTABLE`。
+- 规范答件曾触发认证作者反馈环；usrm／QFA 已加入“协议答件与管理非答件不再触发 responder”的根因门禁。外部 CI 显式 skip 复核通过，协议答件数停止增长。
 
 ## 异常与开放项
 
 - fresh prepare 初版曾把源归档的历史 runtime 复制进新工作目录，在离线准备阶段发现 21 个订单；现已改为激活前删除所复制 runtime。该版本未执行网络发送，未产生重复工单。
-- 当前状态是 `DELIVERED／OPEN`，不是入盟、共识或跨线验证完成。usrm 后续管理回复 comment `7100156572` 已确认修正口径，但明确标为非协议答件，故 `accepted_answers` 仍为 0。
+- 当前状态是 `DELIVERED／OPEN`，不是入盟、共识或跨线验证完成。usrm 管理回复 comment `7100156572` 明确标为非协议答件，不计入后续两份唯一 `OPEN` 答件。
 - 管理修正单自身因包含协议标记文本也被轮询器列为 invalid；未造成晋级，但后续管理卡必须避免写入该标记，防止污染答件流。
 - 私域投递、密钥指纹和完整仓谱只在私域证据区保存；公开证据仅保留公共 issue、聚合计数和脱敏结果。

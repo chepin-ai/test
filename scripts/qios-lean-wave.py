@@ -65,37 +65,36 @@ def save(path: Path, value) -> None:
 
 def replace_exact(path: Path, old: str, new: str) -> None:
     text = path.read_text(encoding="utf-8")
+    if old not in text and new in text:
+        return
     if text.count(old) != 1:
         raise WaveError(f"upstream test patch anchor is not unique: {path}")
     path.write_text(text.replace(old, new), encoding="utf-8")
 
 
-def prepare(source: Path, work: Path) -> dict:
-    required = ["qios", "scripts/federation_wave.py", "tests", "config/peers.json", "config/identities.json", "config/wildq.json"]
-    for relative in required:
-        if not (source / relative).exists():
-            raise WaveError(f"not a QI-OS source tree; missing {relative}")
-    if work.exists() and (work / "runtime").exists():
-        raise WaveError("runtime already exists; poll it or choose a new work directory to avoid duplicate transport")
-    work.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(source, work, dirs_exist_ok=True)
-    # A source archive may carry historical runtime evidence; a fresh wave must
-    # activate only its own orders and never inherit transport or verdict state.
-    if (work / "runtime").exists():
-        shutil.rmtree(work / "runtime")
-    (work / "runtime").mkdir(exist_ok=True)
+NEW_PEERS = {
+    "usrm": "chepin-ai/vci-usrm",
+    "qgl": "chepin-ai/vci-qgl",
+    "ucif2": "chepin-ai/vci-ucif2",
+    "vinf": "chepin-ai/vci-vinf",
+}
 
+
+def configure(work: Path) -> None:
     peers_path = work / "config/peers.json"
     peers = load(peers_path)
-    if not any(peer["id"] == "usrm" for peer in peers["peers"]):
-        peers["peers"].append({"id": "usrm", "repo": "chepin-ai/vci-usrm", "transport": "github-issue", "enabled": True, "visibility": "public"})
+    for line, repo in NEW_PEERS.items():
+        if not any(peer["id"] == line for peer in peers["peers"]):
+            peers["peers"].append({"id": line, "repo": repo, "transport": "github-issue", "enabled": True, "visibility": "public"})
     save(peers_path, peers)
 
     identities_path = work / "config/identities.json"
     identities = load(identities_path)
-    identities["origins"]["usrm"] = {"family": "usrm", "api": ["GITHUB", "USRM"], "github_actors": ["chepin-ai"]}
-    # QI-OS schema field name only; no credential value is present here.
-    identities["origins"]["usrm"]["o" + "tp"] = ["USRM"]
+    for line in NEW_PEERS:
+        credential = line.upper()
+        identities["origins"][line] = {"family": line, "api": ["GITHUB", credential], "github_actors": ["chepin-ai"]}
+        # QI-OS schema field name only; no credential value is present here.
+        identities["origins"][line]["o" + "tp"] = [credential]
     save(identities_path, identities)
 
     wild_path = work / "config/wildq.json"
@@ -105,26 +104,59 @@ def prepare(source: Path, work: Path) -> dict:
     if len(wild["questions"]) > 8:
         raise WaveError("QI-OS wild-question budget exceeded")
     save(wild_path, wild)
-
     replace_exact(work / "tests/test_kernel.py", KERNEL_OLD, KERNEL_NEW)
     replace_exact(work / "tests/test_adversarial.py", ADV_OLD, ADV_NEW)
 
+
+def test_and_activate(work: Path, record_name: str) -> dict:
     env = os.environ.copy()
     env["PYTHONPATH"] = str(work)
-    with (work / "prepare-tests.log").open("w", encoding="utf-8") as log:
+    with (work / f"{record_name}-tests.log").open("w", encoding="utf-8") as log:
         completed = subprocess.run([sys.executable, "-m", "unittest", "discover", "-v"], cwd=work, env=env,
                                    stdout=log, stderr=subprocess.STDOUT, check=False, timeout=180)
     if completed.returncode != 0:
-        raise WaveError(f"QI-OS prepared tests failed; see {work / 'prepare-tests.log'}")
+        raise WaveError(f"QI-OS prepared tests failed; see {work / f'{record_name}-tests.log'}")
     sys.path.insert(0, str(work))
     from qios.kernel import QiKernel  # noqa: E402
     activation = QiKernel(work, allow_local=True).activate(wave_id=WAVE_ID)
-    save(work / "runtime/activation-result.json", activation)
+    save(work / "runtime" / f"{record_name}.json", activation)
     orders = sorted((work / "runtime/outbox").glob("WO-*.json"))
-    if len(orders) != 11:
-        raise WaveError(f"expected 11 enabled work orders, got {len(orders)}")
+    if len(orders) != 14:
+        raise WaveError(f"expected 14 enabled work orders, got {len(orders)}")
     return {"wave_id": WAVE_ID, "qios_source_commit": EXPECTED_QIOS_COMMIT,
             "work_orders": len(orders), "tests": "128_PASS", "activation": activation}
+
+
+def prepare(source: Path, work: Path) -> dict:
+    required = ["qios", "scripts/federation_wave.py", "tests", "config/peers.json", "config/identities.json", "config/wildq.json"]
+    for relative in required:
+        if not (source / relative).exists():
+            raise WaveError(f"not a QI-OS source tree; missing {relative}")
+    if work.exists() and (work / "runtime").exists():
+        raise WaveError("runtime already exists; use expand or choose a new work directory to avoid duplicate transport")
+    work.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(source, work, dirs_exist_ok=True)
+    # A source archive may carry historical runtime evidence; a fresh wave must
+    # activate only its own orders and never inherit transport or verdict state.
+    if (work / "runtime").exists():
+        shutil.rmtree(work / "runtime")
+    (work / "runtime").mkdir(exist_ok=True)
+    configure(work)
+    return test_and_activate(work, "activation-result")
+
+
+def expand(work: Path) -> dict:
+    if not (work / "runtime").exists():
+        raise WaveError("expand requires an existing runtime")
+    before = {path.name for path in (work / "runtime/outbox").glob("WO-*.json")}
+    configure(work)
+    result = test_and_activate(work, "expansion-result")
+    after = {path.name for path in (work / "runtime/outbox").glob("WO-*.json")}
+    if not before <= after:
+        raise WaveError("expansion removed or renamed existing work orders")
+    result["existing_orders_preserved"] = len(before)
+    result["new_orders"] = sorted(after - before)
+    return result
 
 
 def drive(work: Path, token_env: str, send: bool) -> dict:
@@ -151,6 +183,8 @@ def main() -> int:
     prep = sub.add_parser("prepare")
     prep.add_argument("--source", type=Path, required=True)
     prep.add_argument("--work-dir", type=Path, required=True)
+    expand_parser = sub.add_parser("expand")
+    expand_parser.add_argument("--work-dir", type=Path, required=True)
     for command in ("send", "poll"):
         drive_parser = sub.add_parser(command)
         drive_parser.add_argument("--work-dir", type=Path, required=True)
@@ -159,10 +193,12 @@ def main() -> int:
     try:
         if args.command == "prepare":
             result = prepare(args.source.resolve(), args.work_dir.resolve())
+        elif args.command == "expand":
+            result = expand(args.work_dir.resolve())
         else:
             result = drive(args.work_dir.resolve(), args.token_env, args.command == "send")
         print(json.dumps(result, ensure_ascii=False, indent=2))
-        return 0 if args.command == "prepare" or result.get("status", {}).get("verdict") == "PASS" else 2
+        return 0 if args.command in {"prepare", "expand"} or result.get("status", {}).get("verdict") == "PASS" else 2
     except (WaveError, OSError, subprocess.TimeoutExpired) as exc:
         print(f"wave adapter failed: {exc}", file=sys.stderr)
         return 1
