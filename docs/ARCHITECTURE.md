@@ -28,6 +28,19 @@ asfa-bridge-poller
   main                    一次性 CLI：轮询、入库、显式消费、波次计划、任务票、受控执行、状态保存；不是守护进程
 ```
 
+## Lean 证据联邦切片
+
+```text
+lean/Qf（关系、证据、同步的六个内核定理）
+  → lake build＋Audit.lean（实际 #check 声明块＋公理白名单）
+  → qf-lean-capsule/v1（源树、toolchain、manifest、声明与日志哈希）
+  → staged registry（同键异命题整批拒绝；同命题只追加环境 attestation）
+  → canonical JSON 精确投影／KG、细胞复形、超超图、范畴-HoTT、LaTeX lossy 投影
+  → 反向结果只以 CANDIDATE 重新进入 Lean 重放
+```
+
+该面只提供本线 `FORMAL_R1` 和事件驱动构建入口，不是全局 Lean 仓已经统一，也不提供发布者签名、跨机证明或非形式命题忠实性。完整分层和升级闸见 `docs/LEAN_FEDERATION.md`。
+
 ## 数据流
 
 ```text

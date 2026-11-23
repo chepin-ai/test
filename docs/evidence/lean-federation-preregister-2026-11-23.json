@@ -1,0 +1,44 @@
+{
+  "schema_version": "asfa-lean-federation-preregister/v1",
+  "registered_at": "2026-11-23T11:00:00+08:00",
+  "registration_stage": "BEFORE_IMPLEMENTATION",
+  "baseline_commit": "04166e8974583594ff20990d8fa7920c91c0c78a",
+  "result_status": "PREREGISTERED_ONLY",
+  "scope": "Minimal executable vertical slice for a multi-package Lean evidence federation. This is not a claim that all federation repositories, legacy packages, external CI lanes, or mathematical domains have already been unified.",
+  "criteria": [
+    {
+      "id": "LEAN-01",
+      "requirement": "A pinned Lean 4.35.0 core-only package builds from source with no sorry/admit and no additional axiom dependency for the anchored declarations."
+    },
+    {
+      "id": "LEAN-02",
+      "requirement": "Lean and an independent Python oracle reject transitive composition of coupling and bridging, and reject promotion of lossy projections to FORMAL evidence."
+    },
+    {
+      "id": "LEAN-03",
+      "requirement": "Same-key/different-statement synchronization fails without changing registry bytes; same-key/same-statement evidence from a new environment adds an attestation without rewriting origins."
+    },
+    {
+      "id": "LEAN-04",
+      "requirement": "The independent oracle passes known-answer and synthetic rejection tests before accepting real synchronization output, and rejects a semantically forged report whose hashes have been repaired."
+    },
+    {
+      "id": "LEAN-05",
+      "requirement": "A clean archive rebuild reruns the Lean build, axiom audit, Python oracle and fixed fixture checks. Automation is event-driven and contains no schedule trigger."
+    },
+    {
+      "id": "LEAN-06",
+      "requirement": "The legacy public usrm package remains pinned to its own toolchain and is REGISTERED_NOT_ACTIVATED until independently rebuilt; no forced global toolchain rewrite is claimed."
+    },
+    {
+      "id": "COLLAB-01",
+      "requirement": "Collaboration requests carry a unique nonce and response schema. Local files, API transport, remote receipt, line acknowledgement and verified completion are separate states; absent receipts remain explicit negative results."
+    }
+  ],
+  "security_boundaries": [
+    "No credential values in source, logs, fixtures, reports, commit messages or remote URLs.",
+    "No last-write-wins overwrite, automatic FORMAL promotion, self-modifying trusted kernel, cron driver, or unverified cross-line completion claim.",
+    "Lean kernel checking does not by itself prove that an informal statement, external QF-OS canon, graph projection, or natural-language theorem has the intended meaning.",
+    "Independent-kernel replay is recorded separately when available; no paranoid or multi-machine verdict is inferred from an ordinary lake build."
+  ]
+}

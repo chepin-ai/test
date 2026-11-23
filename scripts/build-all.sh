@@ -21,6 +21,7 @@ python3 scripts/verify-atomic-write-python.py --self-test
 python3 scripts/verify-lock-symlink-python.py --self-test
 python3 scripts/verify-ticket-utxo-python.py --self-test
 python3 scripts/verify-ticket-mixed-mode-python.py --self-test
+python3 scripts/verify-lean-federation-python.py --self-test
 python3 scripts/verify-wave-python.py \
   --expect-plan-hash 5b27a80652ea74fc1b11e07033119ea49708018244325e5dae56f0f6bb88ca34
 rm -f /tmp/asfa-wave-report.json /tmp/asfa-wave-state.json \

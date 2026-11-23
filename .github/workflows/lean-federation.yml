@@ -1,0 +1,50 @@
+name: lean-federation
+
+on:
+  push:
+    paths:
+      - "lean/**"
+      - "federation/**"
+      - "scripts/lean-federation.py"
+      - "scripts/verify-lean-federation-python.py"
+      - "scripts/lean-federation-gate.sh"
+      - ".github/workflows/lean-federation.yml"
+  workflow_dispatch:
+  repository_dispatch:
+    types: [lean-federation]
+
+permissions:
+  contents: read
+
+jobs:
+  formal-r1:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact event commit
+        uses: actions/checkout@v4
+
+      - name: Install pinned Lean toolchain
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain "$(cat lean/lean-toolchain)"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+
+      - name: Build, synchronize and independently judge FORMAL_R1 capsule
+        run: |
+          set -euo pipefail
+          bash scripts/lean-federation-gate.sh \
+            "${{ github.sha }}" \
+            "${{ runner.temp }}/lean-federation" \
+            "$GITHUB_WORKSPACE"
+
+      - name: Publish machine-readable evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lean-federation-r1-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/lean-federation/
+          if-no-files-found: warn
+          retention-days: 30

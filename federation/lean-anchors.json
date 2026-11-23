@@ -1,0 +1,29 @@
+{
+  "schema_version": "qf-lean-anchors/v1",
+  "declarations": [
+    {
+      "logical_key": "qf.relation.coupling_not_transitive",
+      "name": "Qf.coupling_not_transitive"
+    },
+    {
+      "logical_key": "qf.relation.bridging_not_transitive",
+      "name": "Qf.bridging_not_transitive"
+    },
+    {
+      "logical_key": "qf.evidence.lossy_projection_not_formal",
+      "name": "Qf.lossy_projection_not_formal"
+    },
+    {
+      "logical_key": "qf.sync.admit_informal_rejected",
+      "name": "Qf.admit_informal_rejected"
+    },
+    {
+      "logical_key": "qf.sync.admit_statement_conflict",
+      "name": "Qf.admit_statement_conflict"
+    },
+    {
+      "logical_key": "qf.sync.admit_same_statement_preserves_origin",
+      "name": "Qf.admit_same_statement_preserves_origin"
+    }
+  ]
+}

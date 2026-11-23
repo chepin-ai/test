@@ -1,0 +1,29 @@
+{
+  "schema_version": "qf-lean-registry/v1",
+  "packages": [
+    {
+      "package_id": "qf-constraints",
+      "origin": "asfa-ai",
+      "source": "lean/",
+      "toolchain": "leanprover/lean4:v4.35.0",
+      "dependency_profile": "core-only",
+      "status": "CANDIDATE"
+    },
+    {
+      "package_id": "usrm-lean-lab",
+      "origin": "usrm",
+      "source": "https://github.com/chepin-ai/vci-playground/tree/main/lean",
+      "toolchain": "leanprover/lean4:v4.9.0",
+      "dependency_profile": "core-only",
+      "status": "REGISTERED_NOT_ACTIVATED",
+      "activation_requirements": [
+        "independent source build at an exact source commit",
+        "zero-sorry and axiom audit",
+        "statement anchors and provenance capsule",
+        "no implicit rewrite to the qf-constraints toolchain"
+      ]
+    }
+  ],
+  "declarations": [],
+  "relations": []
+}

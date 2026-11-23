@@ -1,0 +1,5 @@
+name = "qf-constraints"
+defaultTargets = ["Qf"]
+
+[[lean_lib]]
+name = "Qf"

@@ -40,6 +40,10 @@
   - 工作票按 `(session,id)` 唯一链和最高序列号取链尖，绑定 `plan_hash`；每根默认 20 票，第 21 票失败且不消费父票；多作业整波要求全部链尖属于同一 agent，无拆波执行接口；
   - v5 恢复重建血缘、spent 集合与 Execute↔结果绑定，拒绝双花、跨作业父链、多基票、序列断裂、结果缺失，以及根 Revoke 同一时间或之后的 Transfer／Execute；无票状态继续序列化为 v4，固定字节不漂移；
   - CLI 在任何运行时副作用前拒绝 `--execute-wave` 与 Mint／Transfer／Revoke 同用，防止旧执行结果与票变更组成没有 Execute 交易的混合历史；单独旧执行及单独票变更保持兼容。
+- `lean/Qf`＋`federation/`
+  - 钉定 Lean `v4.35.0` 的 core-only 最小约束核，实际证明非传递关系拒绝、lossy 投影不降格、非 FORMAL 拒绝、同键异命题冲突和同命题来源保持；
+  - 真实构建生成 declaration capsule、环境 attestation、registry 和六类投影；独立 Python 重建声明／证据／同步语义并亲自拒绝伪造报告；
+  - 只声称本线 `FORMAL_R1`，不把普通构建升级为沙箱多内核、跨机、跨线或全局激活。
 
 ## 复验
 
@@ -147,6 +151,9 @@ cargo run -p asfa-bridge-poller -- \
 
 ```bash
 bash scripts/build-all.sh
+# 另需与 lean/lean-toolchain 一致的 lake；提交级 Lean R1 门禁：
+bash scripts/lean-federation-gate.sh FULL_IMPLEMENTATION_COMMIT /tmp/asfa-lean-gate "$PWD"
+python3 scripts/verify-lean-federation-python.py --self-test
 ```
 
 预期：119 项 Rust 测试通过（bridge 单元 56、bridge 集成 49、kernel 11、userspace 3，其中 ticket 模块 9 项）；烟测汇总为 `total=3, verified=1, failed=2`，两个失败分别是故意设置的非法 JSON 和缺失文件。egress 预注册 48 个 IPv4／IPv6 已知答案由 Rust 与独立 Python 同时复核；旧新真实进程差分证明旧端访问 loopback 并 verified，新默认端在零 TCP accept 下返回 `blocked_egress`，显式本地放权仍可达目标且六类恶意代理环境变量零命中。输出路径八组旧新差分覆盖轮询、wave、execution、父路径、dangling symlink、符号链接父目录和硬链接：六个攻击用例旧端退出 0 并发生覆盖，干净新端均在锁和写入前退出 2；独立 Python 以 realpath／samefile／stat 复判并拒绝五类假报告。原子写五组差分覆盖预置 symlink、hardlink、普通文件、128 项冲突耗尽与正常控制：旧端在前三类攻击中均 exit 0 并覆盖或改名既有项；干净新端对可绕过冲突安全重试，对耗尽显式 exit 2，且全部 sentinel 保留。独立 Python 重读文件类型、链接目标、文件身份与 SHA-256，并以四项文件系统已知答案和五类假报告先行自证。状态锁五组差分进一步覆盖预置 lock symlink 的跨 rename inode 迁移、dangling symlink、常规锁、hardlink 锁和正常控制：旧端首进程存活时第二进程可消费，干净新端在轮询、状态变化和 FIFO 输出前失败；独立 Python 以五项已知答案和六类假报告自证后复判。QF-OS 静态向量准入 `a1 → b1 → a2`，两个延后项分别由来源配额和全局配额解释。执行夹具包含 7 项作业，实测 2 个真实成功回执与 5 个显式死信，重放为 7 项 skipped 且账本字节不变；Python 独立重建输出与失败类别，并以 5 个篡改样本自证，其中包含篡改后重算哈希的假输出与假失败类别。独立 JSON 判读以迭代遍历复核深度、全文档节点数、转义重复键及五个已知答案负例。任务票最终差分为 9 组、48 个真实进程步骤；独立 Python 先通过 3 个已知答案、1 个合成有效、4 个合成拒绝并拒绝伪造真实报告，再验收最终 PASS。合法重放不新增票交易且 v5 状态字节不变；撤销后伪造历史由 Rust 与 Python 同时拒绝。最终差分新端来自无 `.git`、初始无 target 的实现提交归档，旧端来自同基线提交重建，哈希与环境重置注记均入证据索引。混合模式修复另以 5 组、17 个真实进程步骤复现旧端 Transfer／Revoke 混合历史，并证明新端在副作用前拒绝且零输出；独立判读 PASS，Transfer 原时间戳吸收反例与 Revoke 不可经任务票接口恢复的边界均保留。
@@ -155,6 +162,7 @@ bash scripts/build-all.sh
 
 - [实现状态与未覆盖边界](docs/STATUS.md)
 - [实际架构](docs/ARCHITECTURE.md)
+- [全局 Lean 证据联邦与数学操作系统方案](docs/LEAN_FEDERATION.md)
 - [Outbox / 哈希链协议](docs/BRIDGE_PROTOCOL.md)
 - [任务票最终证据总索引](docs/evidence/ticket-utxo-evidence-manifest-2026-11-21.json)
 - [混合执行／票变更门禁证据总索引](docs/evidence/ticket-mixed-mode-evidence-manifest-2026-11-23.json)
@@ -164,4 +172,4 @@ bash scripts/build-all.sh
 
 ## 诚实边界
 
-“无签名哈希链”只证明数据内部一致性，不证明发布者身份。`qfos-exec-v1` 是本仓定义的纯内置执行契约，不是已验证的外部 QF-OS 正典或 QIOS 适配器；回执与报告 SHA-256 不是签名，本地恢复幂等也不是分布式 exactly-once。当前 Coq 文件只是一个高度定理示例，不能据此宣称系统经过形式化安全验证。详细限制见状态文档。
+“无签名哈希链”只证明数据内部一致性，不证明发布者身份。`qfos-exec-v1` 是本仓定义的纯内置执行契约，不是已验证的外部 QF-OS 正典或 QIOS 适配器；回执与报告 SHA-256 不是签名，本地恢复幂等也不是分布式 exactly-once。当前 Coq 文件只是一个高度定理示例；Lean 联邦切片也只覆盖六个关系／同步定理，二者都不能据此宣称系统经过形式化安全验证。详细限制见状态文档。

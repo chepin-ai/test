@@ -1,4 +1,6 @@
 /target/
+lean/.lake/
+scripts/__pycache__/
 .env
 *.log
 *-report.json
