@@ -165,3 +165,16 @@ cmp /tmp/ticket-consistency-recheck.json \
 - `lean-federation-collaboration-2026-11-23.json`：cisvr／usrm 两次真实 HTTP 401 和各线 `NOT_DELIVERED／ACK=NONE`，不构成全局讨论或响应证据。
 - `lean-federation-evidence-manifest-2026-11-23.json`：实现、环境、全部 artifact 哈希、结果与未覆盖边界的总索引。
 - `lean-federation-publication-2026-11-23.json`：唯一远端、HTTP/1.1 重读成功、`ahead_by=10, behind_by=0`、`NOT_PUSHED` 和无外部 CI／ACK 的发布边界。
+
+## 2026-11-23：QI-OS 全局大周天真实投递
+
+- `qios-wave-2026-11-23/qios-original-tests.log` 与 `qios-prepare-tests.log`：QI-OS 原始源和加入 usrm 后的配置驱动实现均为 128 项 PASS。
+- `qios-wave-2026-11-23/public-wave-summary.json`：7 个公共 issue 明细＋4 个私有投递聚合计数；11 个全部 `DELIVERED`，但 `accepted_answers=0、research_verdict=OPEN`。
+- `qios-wave-2026-11-23/online-oracle.json`：独立在线判读，11/11 工单 canonical 字节一致、账本完整、promotion=false。
+- `qios-wave-2026-11-23/direct-lane-push.json`：cisvr／usrm 公共 inbox 提交 `92bcb5738ddf3a702761ef1f61fccd64398ec6ff` 与逐字节读回。
+- `qios-wave-2026-11-23/admin-corrections.json`：针对 usrm 非合规自动回复的修正单；作者关联与事件 schema 不放宽。
+- `qios-wave-2026-11-23/ai-full-smoke.json`：公共 run `45165978216`，`AI_FULL_PAT` 认证为 `chepin-ai`，不回读 Secret 值。
+- `qios-wave-2026-11-23/credential-public-summary.json`：脱敏凭证状态；QI／Kaggle／Deepseek／Kimi 有效，BI／Gitee 401 未写入，11 个私域 Secret 写入均元数据回读。
+- `qios-wave-2026-11-23/private-evidence-readback.json`：私域证据提交 `c00b8629713b4faea667377fe079ebfacc68d8af`，仅公开提交与布尔回执，私有路径和明细不公域扩散。
+- `qios-wave-evidence-manifest-2026-11-23.json`：实现、干净重建、公共投递、独立判读、负例与全部公开 artifact 哈希总索引。
+- `qios-wave-publication-2026-11-23.json`：唯一远端、`ahead_by=12, behind_by=0`、`NOT_PUSHED`、实现 CI 未运行与全局研究 `OPEN` 的发布边界。

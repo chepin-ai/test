@@ -1,0 +1,106 @@
+{
+  "schema": "asfa-qios-public-wave-summary/v1",
+  "wave_id": "WAVE-QI-LEAN-FED-20261123-01",
+  "delivered_total": 11,
+  "public_deliveries": [
+    {
+      "workorder_id": "WO-05fe45b788522a7e9149bbeb",
+      "state": "DELIVERED",
+      "repo": "chepin-qi/qlv-pub",
+      "issue_number": 3,
+      "issue_url": "https://github.com/chepin-qi/qlv-pub/issues/3"
+    },
+    {
+      "workorder_id": "WO-12e82696205e6df3401a0029",
+      "state": "DELIVERED",
+      "repo": "chepin-ai/vci-qfa",
+      "issue_number": 4,
+      "issue_url": "https://github.com/chepin-ai/vci-qfa/issues/4"
+    },
+    {
+      "workorder_id": "WO-4c3c5718516c240015cf89a1",
+      "state": "DELIVERED",
+      "repo": "chepin-ai/vci-usrm",
+      "issue_number": 24,
+      "issue_url": "https://github.com/chepin-ai/vci-usrm/issues/24"
+    },
+    {
+      "workorder_id": "WO-ad5432304ba2b313a6072ee3",
+      "state": "DELIVERED",
+      "repo": "chepin-ai/vci-control",
+      "issue_number": 2,
+      "issue_url": "https://github.com/chepin-ai/vci-control/issues/2"
+    },
+    {
+      "workorder_id": "WO-dfac8006b92ffdf694503439",
+      "state": "DELIVERED",
+      "repo": "chepin-ai/vci-inbox",
+      "issue_number": 18,
+      "issue_url": "https://github.com/chepin-ai/vci-inbox/issues/18"
+    },
+    {
+      "workorder_id": "WO-ec5a91075cddb40c5208c576",
+      "state": "DELIVERED",
+      "repo": "chepin-ai/vci-aiq",
+      "issue_number": 2,
+      "issue_url": "https://github.com/chepin-ai/vci-aiq/issues/2"
+    },
+    {
+      "workorder_id": "WO-f659afbb508ef5e920fe3e5b",
+      "state": "DELIVERED",
+      "repo": "chepin-qi/qtlv-pub",
+      "issue_number": 2,
+      "issue_url": "https://github.com/chepin-qi/qtlv-pub/issues/2"
+    }
+  ],
+  "private_delivery_count": 4,
+  "accepted_answers": 0,
+  "research_verdict": "OPEN",
+  "promotion": false,
+  "invalid_automatic_responses": [
+    {
+      "workorder_id": "WO-4c3c5718516c240015cf89a1",
+      "invalid": [
+        {
+          "author": "github-actions[bot]",
+          "author_association": "CONTRIBUTOR",
+          "comment_id": 7100006041,
+          "reason": "untrusted author_association 'CONTRIBUTOR' (required one of ['COLLABORATOR', 'MEMBER', 'OWNER'])"
+        },
+        {
+          "author": "chepin-qi",
+          "author_association": "NONE",
+          "comment_id": 7100150173,
+          "reason": "untrusted author_association 'NONE' (required one of ['COLLABORATOR', 'MEMBER', 'OWNER'])"
+        },
+        {
+          "author": "github-actions[bot]",
+          "author_association": "CONTRIBUTOR",
+          "comment_id": 7100156572,
+          "reason": "untrusted author_association 'CONTRIBUTOR' (required one of ['COLLABORATOR', 'MEMBER', 'OWNER'])"
+        }
+      ]
+    },
+    {
+      "workorder_id": "WO-ad5432304ba2b313a6072ee3",
+      "invalid": [
+        {
+          "author": "chepin-qi",
+          "author_association": "NONE",
+          "comment_id": 7100151022,
+          "reason": "untrusted author_association 'NONE' (required one of ['COLLABORATOR', 'MEMBER', 'OWNER'])"
+        }
+      ]
+    }
+  ],
+  "administrative_acknowledgements": [
+    {
+      "line": "usrm",
+      "comment_id": 7100156572,
+      "status": "PRESENT_NON_ANSWER",
+      "ack": false
+    }
+  ],
+  "anomaly_2": "Administrative correction comments included protocol marker text and were enumerated as invalid non-answers; no promotion occurred. Future admin cards must omit that marker.",
+  "boundary": "Public issue metadata and aggregate counts only. Private repository names and private issue details are withheld. DELIVERED is not ACK or consensus."
+}

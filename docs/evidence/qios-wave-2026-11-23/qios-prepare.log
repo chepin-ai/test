@@ -1,0 +1,62 @@
+{
+  "wave_id": "WAVE-QI-LEAN-FED-20261123-01",
+  "qios_source_commit": "c13dcee8f67fce568e8b160be39c3d6ff8755736",
+  "work_orders": 11,
+  "tests": "128_PASS",
+  "activation": {
+    "schema": "qi-verdict/v1",
+    "subject": "WAVE-QI-LEAN-FED-20261123-01",
+    "positive": [
+      {
+        "id": "wave-created",
+        "status": "PASS",
+        "count": 11
+      }
+    ],
+    "negative": [
+      {
+        "id": "no-answer-no-close",
+        "status": "PASS"
+      }
+    ],
+    "open_items": [
+      "LOOP-05fe45b788522a7e9149bbeb:crosscheck:qlv",
+      "LOOP-05fe45b788522a7e9149bbeb:delivery",
+      "LOOP-05fe45b788522a7e9149bbeb:qlv",
+      "LOOP-12e82696205e6df3401a0029:crosscheck:qfa-ai",
+      "LOOP-12e82696205e6df3401a0029:delivery",
+      "LOOP-12e82696205e6df3401a0029:qfa-ai",
+      "LOOP-34fe876bb0531894923da5f9:crosscheck:qfa",
+      "LOOP-34fe876bb0531894923da5f9:delivery",
+      "LOOP-34fe876bb0531894923da5f9:qfa",
+      "LOOP-4c3c5718516c240015cf89a1:crosscheck:usrm",
+      "LOOP-4c3c5718516c240015cf89a1:delivery",
+      "LOOP-4c3c5718516c240015cf89a1:usrm",
+      "LOOP-abfe935f9cd74e331d02c243:cfts",
+      "LOOP-abfe935f9cd74e331d02c243:crosscheck:cfts",
+      "LOOP-abfe935f9cd74e331d02c243:delivery",
+      "LOOP-ad5432304ba2b313a6072ee3:cisvr",
+      "LOOP-ad5432304ba2b313a6072ee3:crosscheck:cisvr",
+      "LOOP-ad5432304ba2b313a6072ee3:delivery",
+      "LOOP-ae983a22bf5a625ea3ffbfff:crosscheck:qi-lab",
+      "LOOP-ae983a22bf5a625ea3ffbfff:delivery",
+      "LOOP-ae983a22bf5a625ea3ffbfff:qi-lab",
+      "LOOP-dfac8006b92ffdf694503439:crosscheck:federation",
+      "LOOP-dfac8006b92ffdf694503439:delivery",
+      "LOOP-dfac8006b92ffdf694503439:federation",
+      "LOOP-eb7a6d97705d46210b223e74:crosscheck:lgt",
+      "LOOP-eb7a6d97705d46210b223e74:delivery",
+      "LOOP-eb7a6d97705d46210b223e74:lgt",
+      "LOOP-ec5a91075cddb40c5208c576:aiq",
+      "LOOP-ec5a91075cddb40c5208c576:crosscheck:aiq",
+      "LOOP-ec5a91075cddb40c5208c576:delivery",
+      "LOOP-f659afbb508ef5e920fe3e5b:crosscheck:qtlv",
+      "LOOP-f659afbb508ef5e920fe3e5b:delivery",
+      "LOOP-f659afbb508ef5e920fe3e5b:qtlv"
+    ],
+    "errors": [],
+    "verdict": "OPEN",
+    "promotion": false,
+    "evidence_digest": "f7783cdd782e35d4ef0f3f6e1b11407bd7fc5ee6d16d27dffb9ee972719aa13f"
+  }
+}

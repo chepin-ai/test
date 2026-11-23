@@ -1,0 +1,18 @@
+[
+  {
+    "repo": "chepin-ai/vci-usrm",
+    "issue": 24,
+    "comment_id": 7100150173,
+    "status": 201,
+    "readback_match": true,
+    "body_sha256": "ad93a235e3094a5590d68871af7aaeb08d978fff6e30dbfc8eeabe110e2ceb84"
+  },
+  {
+    "repo": "chepin-ai/vci-control",
+    "issue": 2,
+    "comment_id": 7100151022,
+    "status": 201,
+    "readback_match": true,
+    "body_sha256": "ad93a235e3094a5590d68871af7aaeb08d978fff6e30dbfc8eeabe110e2ceb84"
+  }
+]

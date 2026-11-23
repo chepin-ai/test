@@ -1,0 +1,7 @@
+{
+  "schema": "asfa-private-evidence-readback/v1",
+  "initial_commit": "c00b8629713b4faea667377fe079ebfacc68d8af",
+  "latest_commit": "6f9f5690c3283e6dec46f28f820d08f6c202491b",
+  "latest_readback_match": true,
+  "details": "PRIVATE_VAULT_ONLY_NOT_PUBLISHED"
+}

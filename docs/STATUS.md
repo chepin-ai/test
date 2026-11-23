@@ -1,6 +1,15 @@
 # 实现状态（本轮实测证据：2026-11-16—23）
 
-## 最新续拍：Lean 证据联邦最小垂直切片
+## 最新续拍：QI-OS 全局大周天真实投递与独立读回
+
+- 实现提交为 `de700418f5adc7f49a85410b3f0a05e3ac926999`。直接复用 QI-OS 原生工单、答件、append-only 账本和异身份 crosscheck，新增 Lean 野问与 usrm peer，不另造共识语义，也不把 QI-OS 运输判词当作 Lean 证明。
+- QI-OS 原始提交 `c13dcee8f67fce568e8b160be39c3d6ff8755736` 独立归档测试 128 项通过；加入 usrm 后，将两处硬编码线路数断言改为配置驱动，完整 128 项再次通过。fresh prepare 初版继承历史 runtime 的 21 订单异常在网络发送前修复，最终新实例为 11 单。
+- 11 个工单全部 `DELIVERED`，含 usrm #24、cisvr #2、federation #18。独立在线判读逐一重算标题与 canonical body，11/11 一致，哈希链完整，`accepted_answers=0、promotion=false、research_verdict=OPEN`。
+- usrm 自动回复存在，但作者关联为 `CONTRIBUTOR` 且不是合法 `QI-OS-ANSWER-V1` 事件，故不计 ACK；修正单已写入 usrm #24 与 cisvr #2 并读回一致。usrm 后续 comment `7100156572` 已确认修正口径，但明确标为非协议答件，仍不晋级；管理卡包含协议标记导致自身列为 invalid 的异常也已登记。全局共识和各线完成均未成立。
+- `AI_FULL_PAT` 经公共 run `45165978216` 实测认证为 `chepin-ai`。有效 QI／Kaggle／Deepseek／Kimi 值已密封写入私域 Secrets，11 个写入均元数据回读；BI 与 Gitee 401，未覆盖旧槽位。私域完整证据初提交为 `c00b8629713b4faea667377fe079ebfacc68d8af`，最新响应增补为 `6f9f5690c3283e6dec46f28f820d08f6c202491b`。
+- 从实现提交归档重跑：119 项 Rust 测试、Lean 6 声明／6 attestations／36 投影、QI-OS fresh prepare 与独立自证全部通过。公开证据总索引为 `evidence/qios-wave-evidence-manifest-2026-11-23.json`，私仓名、私钥值和私有投递明细不公域扩散。
+
+## 2026-11-23：Lean 证据联邦最小垂直切片
 
 - 实现提交为 `280d62f3e2225ac7ea314b4492aa51d78a32f6a8`，基线为 `04166e8974583594ff20990d8fa7920c91c0c78a`。采用 Lean 证明核＋HOLO 血缘核＋Lake 多包版本列车＋事件驱动联邦，不以单一巨包、隐式升级或最后写入覆盖强求全局一致。
 - 从实现提交归档，在无 `.git`、空 Rust target、空 Lean `.lake` 环境重跑：119 项 Rust 测试及既有全部门禁保持；Lean `v4.35.0` 实际构建和公理审计通过，六个定理只依赖 `propext`，形成 6 个声明、6 个 attestation 和 36 个精确／有损投影。

@@ -1,0 +1,22 @@
+{
+  "commit": "92bcb5738ddf3a702761ef1f61fccd64398ec6ff",
+  "update_status": 200,
+  "files": {
+    "lanes/cisvr/inbox/QF-LEAN-FED-20261123-01-asfa.md": {
+      "readback_status": 200,
+      "sha256": "97b85eaf43db397e3c8fe75dd26907b2d101120632e37663e27c9db64e971d2b",
+      "matches": true
+    },
+    "lanes/usrm/inbox/QF-LEAN-FED-20261123-01-asfa.md": {
+      "readback_status": 200,
+      "sha256": "97b85eaf43db397e3c8fe75dd26907b2d101120632e37663e27c9db64e971d2b",
+      "matches": true
+    },
+    "lanes/asfa/inbox/README.md": {
+      "readback_status": 200,
+      "sha256": "c1644959393a1072749ca250bada28129ad20c9ebc1013deda7a93440972415d",
+      "matches": true
+    }
+  },
+  "message": "QF-LEAN-FED-20261123-01 @cisvr @usrm: ASFA Lean federation and FED-JOIN reapplication"
+}

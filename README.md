@@ -168,6 +168,7 @@ python3 scripts/verify-lean-federation-python.py --self-test
 - [全局 Lean 证据联邦与数学操作系统方案](docs/LEAN_FEDERATION.md)
 - [Lean 联邦 R1 证据总索引](docs/evidence/lean-federation-evidence-manifest-2026-11-23.json)
 - [QI-OS 原生大周天与独立读回](docs/QI_OS_WAVE.md)
+- [QI-OS 大周天证据总索引](docs/evidence/qios-wave-evidence-manifest-2026-11-23.json)
 - [Outbox / 哈希链协议](docs/BRIDGE_PROTOCOL.md)
 - [任务票最终证据总索引](docs/evidence/ticket-utxo-evidence-manifest-2026-11-21.json)
 - [混合执行／票变更门禁证据总索引](docs/evidence/ticket-mixed-mode-evidence-manifest-2026-11-23.json)

@@ -1,0 +1,16 @@
+{
+  "schema_version": "qf-lean-federation-oracle/v1",
+  "self_test": {
+    "relation_known_answers": 8,
+    "synthetic_valid": 2,
+    "synthetic_rejections": 4,
+    "projection_known_answers": 3
+  },
+  "report_sha256": "e22f0eeab88a6acf995975732725d6706176fdc5f7577939730d4e73b245f8c2",
+  "verdict": "PASS",
+  "declarations": 6,
+  "attestations": 6,
+  "projections": 36,
+  "forged_real_report": "REJECTED_BEFORE_ACCEPTANCE",
+  "boundary": "Independent source, capsule, registry and projection oracle. FORMAL_R1 only; no sandboxed/multi-kernel replay, global activation, CI, federation ACK, or informal-statement fidelity claim."
+}

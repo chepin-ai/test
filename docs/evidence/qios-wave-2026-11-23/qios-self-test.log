@@ -1,0 +1,9 @@
+{
+  "schema": "asfa-qios-wave-oracle/v1",
+  "self_test": {
+    "known_answers": 3,
+    "synthetic_valid": 1,
+    "synthetic_rejections": 2
+  },
+  "oracle_verdict": "PASS"
+}

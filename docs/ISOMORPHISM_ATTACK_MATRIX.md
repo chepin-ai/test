@@ -273,6 +273,19 @@ C2SP 链接是 `main` 开发版，不称为稳定标准。A2A 签名 Agent Card 
 
 实现提交为 `280d62f3e2225ac7ea314b4492aa51d78a32f6a8`。当前仅本线 `FORMAL_R1`；usrm legacy 包未激活，跨线 ACK、外部 CI 和全局统一不成立。总索引为 `docs/evidence/lean-federation-evidence-manifest-2026-11-23.json`。
 
+### 3.13 2026-11-23 QI-OS 大周天身份与闭环门禁
+
+| 攻击／碰撞 | 拒绝条件 | 自动化与实测对应 |
+|---|---|---|
+| 把 issue 创建当作对方收讫或共识 | 必须原件读回；答件与 crosscheck 分离 | 11 单均 `DELIVERED`，但研究保持 `OPEN`，`accepted_answers=0` |
+| 伪造作者关联或 bot 名义自动 ACK | 只接受规定身份与首行规范答件 | usrm `github-actions[bot]` 为 `CONTRIBUTOR` 且事件格式不合规，拒绝计入 ACK |
+| 为让自动回复通过而放宽认证 | 保持 OWNER／MEMBER／COLLABORATOR 或合法 HMAC | 已向 usrm／cisvr 发修正单，要求 `chepin-ai` 合资格 API 或 `USRM` HMAC |
+| 篡改工单正文或账本 | 独立 canonical body 与 `seq + prev-hash` 重算 | 11/11 issue 逐字节一致，账本 tip 独立复算 |
+| 源归档历史状态污染新波次 | fresh prepare 不得继承 runtime | 初版 21 订单异常在网络前发现；修复后恰 11 单，未发生重复投递 |
+| 硬编码线路清单造成漏线 | 测试期望数从 peers 配置机械生成 | 新增 usrm 后完整 128 项测试通过 |
+
+证据总索引为 `docs/evidence/qios-wave-evidence-manifest-2026-11-23.json`。当前只有全域投递与协议负例闭合，不声称研究共识、入盟或跨线数学验证完成。
+
 ## 4. JCS 候选包评估与不采用结论
 
 检索到 `serde_jcs 0.2.0`、`jcs-canonicalize 0.2.1`、`serde_json_canonicalizer 0.4.1`。目前只评估，没有把任何候选加入本仓依赖。

@@ -1,0 +1,12 @@
+{
+  "schema": "asfa-qios-source-evidence/v1",
+  "implementation_commit": "de700418f5adc7f49a85410b3f0a05e3ac926999",
+  "qios_source_commit": "c13dcee8f67fce568e8b160be39c3d6ff8755736",
+  "qios_source_archive_sha256": "3da7105185a1e538cad4e5c5b371cc5e77e87472904e1e973e7d03b982628243",
+  "original_qios_tests": "128_PASS",
+  "prepared_qios_tests": "128_PASS",
+  "anomaly_1": "Initial adapter prepare copied historical runtime and produced 21 offline orders before any network send. Fresh prepare now deletes copied runtime before activation; final count is 11 and no duplicate transport occurred.",
+  "private_evidence_commit": "c00b8629713b4faea667377fe079ebfacc68d8af",
+  "latest_private_evidence_commit": "6f9f5690c3283e6dec46f28f820d08f6c202491b",
+  "anomaly_2": "Administrative correction comments included protocol marker text and were enumerated as invalid non-answers; no promotion occurred. Future admin cards must omit that marker."
+}

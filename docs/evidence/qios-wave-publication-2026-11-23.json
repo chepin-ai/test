@@ -1,0 +1,40 @@
+{
+  "schema_version": "asfa-qios-wave-publication/v1",
+  "observed_at": "2026-11-23T20:00:20+08:00",
+  "implementation_commit": "de700418f5adc7f49a85410b3f0a05e3ac926999",
+  "evidence_candidate_commit": "2693650cd0cc1e0c7eb760908b76bcca0f3325f9",
+  "allowed_remote": "https://github.com/chepin-ai/test.git",
+  "remote_configuration": {
+    "fetch": "https://github.com/chepin-ai/test.git",
+    "push": "https://github.com/chepin-ai/test.git",
+    "credential_embedded": false,
+    "only_remote": true
+  },
+  "remote_read": {
+    "method": "GIT_TERMINAL_PROMPT=0 git -c http.version=HTTP/1.1 ls-remote origin refs/heads/main",
+    "exit_code": 0,
+    "main": "2a40df076c0d4f63a1f5dd25f368f2916a8d0d50",
+    "ahead_by": 12,
+    "behind_by": 0,
+    "remote_equals_local": false
+  },
+  "push": {
+    "attempted": false,
+    "reason": "The verified QI credential has pull-only permission on chepin-ai/test. AI_FULL_PAT was verified through public CI but is not exposed as a runtime value; no historical credential was reused.",
+    "status": "NOT_PUSHED"
+  },
+  "external_ci": {
+    "implementation_run_observed": false,
+    "credential_smoke_run": 45165978216,
+    "reason": "The AI_FULL_PAT smoke run validates the existing credential, not the new implementation commits; the implementation was not pushed."
+  },
+  "federation": {
+    "qios_workorders_delivered": 11,
+    "accepted_answers": 0,
+    "independent_crosschecks": 0,
+    "research_verdict": "OPEN",
+    "usrm_administrative_acknowledgement": "PRESENT_NON_ANSWER",
+    "active_consensus_claim": false
+  },
+  "evidence_commit_note": "The evidence commit is amended only to add this publication record and its documentation reference; ahead/behind remains 12/0. The final amended HEAD is measured with Git after the amend. No push success, implementation CI, alliance activation, protocol answer or consensus is asserted."
+}

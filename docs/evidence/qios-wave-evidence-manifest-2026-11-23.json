@@ -1,0 +1,131 @@
+{
+  "schema": "asfa-qios-wave-evidence-manifest/v1",
+  "date": "2026-11-23",
+  "implementation_commit": "de700418f5adc7f49a85410b3f0a05e3ac926999",
+  "qios_source_commit": "c13dcee8f67fce568e8b160be39c3d6ff8755736",
+  "results": {
+    "rust_tests": 119,
+    "lean_declarations": 6,
+    "lean_attestations": 6,
+    "lean_projections": 36,
+    "lean_oracle": "PASS",
+    "qios_original_tests": "128_PASS",
+    "qios_prepared_tests": "128_PASS",
+    "workorders_delivered": 11,
+    "public_deliveries": 7,
+    "private_deliveries_aggregate": 4,
+    "independent_online_readback": "11/11_PASS",
+    "accepted_answers": 0,
+    "usrm_administrative_acknowledgement": "PRESENT_NON_ANSWER",
+    "research_verdict": "OPEN",
+    "promotion": false,
+    "ai_full_public_smoke": "PASS",
+    "secret_metadata_readback": "11/11_PASS",
+    "invalid_credentials_not_written": [
+      "BI_FULL_PAT",
+      "GITEE_CI_CONTROL_MIRROR_TOKEN"
+    ]
+  },
+  "collaboration": {
+    "usrm_issue": 24,
+    "cisvr_issue": 2,
+    "federation_issue": 18,
+    "usrm_automatic_response": "PRESENT_BUT_REJECTED_AUTHOR_ASSOCIATION_AND_EVENT_SCHEMA",
+    "usrm_correction_confirmation": "PRESENT_NON_ANSWER_COMMENT_7100156572",
+    "protocol_corrections": "DELIVERED_AND_READBACK_MATCHED",
+    "line_acks": 0,
+    "independent_crosschecks": 0
+  },
+  "anomalies": [
+    "ANOMALY-1: initial adapter copied historical runtime and produced 21 offline orders before any network send; fixed before final 11-order preparation.",
+    "ANOMALY-2: admin correction comments included the protocol marker and were enumerated as invalid non-answers; no promotion occurred and future admin cards omit the marker."
+  ],
+  "repository_artifacts": [
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/rust-build-all.log",
+      "sha256": "42c37830bd3bed7718702c275bdb974dc8b2d92f55c1d07a9a1bbba386d2a1d9",
+      "role": "clean full Rust and existing Python gates"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/lean-gate.log",
+      "sha256": "aa88bab7249a4ac8cdc939e16185e39ef909a756f168f98ee978219e1dbc9546",
+      "role": "committed-source Lean R1 gate"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/lean-report.json",
+      "sha256": "e22f0eeab88a6acf995975732725d6706176fdc5f7577939730d4e73b245f8c2",
+      "role": "Lean capsule and synchronization report bound to de700418"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/lean-oracle.json",
+      "sha256": "352606c89722b439cd08a346e805b9f4b67d695aa05392aede405947a3ba4937",
+      "role": "independent Lean verdict"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/qios-original-tests.log",
+      "sha256": "5ee96f25830b3f4b5ee544f3779e504ab73c40ded44679aebc74dc17741366ea",
+      "role": "original QI-OS archive: 128 tests PASS"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/qios-prepare-tests.log",
+      "sha256": "88c3ab522f6fe78bbada6f808af2ad9da4817b32cc3080ec3e1f60f9279cc9fb",
+      "role": "configuration-driven QI-OS wave: 128 tests PASS"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/qios-prepare.log",
+      "sha256": "8bab64ae8fa9c0c071429b2faff83e19cbc7694409f36fd618957d060b682981",
+      "role": "fresh offline activation of 11 work orders"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/qios-self-test.log",
+      "sha256": "948ed9b034f3c59ed334d15583a94bad8de656b480efa13dc8d4373c35732423",
+      "role": "wave-oracle self-tests"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/online-oracle.json",
+      "sha256": "f044d9d64d68e2ac0e8fb81bafe6c61d25c085e6e2d1893d83acc27135959540",
+      "role": "latest 11/11 live issue byte readback and independent ledger verdict"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/public-wave-summary.json",
+      "sha256": "9a17a89e5c48608906ef9d8932d2238f5902903711af467ec2688b9c352862f6",
+      "role": "latest public delivery, invalid non-answer and administrative acknowledgement summary"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/direct-lane-push.json",
+      "sha256": "0d540a895aaffb3f2811ee71f2263c68c07b00d3e1dd2fbcbcf6aec6ee24ebd1",
+      "role": "cisvr/usrm public inbox cards and byte readback"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/admin-corrections.json",
+      "sha256": "458e70235d6369b49c418905535785fd916838b1b1df8026c4631679fbb80150",
+      "role": "usrm/cisvr protocol correction comments"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/ai-full-smoke.json",
+      "sha256": "72239a61e66942a6c5d14e9051cff3395009dab3950909f312eb6838582137dc",
+      "role": "AI_FULL_PAT public CI authentication run and safe logs"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/credential-public-summary.json",
+      "sha256": "c32a11a4f4872e73cfc38c4108cdd614406e5062151d7423cb4bb6c0fc90ab8c",
+      "role": "sanitized credential validity and secret-write metadata"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/private-evidence-readback.json",
+      "sha256": "8ba74a33defc085ba31e3984a05fbfe9445ae8c244fe685b7708d8b2792211f7",
+      "role": "latest private evidence commit and readback boolean only"
+    },
+    {
+      "path": "docs/evidence/qios-wave-2026-11-23/source.json",
+      "sha256": "6eb9b56d1ad93b85c70e9f180ca3e104e2be00607fd53987d6bf7f30e8350b82",
+      "role": "source commits, archive hash and anomaly corrections"
+    }
+  ],
+  "boundaries": [
+    "DELIVERED is a transport fact, not line ACK, alliance membership, independent crosscheck, mathematical agreement or verified completion.",
+    "Administrative responses and correction confirmations are not protocol answers. The rejected usrm automatic response remains a negative event.",
+    "Private repository names, private issue details and credential values are not published. Private evidence readback is recorded only by commit and boolean.",
+    "Lean FORMAL_R1 remains local to six constraint theorems; no R2, global Lean migration or production-scale proof is claimed."
+  ]
+}

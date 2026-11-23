@@ -1,0 +1,25 @@
+{
+  "dispatch_status": 204,
+  "note": "Polling the already-dispatched run; no second dispatch was sent.",
+  "run": {
+    "id": 45165978216,
+    "status": "completed",
+    "conclusion": "success",
+    "head_sha": "4f7bbf4c89cf0d3389782e1ec5f8fac9433de24e",
+    "event": "workflow_dispatch",
+    "created_at": "2026-11-23T11:31:27Z",
+    "updated_at": "2026-11-23T11:31:36Z",
+    "url": "https://api.github.com/repos/chepin-ai/vci-inbox/actions/runs/45165978216"
+  },
+  "logs_status": 200,
+  "safe_log_lines": [
+    "2026-11-23T11:31:33.9603777Z \u001b[36;1mprint(json.dumps({'secret_presence':presence}))\u001b[0m",
+    "2026-11-23T11:31:33.9608378Z \u001b[36;1mprint(json.dumps({'pat_authenticated':True,'login':data.get('login')}))\u001b[0m",
+    "2026-11-23T11:31:34.3202276Z {\"secret_presence\": {\"PAT\": true, \"KAGGLE_KEY\": true, \"KAGGLE_USERNAME\": true, \"DEEPSEEK_API_KEY_VCI1\": true, \"KIMI_API_KEY_VCI1\": true}}",
+    "2026-11-23T11:31:34.3203643Z {\"pat_authenticated\": true, \"login\": \"chepin-ai\"}",
+    "2026-11-23T11:31:33.9603774Z \u001b[36;1mprint(json.dumps({'secret_presence':presence}))\u001b[0m",
+    "2026-11-23T11:31:33.9608282Z \u001b[36;1mprint(json.dumps({'pat_authenticated':True,'login':data.get('login')}))\u001b[0m",
+    "2026-11-23T11:31:34.3202206Z {\"secret_presence\": {\"PAT\": true, \"KAGGLE_KEY\": true, \"KAGGLE_USERNAME\": true, \"DEEPSEEK_API_KEY_VCI1\": true, \"KIMI_API_KEY_VCI1\": true}}",
+    "2026-11-23T11:31:34.3203638Z {\"pat_authenticated\": true, \"login\": \"chepin-ai\"}"
+  ]
+}
