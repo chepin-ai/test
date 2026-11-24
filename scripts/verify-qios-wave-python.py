@@ -67,6 +67,23 @@ def verify_hmac_event(event: dict, secret: str) -> None:
         raise Reject("HMAC signature mismatch")
 
 
+def reject_hmac_adjudication_divergence(poll: dict, verified_event_ids: list[str]) -> None:
+    """A valid remote signature must not be reported as an auth failure by the poll."""
+    adjudications = {
+        item.get("event_id"): item
+        for item in poll.get("adjudications", [])
+        if isinstance(item, dict) and isinstance(item.get("event_id"), str)
+    }
+    for event_id in verified_event_ids:
+        item = adjudications.get(event_id)
+        if item is None:
+            raise Reject(f"HMAC adjudication missing: {event_id}")
+        auth_failures = {"AUTH_SIGNATURE", "AUTH_UNAVAILABLE"}
+        observed = set(item.get("errors", [])) | set(item.get("open_items", []))
+        if observed & auth_failures:
+            raise Reject(f"runtime/oracle HMAC divergence: {event_id}")
+
+
 def verify_ledger(path: Path) -> dict:
     entries = []
     if path.exists():
@@ -165,7 +182,22 @@ def self_test() -> dict:
         rejected += 1
     if rejected != 2:
         raise Reject("HMAC negative controls")
-    return {"known_answers": 4, "synthetic_valid": 2, "synthetic_rejections": 4}
+    reject_hmac_adjudication_divergence(
+        {"adjudications": [{"event_id": event["event_id"], "errors": []}]},
+        [event["event_id"]])
+    divergence_rejections = 0
+    for bad_poll in (
+            {"adjudications": [{"event_id": event["event_id"], "errors": ["AUTH_SIGNATURE"]}]},
+            {"adjudications": [{"event_id": event["event_id"], "open_items": ["AUTH_UNAVAILABLE"]}]},
+            {"adjudications": []}):
+        try:
+            reject_hmac_adjudication_divergence(bad_poll, [event["event_id"]])
+        except Reject:
+            divergence_rejections += 1
+    if divergence_rejections != 3:
+        raise Reject("HMAC adjudication divergence controls")
+    return {"known_answers": 4, "synthetic_valid": 2, "synthetic_rejections": 4,
+            "hmac_adjudication_divergence_rejections": divergence_rejections}
 
 
 def verify(root: Path, token: str | None, network: bool, hmac_secret: str | None) -> dict:
@@ -197,6 +229,7 @@ def verify(root: Path, token: str | None, network: bool, hmac_secret: str | None
             if (issue.get("user") or {}).get("login") != "chepin-qi":
                 raise Reject(f"unexpected wave actor: {order_id}")
             valid_answers = 0
+            hmac_verified_event_ids = []
             for comment in comments(repo, delivery["issue_number"], token):
                 body = comment.get("body") or ""
                 if not body.startswith("QI-OS-ANSWER-V1\n"):
@@ -213,9 +246,12 @@ def verify(root: Path, token: str | None, network: bool, hmac_secret: str | None
                     if not hmac_secret:
                         raise Reject("HMAC_SECRET_UNAVAILABLE")
                     verify_hmac_event(payload, hmac_secret)
+                    hmac_verified_event_ids.append(payload["event_id"])
                 valid_answers += 1
-            if poll_by_id.get(order_id, {}).get("answers") != valid_answers:
+            poll = poll_by_id.get(order_id, {})
+            if poll.get("answers") != valid_answers:
                 raise Reject(f"answer count changed or mismatched after QI-OS poll: {order_id}")
+            reject_hmac_adjudication_divergence(poll, hmac_verified_event_ids)
         checked.append(order_id)
     status = result.get("status", {})
     research_verdict = status.get("verdict")
