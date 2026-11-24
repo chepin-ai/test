@@ -282,6 +282,300 @@ if __name__ == "__main__":
     unittest.main()
 '''
 
+CONTENT_RECORD_METHOD = '''
+    def _content_required(self, loop: dict[str, Any]) -> list[str]:
+        questions = loop.get("content_required")
+        if questions is None:
+            order = self._json(self.outbox / f"{loop['workorder_id']}.json")
+            questions = [q.get("id") for q in order.get("params", {}).get("questions", [])]
+        if not isinstance(questions, list) or not questions or \\
+                not all(isinstance(q, str) and q for q in questions) or \\
+                len(set(questions)) != len(questions):
+            raise ValueError("CONTENT_QUESTION_CONFIG")
+        return sorted(questions)
+
+    def record_content_proof(self, loop_id: str, peer: str, receipt: dict[str, Any],
+                             *, principal: str) -> dict[str, Any]:
+        """Record only a host-verified proof; no remote event routes here."""
+        loops = self._loops()
+        loop = loops["loops"].get(loop_id)
+        if not loop:
+            return evaluate([], [{"id": "CONTENT_LOOP_UNKNOWN", "status": "FAIL"}],
+                            errors=["CONTENT_LOOP_UNKNOWN"], subject=loop_id)
+        answer = loop.get("answers", {}).get(peer)
+        cross = loop.get("crosschecks", {}).get(peer)
+        required = {
+            "schema", "question_coverage", "method", "evidence_grade", "source_commit",
+            "capsule_sha256", "report_sha256", "oracle_report_sha256", "verifier_sha256",
+            "verifier_principal", "subject_answer_digest", "subject_crosscheck_digest",
+            "oracle_verdict", "proof_id",
+        }
+        errors = []
+        if not answer or not cross or answer["answer"].get("verdict") != "PASS" or \\
+                cross.get("verdict") != "PASS":
+            errors.append("CONTENT_PREREQUISITES")
+        if not isinstance(receipt, dict) or set(receipt) != required:
+            errors.append("CONTENT_RECEIPT_SCHEMA")
+        if errors:
+            return evaluate([], [{"id": e, "status": "FAIL"} for e in errors],
+                            errors=errors, subject=loop_id)
+        if receipt["schema"] != "qi-lean-content-proof/v1" or \\
+                receipt["method"] != "clean-archive-lake-build-independent-oracle" or \\
+                receipt["evidence_grade"] != "FORMAL_R1" or receipt["oracle_verdict"] != "PASS":
+            errors.append("CONTENT_RECEIPT_SEMANTICS")
+        if not isinstance(principal, str) or not principal or \\
+                receipt["verifier_principal"] != principal or \\
+                cross["identity"].get("principal") != principal:
+            errors.append("CONTENT_VERIFIER_PRINCIPAL")
+        if receipt["subject_answer_digest"] != answer["answer_digest"] or \\
+                receipt["subject_answer_digest"] != digest(answer["answer"]):
+            errors.append("CONTENT_ANSWER_BINDING")
+        if receipt["subject_crosscheck_digest"] != cross.get("crosscheck_digest"):
+            errors.append("CONTENT_CROSSCHECK_BINDING")
+        coverage = receipt["question_coverage"]
+        if not isinstance(coverage, list) or not coverage or coverage != sorted(set(coverage)) or \\
+                not all(isinstance(q, str) and q for q in coverage) or \\
+                not set(coverage) <= set(self._content_required(loop)):
+            errors.append("CONTENT_QUESTION_COVERAGE")
+        if not re.fullmatch(r"[0-9a-f]{40}", receipt["source_commit"]):
+            errors.append("CONTENT_SOURCE_COMMIT")
+        for field in ("capsule_sha256", "report_sha256", "oracle_report_sha256",
+                      "verifier_sha256", "subject_answer_digest", "subject_crosscheck_digest"):
+            if not isinstance(receipt[field], str) or not re.fullmatch(r"[0-9a-f]{64}", receipt[field]):
+                errors.append("CONTENT_HASH:" + field)
+        unsigned = {k: v for k, v in receipt.items() if k != "proof_id"}
+        expected_id = digest({"schema": "qi-content-proof-id/v1", "receipt": unsigned})
+        if receipt["proof_id"] != expected_id:
+            errors.append("CONTENT_PROOF_ID")
+        existing = loop.setdefault("content_proofs", {}).setdefault(peer, [])
+        if any(item.get("proof_id") == receipt["proof_id"] for item in existing):
+            errors.append("CONTENT_PROOF_IMMUTABLE")
+        if errors:
+            return evaluate([], [{"id": e, "status": "FAIL"} for e in sorted(set(errors))],
+                            errors=sorted(set(errors)), subject=loop_id)
+        existing.append(copy.deepcopy(receipt))
+        existing.sort(key=lambda item: item["proof_id"])
+        result = self._recompute_loop(loop_id, loops)
+        self.ledger.append("content_proof_recorded", {
+            "loop_id": loop_id, "peer": peer, "proof_id": receipt["proof_id"],
+            "question_coverage": coverage, "verifier_principal": principal})
+        return result
+
+'''
+
+CONTENT_RECOMPUTE_OLD = '''        loop["pending"] = sorted(pending)
+        loop["failure_reasons"] = sorted(errors)
+'''
+CONTENT_RECOMPUTE_NEW = '''        for peer in loop.get("required", []):
+            answer = loop["answers"].get(peer)
+            cross = loop["crosschecks"].get(peer)
+            if answer and cross and answer["answer"].get("verdict") == "PASS" and \\
+                    cross.get("verdict") == "PASS":
+                content_item = f"content-proof:{peer}"
+                pending.add(content_item)
+                covered = set()
+                for receipt in loop.get("content_proofs", {}).get(peer, []):
+                    covered.update(receipt.get("question_coverage", []))
+                if set(self._content_required(loop)) <= covered:
+                    pending.discard(content_item)
+        loop["pending"] = sorted(pending)
+        loop["failure_reasons"] = sorted(errors)
+'''
+
+CONTENT_CROSS_OLD = '''                    loop["crosschecks"][peer] = {
+                        "origin": event["origin"], "verdict": payload["verdict"],
+                        "subject_answer_digest": candidate_digest,
+                        "answer_digest": original["answer_digest"],
+                        "identity": identity}
+'''
+CONTENT_CROSS_NEW = '''                    loop["crosschecks"][peer] = {
+                        "origin": event["origin"], "verdict": payload["verdict"],
+                        "subject_answer_digest": candidate_digest,
+                        "answer_digest": original["answer_digest"],
+                        "crosscheck_digest": digest(payload),
+                        "identity": identity}
+'''
+
+CONTENT_ACTIVATION_OLD = '''                "failure_reasons": [], "delivery": {"state": "PENDING"},
+                "verdict": "OPEN", "promotion": False}
+'''
+CONTENT_ACTIVATION_NEW = '''                "failure_reasons": [], "delivery": {"state": "PENDING"},
+                "content_required": [q["id"] for q in open_q], "content_proofs": {},
+                "verdict": "OPEN", "promotion": False}
+'''
+
+KERNEL_CONTENT_OLD = '''    def test_14_full_reverse_ripple_closes_only_after_crosscheck(self):
+        loop_id, loop = self.activate_one()
+        peer = loop["peer"]
+        payload = self.answer_payload(loop_id)
+        self.kernel.ingest(make_event(peer, "answer", "answer", payload, mode="local"))
+        answer = {k: payload.get(k) for k in ("verdict", "claims", "artifacts", "open_items")}
+        cross = {"loop_id": loop_id, "role": "crosscheck", "target_peer": peer,
+                 "verdict": "PASS", "subject_answer_digest": digest(answer)}
+        result = self.kernel.ingest(make_event("tower", "answer", "cross", cross, mode="local", credential_ref="TOWER"))
+        self.assertEqual("PASS", result["verdict"])
+        self.assertTrue(self.kernel._loops()["loops"][loop_id]["promotion"])
+'''
+KERNEL_CONTENT_NEW = '''    def test_14_pass_answer_and_crosscheck_still_require_content_proof(self):
+        loop_id, loop = self.activate_one()
+        peer = loop["peer"]
+        payload = self.answer_payload(loop_id)
+        self.kernel.ingest(make_event(peer, "answer", "answer", payload, mode="local"))
+        answer = {k: payload.get(k) for k in ("verdict", "claims", "artifacts", "open_items")}
+        cross = {"loop_id": loop_id, "role": "crosscheck", "target_peer": peer,
+                 "verdict": "PASS", "subject_answer_digest": digest(answer)}
+        result = self.kernel.ingest(make_event("tower", "answer", "cross", cross, mode="local", credential_ref="TOWER"))
+        self.assertEqual("OPEN", result["verdict"])
+        self.assertIn(f"content-proof:{peer}", result["open_items"])
+        self.assertFalse(self.kernel._loops()["loops"][loop_id]["promotion"])
+'''
+
+ADV_CONTENT_OLD = '''        self.assertEqual("PASS", closed["verdict"])
+        replacement = self.answer_payload(loop_id, claims=["unverified-replacement"])
+        result = self.kernel.ingest(make_event(peer, "answer", "replace", replacement, mode="local"))
+        self.assertEqual("FAIL", result["verdict"])
+        self.assertIn("ANSWER_IMMUTABLE", result["errors"])
+        current = self.kernel._loops()["loops"][loop_id]
+        self.assertEqual(["original-verified"], current["answers"][peer]["answer"]["claims"])
+        self.assertEqual("PASS", current["verdict"])
+'''
+ADV_CONTENT_NEW = '''        self.assertEqual("OPEN", closed["verdict"])
+        replacement = self.answer_payload(loop_id, claims=["unverified-replacement"])
+        result = self.kernel.ingest(make_event(peer, "answer", "replace", replacement, mode="local"))
+        self.assertEqual("FAIL", result["verdict"])
+        self.assertIn("ANSWER_IMMUTABLE", result["errors"])
+        current = self.kernel._loops()["loops"][loop_id]
+        self.assertEqual(["original-verified"], current["answers"][peer]["answer"]["claims"])
+        self.assertEqual("OPEN", current["verdict"])
+        self.assertIn(f"content-proof:{peer}", current["pending"])
+'''
+
+ADV_CONTENT_ACTOR_OLD = '''        self.assertEqual("PASS", closed["verdict"])
+
+    def test_a14_unsigned_api_without_actor_fails_closed(self):
+'''
+ADV_CONTENT_ACTOR_NEW = '''        self.assertEqual("OPEN", closed["verdict"])
+        self.assertIn(f"content-proof:{peer}", closed["open_items"])
+
+    def test_a14_unsigned_api_without_actor_fails_closed(self):
+'''
+
+CONTENT_GATE_TESTS = '''from __future__ import annotations
+
+import copy
+import json
+import shutil
+import tempfile
+import unittest
+from pathlib import Path
+
+from qios.canon import digest
+from qios.envelope import make_event
+from qios.kernel import QiKernel
+
+REPO = Path(__file__).resolve().parents[1]
+
+
+class ContentProofGateTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="qios-content-gate-"))
+        self.addCleanup(lambda: shutil.rmtree(self.tmp, ignore_errors=True))
+        shutil.copytree(REPO / "config", self.tmp / "config")
+        questions = [{"id": q, "status": "open", "question": q, "falsifier": "false-pass",
+                      "requested_evidence": "host-verified-proof"} for q in ("Q1", "Q2")]
+        (self.tmp / "config" / "wildq.json").write_text(json.dumps({
+            "schema": "qi-wildq/v1", "questions": questions}), encoding="utf-8")
+        self.kernel = QiKernel(self.tmp, allow_local=True)
+        self.kernel.activate(wave_id="WAVE-CONTENT-TEST")
+        self.loop_id = sorted(self.kernel._loops()["loops"])[0]
+        loop = self.kernel._loops()["loops"][self.loop_id]
+        self.peer = loop["peer"]
+        self.kernel.record_delivery(loop["workorder_id"], {
+            "state": "DELIVERED", "repo": "example/line", "issue_number": 1,
+            "issue_url": "https://example.invalid/1"})
+        answer = {"loop_id": self.loop_id, "role": "answer", "verdict": "PASS",
+                  "claims": [], "artifacts": [], "open_items": []}
+        self.kernel.ingest(make_event(self.peer, "answer", "answer", answer, mode="local"))
+        current = self.kernel._loops()["loops"][self.loop_id]
+        answer_digest = current["answers"][self.peer]["answer_digest"]
+        cross = {"loop_id": self.loop_id, "role": "crosscheck", "target_peer": self.peer,
+                 "verdict": "PASS", "subject_answer_digest": answer_digest}
+        result = self.kernel.ingest(make_event(
+            "tower", "answer", "cross", cross, mode="local", credential_ref="TOWER"))
+        self.assertEqual("OPEN", result["verdict"])
+        self.assertIn(f"content-proof:{self.peer}", result["open_items"])
+
+    def receipt(self, coverage):
+        current = self.kernel._loops()["loops"][self.loop_id]
+        value = {
+            "schema": "qi-lean-content-proof/v1", "question_coverage": sorted(coverage),
+            "method": "clean-archive-lake-build-independent-oracle", "evidence_grade": "FORMAL_R1",
+            "source_commit": "1" * 40, "capsule_sha256": "a" * 64,
+            "report_sha256": "b" * 64, "oracle_report_sha256": "c" * 64,
+            "verifier_sha256": "d" * 64, "verifier_principal": "local:TOWER",
+            "subject_answer_digest": current["answers"][self.peer]["answer_digest"],
+            "subject_crosscheck_digest": current["crosschecks"][self.peer]["crosscheck_digest"],
+            "oracle_verdict": "PASS",
+        }
+        value["proof_id"] = digest({"schema": "qi-content-proof-id/v1", "receipt": value})
+        return value
+
+    def record(self, receipt, principal="local:TOWER"):
+        return self.kernel.record_content_proof(
+            self.loop_id, self.peer, receipt, principal=principal)
+
+    def test_01_partial_coverage_is_open_then_complete_coverage_passes(self):
+        partial = self.record(self.receipt(["Q1"]))
+        self.assertEqual("OPEN", partial["verdict"])
+        self.assertIn(f"content-proof:{self.peer}", partial["open_items"])
+        complete = self.record(self.receipt(["Q2"]))
+        self.assertEqual("PASS", complete["verdict"])
+        self.assertTrue(complete["promotion"])
+
+    def test_02_wrong_bindings_and_principal_fail_without_mutation(self):
+        before = json.dumps(self.kernel._loops(), sort_keys=True)
+        for field in ("subject_answer_digest", "subject_crosscheck_digest"):
+            with self.subTest(field=field):
+                receipt = self.receipt(["Q1"])
+                receipt[field] = "0" * 64
+                receipt["proof_id"] = digest({"schema": "qi-content-proof-id/v1",
+                    "receipt": {k: v for k, v in receipt.items() if k != "proof_id"}})
+                result = self.record(receipt)
+                self.assertEqual("FAIL", result["verdict"])
+        wrong_principal = self.receipt(["Q1"])
+        wrong_principal["verifier_principal"] = "local:OTHER"
+        wrong_principal["proof_id"] = digest({"schema": "qi-content-proof-id/v1",
+            "receipt": {k: v for k, v in wrong_principal.items() if k != "proof_id"}})
+        self.assertEqual("FAIL", self.record(wrong_principal)["verdict"])
+        self.assertEqual(before, json.dumps(self.kernel._loops(), sort_keys=True))
+
+    def test_03_unknown_partial_and_malformed_coverage_fail(self):
+        for coverage in ([], ["UNKNOWN"], ["Q1", "Q1"]):
+            with self.subTest(coverage=coverage):
+                self.assertEqual("FAIL", self.record(self.receipt(coverage))["verdict"])
+        unsorted_coverage = self.receipt(["Q1"])
+        unsorted_coverage["question_coverage"] = ["Q2", "Q1"]
+        self.assertEqual("FAIL", self.record(unsorted_coverage)["verdict"])
+
+    def test_04_bad_proof_id_hash_and_oracle_verdict_fail(self):
+        for mutation in ("proof_id", "capsule_sha256", "oracle_verdict"):
+            with self.subTest(mutation=mutation):
+                receipt = self.receipt(["Q1"])
+                receipt[mutation] = "0" * 64 if mutation != "oracle_verdict" else "OPEN"
+                self.assertEqual("FAIL", self.record(receipt)["verdict"])
+
+    def test_05_duplicate_content_proof_is_immutable(self):
+        receipt = self.receipt(["Q1"])
+        self.assertEqual("OPEN", self.record(receipt)["verdict"])
+        result = self.record(copy.deepcopy(receipt))
+        self.assertEqual("FAIL", result["verdict"])
+        self.assertIn("CONTENT_PROOF_IMMUTABLE", result["errors"])
+
+
+if __name__ == "__main__":
+    unittest.main()
+'''
+
 NEW_PEERS = {
     "usrm": "chepin-ai/vci-usrm",
     "qgl": "chepin-ai/vci-qgl",
@@ -317,6 +611,27 @@ def configure(work: Path) -> None:
     replace_exact(work / "tests/test_kernel.py", KERNEL_OLD, KERNEL_NEW)
     replace_exact(work / "tests/test_adversarial.py", ADV_OLD, ADV_NEW)
     replace_exact(work / "qios/transport.py", TRANSPORT_OLD, TRANSPORT_NEW)
+    replace_exact(work / "qios/kernel.py", "import json\nimport os\n", "import copy\nimport json\nimport os\n")
+    kernel_text = (work / "qios/kernel.py").read_text(encoding="utf-8")
+    if "def record_content_proof" not in kernel_text:
+        replace_exact(work / "qios/kernel.py", "\n    def _recompute_loop(self, loop_id: str, loops: dict[str, Any]) -> dict[str, Any]:\n",
+                      CONTENT_RECORD_METHOD + "    def _recompute_loop(self, loop_id: str, loops: dict[str, Any]) -> dict[str, Any]:\n")
+    elif kernel_text.count("def record_content_proof") != 1:
+        raise WaveError("content-proof writer patch is duplicated")
+    kernel_text = (work / "qios/kernel.py").read_text(encoding="utf-8")
+    if 'content_item = f"content-proof:{peer}"' not in kernel_text:
+        replace_exact(work / "qios/kernel.py", CONTENT_RECOMPUTE_OLD, CONTENT_RECOMPUTE_NEW)
+    elif kernel_text.count('content_item = f"content-proof:{peer}"') != 1:
+        raise WaveError("content-proof recompute patch is duplicated")
+    replace_exact(work / "qios/kernel.py", CONTENT_CROSS_OLD, CONTENT_CROSS_NEW)
+    replace_exact(work / "qios/kernel.py", CONTENT_ACTIVATION_OLD, CONTENT_ACTIVATION_NEW)
+    replace_exact(work / "tests/test_kernel.py", KERNEL_CONTENT_OLD, KERNEL_CONTENT_NEW)
+    replace_exact(work / "tests/test_adversarial.py", ADV_CONTENT_OLD, ADV_CONTENT_NEW)
+    replace_exact(work / "tests/test_adversarial.py", ADV_CONTENT_ACTOR_OLD, ADV_CONTENT_ACTOR_NEW)
+    content_test_path = work / "tests/test_content_proof_gate.py"
+    if content_test_path.exists() and content_test_path.read_text(encoding="utf-8") != CONTENT_GATE_TESTS:
+        raise WaveError("content-proof test fixture drift")
+    content_test_path.write_text(CONTENT_GATE_TESTS, encoding="utf-8")
     test_path = work / "tests/test_hmac_transport.py"
     if test_path.exists() and test_path.read_text(encoding="utf-8") != HMAC_TESTS:
         raise WaveError("HMAC transport test fixture drift")

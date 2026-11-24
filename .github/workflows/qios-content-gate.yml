@@ -1,0 +1,111 @@
+name: qios-content-gate
+
+on:
+  push:
+    paths:
+      - "scripts/qios-lean-wave.py"
+      - "scripts/qios-content-proof.py"
+      - "scripts/qios-content-proof-integration.py"
+      - "scripts/verify-qios-content-proof-python.py"
+      - "scripts/lean-federation.py"
+      - "scripts/verify-lean-federation-python.py"
+      - "lean/**"
+      - "federation/**"
+      - ".github/workflows/qios-content-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scoped-content-proof:
+    if: github.repository == 'chepin-ai/test'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact public implementation commit
+        uses: actions/checkout@v4
+
+      - name: Install pinned Lean toolchain
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain "$(cat lean/lean-toolchain)"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+
+      - name: Read pinned QI-OS source inside runner
+        env:
+          QI_READ_TOKEN: ${{ secrets.QI_OS_PAT }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import tarfile
+          import urllib.request
+
+          commit = "c13dcee8f67fce568e8b160be39c3d6ff8755736"
+          if not os.environ.get("QI_READ_TOKEN"):
+              raise SystemExit("QI_OS_PAT is unavailable")
+          request = urllib.request.Request(
+              f"https://api.github.com/repos/chepin-qi/qi-os/tarball/{commit}",
+              headers={"Authorization": "Bearer " + os.environ["QI_READ_TOKEN"],
+                       "Accept": "application/vnd.github+json", "User-Agent": "qios-content-gate"})
+          archive = Path(os.environ["RUNNER_TEMP"]) / "qios-source.tar.gz"
+          with urllib.request.urlopen(request, timeout=120) as response:
+              archive.write_bytes(response.read())
+          unpacked = Path(os.environ["RUNNER_TEMP"]) / "qios-unpacked"
+          unpacked.mkdir()
+          with tarfile.open(archive, "r:gz") as handle:
+              handle.extractall(unpacked, filter="data")
+          roots = [p for p in unpacked.iterdir() if p.is_dir()]
+          if len(roots) != 1:
+              raise SystemExit("unexpected QI-OS archive root")
+          target = Path(os.environ["RUNNER_TEMP"]) / "qios-source"
+          roots[0].rename(target)
+          for relative in ("qios/kernel.py", "scripts/federation_wave.py", "config/peers.json"):
+              if not (target / relative).is_file():
+                  raise SystemExit("pinned QI-OS source is incomplete")
+          print("QI-OS pinned source acquired; private source remains runner-local")
+          PY
+
+      - name: Prepare QI-OS adapter and run all state/attack tests
+        run: |
+          set -euo pipefail
+          python3 scripts/qios-lean-wave.py prepare \
+            --source "${{ runner.temp }}/qios-source" \
+            --work-dir "${{ runner.temp }}/qios-content-adapter" \
+            > "${{ runner.temp }}/qios-prepare-summary.json"
+
+      - name: Clean-archive Lean rebuild and scoped content-proof integration
+        run: |
+          set -euo pipefail
+          python3 scripts/qios-content-proof-integration.py \
+            --adapter-work "${{ runner.temp }}/qios-content-adapter" \
+            --repo "$GITHUB_WORKSPACE" \
+            --commit "${{ github.sha }}" \
+            --work-dir "${{ runner.temp }}/qios-content-integration"
+
+      - name: Independently verify content receipt, bindings and scope
+        run: |
+          set -euo pipefail
+          python3 scripts/verify-qios-content-proof-python.py \
+            --integration-work "${{ runner.temp }}/qios-content-integration" \
+            --out "${{ runner.temp }}/qios-content-integration/independent-content-oracle.json"
+
+      - name: Publish public proof evidence without private QI-OS source or runtime
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qios-content-proof-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/qios-content-integration/integration-result.json
+            ${{ runner.temp }}/qios-content-integration/independent-content-oracle.json
+            ${{ runner.temp }}/qios-content-integration/generator.log
+            ${{ runner.temp }}/qios-content-integration/generation/content-proof.json
+            ${{ runner.temp }}/qios-content-integration/generation/generation-result.json
+            ${{ runner.temp }}/qios-content-integration/generation/evidence/
+            ${{ runner.temp }}/qios-content-integration/generation/trusted-runner-process.log
+            ${{ runner.temp }}/qios-content-integration/generation/trusted-oracle-process.log
+          if-no-files-found: warn
+          retention-days: 30

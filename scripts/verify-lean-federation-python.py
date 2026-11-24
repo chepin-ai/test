@@ -332,8 +332,11 @@ def validate_report(repo: Path, report: dict, directory: Path, require_commit: b
             raise
         if "statementConflict" not in str(exc):
             raise Reject(f"wrong conflict rejection: {exc}")
-    if cjson(expected) != before or report["conflict_control"] != {"rejected": True, "registry_unchanged": True}:
-        raise Reject("conflict no-write gate")
+    conflict_control = report["conflict_control"]
+    if cjson(expected) != before or conflict_control.get("rejected") is not True or \
+            conflict_control.get("registry_unchanged") is not True or \
+            "statementConflict" not in conflict_control.get("error", ""):
+        raise Reject("conflict no-write gate or semantic branch")
     projections = report["projections"]["projections"]
     if len(projections) != len(expected["declarations"]) * len(TARGETS):
         raise Reject("projection coverage")

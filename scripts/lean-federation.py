@@ -343,17 +343,22 @@ def execute(repo: Path, source_commit: str, work: Path) -> dict:
     if canonical(replay) != canonical(admitted) or replay_changes["attestations_added"]:
         raise FederationError("idempotent replay changed registry")
     conflict = copy.deepcopy(capsule)
-    conflict["declarations"][0]["statement_sha256"] = "0" * 64
-    conflict["declarations"][0]["declaration_id"] = digest({
+    conflict_declaration = conflict["declarations"][0]
+    conflict_declaration["statement_type"] += " ∧ False"
+    conflict_declaration["statement_sha256"] = statement_digest(
+        conflict_declaration["name"], conflict_declaration["statement_type"])
+    conflict_declaration["declaration_id"] = digest({
         "schema": "qf-lean-declaration/v1",
-        "logical_key": conflict["declarations"][0]["logical_key"],
-        "statement_sha256": conflict["declarations"][0]["statement_sha256"]})
+        "logical_key": conflict_declaration["logical_key"],
+        "statement_sha256": conflict_declaration["statement_sha256"]})
     conflict_rejected = False
+    conflict_error = None
     before_conflict = canonical(admitted)
     try:
         admit_capsule(admitted, conflict)
     except FederationError as exc:
-        conflict_rejected = "statementConflict" in str(exc) or "statement digest mismatch" in str(exc)
+        conflict_error = str(exc)
+        conflict_rejected = "statementConflict" in conflict_error
     conflict_unchanged = before_conflict == canonical(admitted)
     if not (conflict_rejected and conflict_unchanged):
         raise FederationError("conflict control did not fail closed")
@@ -371,7 +376,8 @@ def execute(repo: Path, source_commit: str, work: Path) -> dict:
         "projections": projections,
         "changes": changes,
         "idempotent_replay": True,
-        "conflict_control": {"rejected": conflict_rejected, "registry_unchanged": conflict_unchanged},
+        "conflict_control": {"rejected": conflict_rejected, "registry_unchanged": conflict_unchanged,
+                             "error": conflict_error},
         "legacy_usrm": {"status": "REGISTERED_NOT_ACTIVATED", "toolchain_rewritten": False},
         "boundary": "Local Lean build and provenance synchronization only. No global federation activation, external CI, cross-line acknowledgement, sandboxed replay, independent-kernel verdict, or informal-statement fidelity claim."
     }

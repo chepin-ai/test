@@ -1,0 +1,18 @@
+{
+  "schema": "asfa-qios-content-gate-preregister/v1",
+  "registered_at": "2026-11-24T00:00:00Z",
+  "registration_stage": "BEFORE_IMPLEMENTATION",
+  "result_status": "PREREGISTERED_ONLY",
+  "base_implementation_commit": "51ff34b7079f71536a0abb40512afd5ddd5f2a11",
+  "attack_invariants": [
+    {"id": "CG-01", "requirement": "PASS answer plus independent PASS crosscheck without a host-verified content receipt remains OPEN with content-proof debt."},
+    {"id": "CG-02", "requirement": "A content receipt binds the exact answer and crosscheck digests, the crosscheck principal, declared question coverage, and content-addressed build/oracle artifacts."},
+    {"id": "CG-03", "requirement": "Wrong answer digest, wrong crosscheck digest, wrong principal, unknown question, malformed hashes and duplicate proof ids fail without loop mutation."},
+    {"id": "CG-04", "requirement": "Partial question coverage remains OPEN; only complete coverage of the pre-registered question set can clear content-proof debt."},
+    {"id": "CG-05", "requirement": "A Lean receipt is generated only after a clean source-archive rebuild, real lake build/audit and independent source/capsule/registry/projection oracle PASS; evidence remains FORMAL_R1."},
+    {"id": "CG-06", "requirement": "The existing live wave remains OPEN; no historical answer, crosscheck or issue is rewritten."},
+    {"id": "LG-01", "requirement": "The runner conflict control changes statement_type and repairs all dependent hashes, so admission reaches statementConflict rather than a digest-format rejection."}
+  ],
+  "forbidden": ["remote comment directly writes content proof", "self-declared PASS is content verification", "synthetic unit receipt is real Lean evidence", "FORMAL_R1 is promoted to sandboxed or independent-kernel replay", "credential values enter source, logs, fixtures or evidence"],
+  "boundary": "The host content-proof writer is not a remote event endpoint. Synthetic receipts test only state-machine behavior; real promotion evidence requires the clean-rebuild generator and independently replayable artifacts."
+}
