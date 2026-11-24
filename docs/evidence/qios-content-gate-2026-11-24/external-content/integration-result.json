@@ -1,0 +1,30 @@
+{
+  "schema": "asfa-qios-content-proof-integration/v1",
+  "source_commit": "de0c58f01c00384a79ab8b7537ecfd4c457d8405",
+  "loop_id": "LOOP-484df50249d98668939d8a3a",
+  "peer": "lgt",
+  "double_pass_without_proof": "OPEN",
+  "scoped_verdict_after_real_proof": "PASS",
+  "scoped_question_coverage": [
+    "WQ-QI-LEAN-FED-01"
+  ],
+  "global_verdict": "OPEN",
+  "global_open_items": 39,
+  "proof_id": "eb2bfa14f43e2c13a4331e6f9c59a4d3c4ad00b6ccb7d7102d3b09aca2de1359",
+  "proof_path": "/home/runner/work/_temp/qios-content-integration/generation/content-proof.json",
+  "report_path": "/home/runner/work/_temp/qios-content-integration/generation/evidence/report.json",
+  "oracle_path": "/home/runner/work/_temp/qios-content-integration/generation/evidence/oracle.json",
+  "duplicate_rejection": [
+    "CONTENT_PROOF_IMMUTABLE",
+    "TRACK_FAIL:CONTENT_PROOF_IMMUTABLE"
+  ],
+  "forged_rejection": [
+    "CONTENT_PROOF_ID",
+    "CONTENT_PROOF_IMMUTABLE",
+    "CONTENT_RECEIPT_SEMANTICS",
+    "TRACK_FAIL:CONTENT_PROOF_ID",
+    "TRACK_FAIL:CONTENT_PROOF_IMMUTABLE",
+    "TRACK_FAIL:CONTENT_RECEIPT_SEMANTICS"
+  ],
+  "boundary": "Real clean-archive Lean FORMAL_R1 proof for one scoped Lean question only. Other wild questions and the global wave remain OPEN; no R2 or multi-kernel claim."
+}

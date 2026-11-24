@@ -1,0 +1,151 @@
+{
+  "schema": "asfa-qios-hmac-adjudication-divergence/v1",
+  "date": "2026-11-24",
+  "result_status": "RESOLVED_TRANSPORT_STATE_UNCHANGED_RESEARCH_OPEN",
+  "events": [
+    {
+      "repo": "chepin-ai/vci-qfa",
+      "issue": 4,
+      "comment_id": 7117083305,
+      "event_id": "EVT-dbd040e1edff6b81328d7bed",
+      "credential_ref": "QLV",
+      "mode": "api",
+      "event_id_match": true,
+      "signature_match": true,
+      "role": "crosscheck",
+      "origin": "qlv",
+      "association": "NONE"
+    },
+    {
+      "repo": "chepin-ai/vci-usrm",
+      "issue": 24,
+      "comment_id": 7117082982,
+      "event_id": "EVT-9cfd972cb872f887d15c95b7",
+      "credential_ref": "QLV",
+      "mode": "api",
+      "event_id_match": true,
+      "signature_match": true,
+      "role": "crosscheck",
+      "origin": "qlv",
+      "association": "NONE"
+    }
+  ],
+  "root_cause": {
+    "class": "WRONG_HMAC_SECRET_IN_POLL_AND_INITIAL_ORACLE_PROCESS",
+    "basis": "Both unchanged remote events verify with the pinned QLV secret; both had earlier API_HMAC_VERIFIED ledger acceptances. AUTH_SIGNATURE rather than AUTH_UNAVAILABLE shows that the failing kernel process had a mismatched secret, not merely an absent one.",
+    "event_content_changed": false,
+    "signature_rule_relaxed": false,
+    "credential_value_included": false
+  },
+  "ledger_anchors": [
+    {
+      "event_id": "EVT-dbd040e1edff6b81328d7bed",
+      "accepted_seq": 130,
+      "wrong_key_replay_rejected_seq": 149
+    },
+    {
+      "event_id": "EVT-9cfd972cb872f887d15c95b7",
+      "accepted_seq": 145,
+      "wrong_key_replay_rejected_seq": 162
+    }
+  ],
+  "wrong_key_poll": {
+    "protocol_answers_seen": 22,
+    "evidence_digest": "2063bdae014f708b96ea400dec0615d2a6a05772e9fe67b9eb5edd9f69ed1030",
+    "adjudications": {
+      "EVT-9cfd972cb872f887d15c95b7": {
+        "errors": [
+          "AUTH_SIGNATURE",
+          "TRACK_FAIL:AUTH_SIGNATURE"
+        ],
+        "event_id": "EVT-9cfd972cb872f887d15c95b7",
+        "open_items": [
+          "AUTH_SIGNATURE"
+        ],
+        "verdict": "FAIL"
+      },
+      "EVT-dbd040e1edff6b81328d7bed": {
+        "errors": [
+          "AUTH_SIGNATURE",
+          "TRACK_FAIL:AUTH_SIGNATURE"
+        ],
+        "event_id": "EVT-dbd040e1edff6b81328d7bed",
+        "open_items": [
+          "AUTH_SIGNATURE"
+        ],
+        "verdict": "FAIL"
+      }
+    }
+  },
+  "correct_key_replay": {
+    "process_exit_code": 2,
+    "open_is_not_failure": true,
+    "protocol_answers_seen": 22,
+    "evidence_digest": "2063bdae014f708b96ea400dec0615d2a6a05772e9fe67b9eb5edd9f69ed1030",
+    "evidence_digest_unchanged_from_wrong_key_poll": true,
+    "adjudications": {
+      "EVT-9cfd972cb872f887d15c95b7": {
+        "errors": [],
+        "event_id": "EVT-9cfd972cb872f887d15c95b7",
+        "open_items": [
+          "answer-open:usrm",
+          "answer:usrm",
+          "crosscheck-open:usrm",
+          "crosscheck:usrm"
+        ],
+        "verdict": "OPEN"
+      },
+      "EVT-dbd040e1edff6b81328d7bed": {
+        "errors": [],
+        "event_id": "EVT-dbd040e1edff6b81328d7bed",
+        "open_items": [
+          "answer-open:qfa-ai",
+          "answer:qfa-ai",
+          "crosscheck-open:qfa-ai",
+          "crosscheck:qfa-ai"
+        ],
+        "verdict": "OPEN"
+      }
+    }
+  },
+  "oracle_gap_and_fix": {
+    "gap": "The earlier independent oracle recomputed remote HMAC but did not compare the current runtime adjudication, so a wrong-key runtime poll could still receive transport PASS.",
+    "patch_commit": "0afc2211ab2183116504be135d67556e23f82bad",
+    "new_controls": [
+      "AUTH_SIGNATURE after independently valid HMAC is rejected",
+      "AUTH_UNAVAILABLE after independently valid HMAC is rejected",
+      "missing runtime adjudication for a verified HMAC event is rejected"
+    ],
+    "synthetic_divergence_rejections": 3,
+    "saved_anomaly_regression": {
+      "oracle_exit_code": 2,
+      "expected": "NONZERO",
+      "actual_error": "oracle rejected: runtime/oracle HMAC divergence: EVT-dbd040e1edff6b81328d7bed"
+    },
+    "live_oracle_after_fix": {
+      "schema": "asfa-qios-wave-oracle/v1",
+      "self_test": {
+        "known_answers": 4,
+        "synthetic_valid": 2,
+        "synthetic_rejections": 4,
+        "hmac_adjudication_divergence_rejections": 3
+      },
+      "oracle_verdict": "PASS",
+      "research_verdict": "OPEN",
+      "promotion": false,
+      "deliveries_checked": 14,
+      "protocol_answers_seen": 22,
+      "unique_answers_accepted": 2,
+      "independent_crosschecks": 2,
+      "duplicate_answer_rejections": 18,
+      "ledger": {
+        "entries": 179,
+        "tip": "d3f52dd49a96e6adce4707cd0733a6c13261d7b1fba2c41ca964f7d80da2bfe0"
+      },
+      "evidence_status": "ANSWERS_REQUIRE_CROSSCHECK",
+      "network_readback": true,
+      "boundary": "Transport and ledger verification only. Research consensus remains separate and cannot be promoted without answers and independent crosschecks."
+    }
+  },
+  "boundary": "This closes the HMAC process/oracle divergence only. It does not prove answer content, clear content-proof debt, promote the global wave, or establish R2."
+}

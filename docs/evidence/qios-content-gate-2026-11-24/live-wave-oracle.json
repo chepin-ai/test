@@ -1,0 +1,24 @@
+{
+  "schema": "asfa-qios-wave-oracle/v1",
+  "self_test": {
+    "known_answers": 4,
+    "synthetic_valid": 2,
+    "synthetic_rejections": 4,
+    "hmac_adjudication_divergence_rejections": 3
+  },
+  "oracle_verdict": "PASS",
+  "research_verdict": "OPEN",
+  "promotion": false,
+  "deliveries_checked": 14,
+  "protocol_answers_seen": 22,
+  "unique_answers_accepted": 2,
+  "independent_crosschecks": 2,
+  "duplicate_answer_rejections": 18,
+  "ledger": {
+    "entries": 179,
+    "tip": "d3f52dd49a96e6adce4707cd0733a6c13261d7b1fba2c41ca964f7d80da2bfe0"
+  },
+  "evidence_status": "ANSWERS_REQUIRE_CROSSCHECK",
+  "network_readback": true,
+  "boundary": "Transport and ledger verification only. Research consensus remains separate and cannot be promoted without answers and independent crosschecks."
+}

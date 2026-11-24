@@ -1,6 +1,15 @@
-# 实现状态（本轮实测证据：2026-11-16—23）
+# 实现状态（本轮实测证据：2026-11-16—24）
 
-## 最新续拍：身份广播、QFA 映射与跨线外部 CI
+## 2026-11-24：Lean 内容证明第三闸与 HMAC 判读发散闭环
+
+- 实现提交 `de0c58f01c00384a79ab8b7537ecfd4c457d8405` 将双 PASS 晋级改为“双 PASS＋主机侧内容证明＋完整问题覆盖”。145 项 QI-OS 回归及二次 expand 幂等测试通过；公共 CI run `45298448970`／`45298449084`／`45298449022` 全部成功。
+- 外部干净归档集成实测：无内容收据时 `double_pass_without_proof=OPEN`；真实 Lean build／audit 和独立 oracle 后，仅作用域 `WQ-QI-LEAN-FED-01` loop PASS，全局仍 OPEN／39 项开放债。该作用域 PASS 不是 usrm、QFA 或 lgt 的真实研究完成，也不代表其他野问已证明。
+- 内容收据绑定答件、复核、主体、提交、覆盖和四类 artifact；proof id 与四项绑定已独立复算。Lean 结果为 6 declarations／6 attestations／36 projections，真实冲突控制到达 `statementConflict`，仅 `FORMAL_R1`，无 R2。
+- 现役 runtime 的两件 HMAC crosscheck 曾因错误密钥进程出现 `AUTH_SIGNATURE`，并暴露独立判读器未对拍本轮内核裁决的缺口。远端事件未变；正确密钥重放后两件均恢复原 `OPEN／errors=[]`，状态证据摘要不变。修复提交 `0afc2211ab2183116504be135d67556e23f82bad` 新增三类发散负例，保存的异常快照被修复后判读器拒绝。
+- 最新在线独立判读为基础设施 PASS／研究 OPEN：14 个工单、22 个协议答件事件、2 个唯一 OPEN 答件、2 个独立 OPEN crosscheck、18 个重复答件拒绝、179 项账本，30 项全局开放债，promotion=false。真实全局研究与内容证明均未收口。
+- 机器证据、外部原始 artifact 与异常差分统一位于 `evidence/qios-content-gate-2026-11-24/`；不包含密钥值或 QI-OS 私仓源码。
+
+## 2026-11-23 续拍：身份广播、QFA 映射与跨线外部 CI（历史快照）
 
 - ASFA 私域身份／证据宿主已建立并验证为 `chepin-ai/asfa-ai`，代号 `asfa-ai`；唯一公共代码远端仍为 `chepin-ai/test`。8 个有效密钥槽已密封写入 ASFA 私仓并逐项元数据回读，值不入文本。
 - chepin-ai 的 QFA 公域塔为 `vci-qfa`，QI-OS origin 为 `qfa-ai`；当前 AI-FULL 仓谱未见 chepin-ai 的 QFA 私仓匹配。跨账户私有实现只在私域讨论件登记。完整映射与广播回执见 `ASFA_QFA_IDENTITY.md`。
@@ -8,7 +17,7 @@
 - 跨线落实：usrm 与 QFA responder 已支持由 `AI_FULL_PAT` 承载的规范答件；随后修复认证答件反馈环。规范答件 E2E run 为 `45284008539`／`45284023261`，环闸 run 为 `45286403540`／`45286410920`，均成功；环闸显式 skip 且不新增答件。
 - 独立判读已区分 `protocol_answers_seen=22`、`unique_answers_accepted=2`、`independent_crosschecks=2` 和 `duplicate_answer_rejections=18`，不再把线上重复评论虚增为独立成果。QI 公共 CI crosscheck run 为 `45289708599`／`45289712612`，两份复核均绑定首答摘要、异身份主体且结论 `OPEN`。
 - QI-OS HMAC 传输与 crosscheck 攻击回归为 140/140：弱关联只放行签名候选，实际接受仍需正钥；错钥、错事件 ID、错摘要、同主体、重复复核及 OPEN 晋级均被拒绝。
-- 构建债修复：`702de82` 的外部 Rust CI 因 RsProxy 504 连续失败两次；移除仓级强制镜像替换，恢复标准 crates.io sparse registry，锁文件和测试判据不变，由后续空缓存 CI 判定。
+- 构建债修复：`702de82` 的外部 Rust CI 因 RsProxy 504 连续失败两次；移除仓级强制镜像替换，恢复标准 crates.io sparse registry，锁文件和测试判据不变。后续 `de0c58f` 的空缓存公共 `build-test-smoke` run `45298448970` 已成功，关闭该镜像单点债。
 
 ## 2026-11-23：QI-OS 全局大周天真实投递与独立读回（历史快照）
 

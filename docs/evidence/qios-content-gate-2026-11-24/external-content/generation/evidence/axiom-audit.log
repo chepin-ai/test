@@ -1,0 +1,30 @@
+Qf.coupling_not_transitive : Qf.Relation.coupling.compose Qf.Relation.coupling = none
+Qf.bridging_not_transitive : Qf.Relation.bridging.compose Qf.Relation.bridging = none
+Qf.lossy_projection_not_formal (evidence : Qf.Evidence) :
+  Qf.projectEvidence Qf.Projection.lossy evidence ≠ Qf.Evidence.formal
+Qf.admit_informal_rejected (current? : Option Qf.Declaration) (candidate : Qf.Declaration)
+  (h : candidate.evidence ≠ Qf.Evidence.formal) :
+  Qf.admitDeclaration current? candidate = Except.error Qf.SyncError.candidateNotFormal
+Qf.admit_statement_conflict (current candidate : Qf.Declaration) (hcurrent : current.evidence = Qf.Evidence.formal)
+  (hkey : current.logicalKey = candidate.logicalKey) (hstatement : current.statementHash ≠ candidate.statementHash) :
+  Qf.admitDeclaration (some current)
+      { logicalKey := candidate.logicalKey, statementHash := candidate.statementHash,
+        profileHash := candidate.profileHash, sourceCommit := candidate.sourceCommit, evidence := Qf.Evidence.formal } =
+    Except.error Qf.SyncError.statementConflict
+Qf.admit_same_statement_preserves_origin (current candidate : Qf.Declaration)
+  (hcurrent : current.evidence = Qf.Evidence.formal) (hcandidate : candidate.evidence = Qf.Evidence.formal)
+  (hkey : current.logicalKey = candidate.logicalKey) (hstatement : current.statementHash = candidate.statementHash) :
+  Qf.admitDeclaration (some current) candidate = Except.ok current
+'Qf.coupling_not_transitive' depends on axioms: [propext]
+'Qf.bridging_not_transitive' depends on axioms: [propext]
+'Qf.lossy_projection_not_formal' depends on axioms: [propext]
+'Qf.admit_informal_rejected' depends on axioms: [propext]
+'Qf.admit_statement_conflict' depends on axioms: [propext]
+'Qf.admit_same_statement_preserves_origin' depends on axioms: [propext]
+Except.error (Qf.SyncError.statementConflict)
+Except.ok { logicalKey := "qf.demo",
+  statementHash := "statement-a",
+  profileHash := "profile-a",
+  sourceCommit := "commit-a",
+  evidence := Qf.Evidence.formal }
+Qf.Evidence.candidate

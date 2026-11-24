@@ -1,0 +1,17 @@
+{
+  "schema": "asfa-qios-content-proof-oracle/v1",
+  "self_test": {
+    "synthetic_valid": 1,
+    "synthetic_rejections": 4
+  },
+  "oracle_verdict": "PASS",
+  "proof_id": "eb2bfa14f43e2c13a4331e6f9c59a4d3c4ad00b6ccb7d7102d3b09aca2de1359",
+  "scoped_verdict": "PASS",
+  "global_verdict": "OPEN",
+  "source_commit": "de0c58f01c00384a79ab8b7537ecfd4c457d8405",
+  "question_coverage": [
+    "WQ-QI-LEAN-FED-01"
+  ],
+  "artifact_hashes": 4,
+  "boundary": "Independent receipt and artifact verification; scoped FORMAL_R1 only, no R2 or global research promotion."
+}

@@ -1,0 +1,227 @@
+{
+  "schema": "asfa-qios-content-gate-evidence-manifest/v1",
+  "date": "2026-11-24",
+  "implementation_commit": "de0c58f01c00384a79ab8b7537ecfd4c457d8405",
+  "hmac_oracle_fix_commit": "0afc2211ab2183116504be135d67556e23f82bad",
+  "qios_source_commit": "c13dcee8f67fce568e8b160be39c3d6ff8755736",
+  "preregistration": "docs/evidence/qios-content-gate-preregister-2026-11-24.json",
+  "external_ci": [
+    {
+      "id": 45298448970,
+      "name": "build-test-smoke",
+      "head_sha": "de0c58f01c00384a79ab8b7537ecfd4c457d8405",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1
+    },
+    {
+      "id": 45298449084,
+      "name": "lean-federation",
+      "head_sha": "de0c58f01c00384a79ab8b7537ecfd4c457d8405",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1
+    },
+    {
+      "id": 45298449022,
+      "name": "qios-content-gate",
+      "head_sha": "de0c58f01c00384a79ab8b7537ecfd4c457d8405",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1
+    },
+    {
+      "id": 45302380928,
+      "name": "build-test-smoke",
+      "head_sha": "0afc2211ab2183116504be135d67556e23f82bad",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1
+    }
+  ],
+  "results": {
+    "qios_adapter_tests": "145_PASS",
+    "second_expand": "145_PASS; 14_EXISTING_ORDERS_PRESERVED; 0_NEW_ORDERS",
+    "double_pass_without_proof": "OPEN",
+    "scoped_verdict_after_real_proof": "PASS",
+    "scoped_question_coverage": [
+      "WQ-QI-LEAN-FED-01"
+    ],
+    "scoped_loop_id": "LOOP-484df50249d98668939d8a3a",
+    "scoped_peer_role": "TEST_LOOP_ONLY_NOT_A_REAL_LGT_RESEARCH_ANSWER",
+    "integration_global_verdict": "OPEN",
+    "integration_global_open_items": 39,
+    "content_oracle": "PASS",
+    "proof_id": "eb2bfa14f43e2c13a4331e6f9c59a4d3c4ad00b6ccb7d7102d3b09aca2de1359",
+    "proof_id_independent_recompute": "PASS",
+    "receipt_artifact_bindings_independent_recompute": "4/4_PASS",
+    "lean_oracle": "PASS",
+    "lean_declarations": 6,
+    "lean_attestations": 6,
+    "lean_projections": 36,
+    "lean_conflict_control": {
+      "error": "statementConflict: qf.relation.coupling_not_transitive",
+      "registry_unchanged": true,
+      "rejected": true
+    },
+    "evidence_grade": "FORMAL_R1_ONLY",
+    "hmac_divergence_saved_anomaly": "REJECTED_BY_FIXED_ORACLE",
+    "hmac_divergence_synthetic_rejections": 3,
+    "live_oracle": "PASS",
+    "live_research_verdict": "OPEN",
+    "live_promotion": false,
+    "live_open_items": 30,
+    "live_ledger_entries": 179,
+    "live_protocol_answers_seen": 22,
+    "live_unique_answers_accepted": 2,
+    "live_independent_crosschecks": 2,
+    "live_duplicate_answer_rejections": 18
+  },
+  "artifact_archives": [
+    {
+      "run_id": 45298449022,
+      "artifact_id": 14876899412,
+      "name": "qios-content-proof-de0c58f01c00384a79ab8b7537ecfd4c457d8405",
+      "archive_sha256": "bf35bf912ad70598c9bb477bc8fcf295fed54e7046099f15740283838299d194"
+    },
+    {
+      "run_id": 45298449084,
+      "artifact_id": 14876334964,
+      "name": "lean-federation-r1-de0c58f01c00384a79ab8b7537ecfd4c457d8405",
+      "archive_sha256": "d81bdcd770a90eef67105786ebf6f7e222c7765b4566a47e9ff2e33180cc8e61"
+    }
+  ],
+  "receipt_bindings": {
+    "capsule_sha256": "a5fab0ca44acb21dddb1c6a2cad1a1257ae0b84b9e69487bef8690d9e91dff03",
+    "report_sha256": "a77a31879aa7e09de039b1a269f79cd907e6161751a6b49c481da6e6b71734cf",
+    "oracle_report_sha256": "d8a71ec7d9137ada808c8ee50dc8ecba7c3b5f63b180c0f5484333cba1c04c40",
+    "verifier_sha256": "9e257d9960ad835e308c4bf2b3f7149bf7dc8dff8305bc6df95bbfed1402d0a6"
+  },
+  "repository_artifacts": [
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/generation/content-proof.json",
+      "bytes": 888,
+      "sha256": "19a46caf400e12a9d4557ac6ef5c7619d4ed5ae4401537d6062381f1d53dee02"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/generation/evidence/axiom-audit.log",
+      "bytes": 2034,
+      "sha256": "1eb01b9b6b9eb18329bab170150b05dd4ae8034dac8f64278183ec31afc5f4c7"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/generation/evidence/capsule.json",
+      "bytes": 5047,
+      "sha256": "0432bb22797ae1aadc37f66d0715e96ff12db4ba48db62620bda4a70377c92f1"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/generation/evidence/lake-build.log",
+      "bytes": 141,
+      "sha256": "2bd397d18125b45c01ca16fc4da39745a6d24d9d17103cc5d3303c29f1ff219b"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/generation/evidence/oracle.json",
+      "bytes": 631,
+      "sha256": "d8a71ec7d9137ada808c8ee50dc8ecba7c3b5f63b180c0f5484333cba1c04c40"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/generation/evidence/projections.json",
+      "bytes": 16709,
+      "sha256": "e59e5423245386de7814273cafba825a0a96b87aaeb4386f4db65c0062c1e3ce"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/generation/evidence/registry.json",
+      "bytes": 10924,
+      "sha256": "3334ad8122fdaf6b21b4fb439d110d8a2003f82dff3b01c4450756723e11d49d"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/generation/evidence/report.json",
+      "bytes": 34374,
+      "sha256": "a77a31879aa7e09de039b1a269f79cd907e6161751a6b49c481da6e6b71734cf"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/generation/generation-result.json",
+      "bytes": 1766,
+      "sha256": "842646a7798279e7320dc682342baa4258dae50094fbb8a7a785f1530a14f167"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/generation/trusted-oracle-process.log",
+      "bytes": 631,
+      "sha256": "d8a71ec7d9137ada808c8ee50dc8ecba7c3b5f63b180c0f5484333cba1c04c40"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/generation/trusted-runner-process.log",
+      "bytes": 161,
+      "sha256": "64345f7e67d93a441118ac19fbeed1a4eb610d269d52f2c1f13df57f01c9556c"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/generator.log",
+      "bytes": 1766,
+      "sha256": "842646a7798279e7320dc682342baa4258dae50094fbb8a7a785f1530a14f167"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/independent-content-oracle.json",
+      "bytes": 560,
+      "sha256": "16924467b528e98c27f1257a0d896b0b6eb7367ff56fffa087a748500b975495"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-content/integration-result.json",
+      "bytes": 1281,
+      "sha256": "f5a15bca5d9a83db7b136e19f31ca20e7543f98799a8fef1978031e75a717de2"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-lean/axiom-audit.log",
+      "bytes": 2034,
+      "sha256": "1eb01b9b6b9eb18329bab170150b05dd4ae8034dac8f64278183ec31afc5f4c7"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-lean/capsule.json",
+      "bytes": 5047,
+      "sha256": "9d603089cfd51792ee25d96d5dde783638ecfdab7cae2c70dca1a82d8b21c8ed"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-lean/lake-build.log",
+      "bytes": 141,
+      "sha256": "8549777e6fa75bf47deedcffb9538cb60f28a60c115ea72a54005a8b88f1dff5"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-lean/oracle.json",
+      "bytes": 631,
+      "sha256": "1b8fa161781a1b713d77d098af55efe0699720d5d097a9e746b67ec8a6e8ed43"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-lean/projections.json",
+      "bytes": 16709,
+      "sha256": "e59e5423245386de7814273cafba825a0a96b87aaeb4386f4db65c0062c1e3ce"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-lean/registry.json",
+      "bytes": 10924,
+      "sha256": "244718fbd3370e2caa21f4fd2a949042491cdcee513425c543337531eb30446d"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/external-lean/report.json",
+      "bytes": 34374,
+      "sha256": "64680220d84ea8a8683c442874b84f3e55c6096840ff4d99becabe801aed8274"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/hmac-adjudication-divergence.json",
+      "bytes": 5132,
+      "sha256": "ee6e0a67c52aadc4f83d4cb219ca6ca69fd15bd2d97ec95a3ebb56d11965f70d"
+    },
+    {
+      "path": "docs/evidence/qios-content-gate-2026-11-24/live-wave-oracle.json",
+      "bytes": 792,
+      "sha256": "6eb9a3cb873004d6dbf06dfd9875f915b979eefb05f48db51ba1b5866f9d62f5"
+    }
+  ],
+  "boundaries": [
+    "PASS for the scoped integration covers only WQ-QI-LEAN-FED-01 under FORMAL_R1; it is not a real lgt, usrm or QFA research completion.",
+    "The live global wave remains OPEN with 30 open items; transport PASS is not content proof, research consensus, federation active status or R2.",
+    "No credential values, QI-OS private source, private runtime ledger or private research ledger are published.",
+    "The HMAC fix verifies remote signatures and current adjudication consistency; it does not legalize OPEN answers or replace content proofs."
+  ]
+}
